@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find apogee_robot_core)/launch/core_bringup.launch"/>
+
+    <include file="$(find mujoco_ros)/launch/sim.launch"/>
+
+</launch>

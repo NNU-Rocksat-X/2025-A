@@ -1,0 +1,4 @@
+int16 body_id
+geometry_msgs/Wrench wrench
+float64 apply_duration
+---

@@ -1,0 +1,15 @@
+<launch>
+    <arg name="env" default="payload"/>
+    <arg name="fixed_cam" default="false"/>
+
+
+    <arg if="$(eval arg('env') == 'payload')" name="env_file" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/urdf/arm2d2.xml"/>
+    <arg if="$(eval arg('env') == 'wrench')" name="env_file" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/urdf/wrench.xml"/>
+    <arg if="$(eval arg('env') == 'train')" name="env_file" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/urdf/training_env.xml"/>
+
+    <node name="ros_sim" pkg="mujoco_ros" type="ros_sim" 
+        args="$(arg env_file) $(arg fixed_cam)" output="screen"/>
+
+    <node name="world_pub" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 map world 10"/>
+
+</launch>
