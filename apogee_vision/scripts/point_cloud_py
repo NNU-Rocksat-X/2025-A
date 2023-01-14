@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+import rospy
+from std_msgs.msg import Float32MultiArray
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs.msg import PointField
+from sensor_msgs import point_cloud2
+from std_msgs.msg import Header
+from geometry_msgs.msg import Pose
+import numpy as np
+from apogee_vision.depth_cam import DepthCam
+import struct
+import time
+import math
+
+import open3d as o3d
+
+import cv2
+
+FOVy = 45
+cx = 0
+cy = 0
+
+
+
+
+class Publisher:
+    def __init__(self):
+        rospy.init_node('point_cloud_node')
+
+        self.pub = rospy.Publisher('/point_cloud', PointCloud2, queue_size=1)
+
+        rospy.Subscriber("/depth", Float32MultiArray, self.depth_cb)
+        rospy.Subscriber("/cam_pose", Pose, self.cam_pose_cb)
+
+        self.depth_cam = None
+
+        self.pub_seq = 0
+        self.frame_buffer = None
+        self.cam_pose = None
+
+        self.rate = rospy.Rate(100)
+
+    def depth_cb(self, msg):
+        self.frame_buffer = msg
+        
+
+    def cam_pose_cb(self, msg):
+        self.cam_pose = msg
+
+
+    def run_old(self):
+        while not rospy.is_shutdown():
+            while self.frame_buffer == None or self.cam_pose == None:
+                self.rate.sleep()
+            init_time = time.time()
+
+            frame_height = self.frame_buffer.layout.dim[0].size
+            frame_width = self.frame_buffer.layout.dim[1].size
+
+            if self.depth_cam == None:
+                self.depth_cam = DepthCam(FOVy, frame_width*2, frame_height*2)
+
+            # TODO: Make into function
+            frame = np.array(list(self.frame_buffer.data)).astype(np.float32)
+            rospy.loginfo(frame.shape)
+            # reduce resolution
+
+            frame = 1 - (frame - frame.min()) / (frame.max() - frame.min())
+            frame = np.reshape(frame, (frame_height, frame_width)).astype(np.float32)
+
+            
+            #frame = frame.astype(np.uint8)
+            #frame = np.flip(frame, 0)
+
+            #print("max:", frame.max(), "min:", frame.min())
+        
+
+            c, r = np.meshgrid(np.linspace(-frame_width/2, frame_width/2, frame_width), np.linspace(-frame_width/2, frame_width/2, frame_height))
+            #x, y = np.meshgrid(np.linspace(-5, 5, frame_width), np.linspace(-5, 5, frame_height))
+            #r = r/math.tan(self.cam_pose.orientation.z)
+            #z_cam = np.sqrt(np.square(frame) - np.square(y))
+            #z = self.cam_pose.position.z - z_cam
+            z = np.float32(frame)
+            x = np.float32(z * (c - self.cam_pose.position.x) * 1 / self.depth_cam.focalx )
+            y = np.float32(z * (r - self.cam_pose.position.y) * 1 / self.depth_cam.focaly )
+            
+
+            z = frame.reshape(1, -1)
+            x = x.reshape(1, -1)
+            y = y.reshape(1, -1)
+
+            x *= -1
+            #y = np.subtract(y, c * math.tan(self.cam_pose.orientation.z))
+
+            #print(z)
+            #print(z * math.tan(self.cam_pose.orientation.z))
+
+            ptcloud = np.array([x, z, y, z]).reshape(4, -1).T
+
+
+
+            background = np.where(ptcloud[:, 3] < 0.01)
+
+            #ptcloud[background][3] = 1
+
+            #print("background:", background[0].shape, "ptcloud:", ptcloud.shape)
+
+
+            ###### DELETE AFTER TEST
+            pc_time = time.time()
+            
+            msg = PointCloud2()
+            msg.height = frame_height
+            msg.width = frame_width
+
+            msg.fields = [
+                PointField('x', 0, PointField.FLOAT32, 1),
+                PointField('y', 4, PointField.FLOAT32, 1),
+                PointField('z', 8, PointField.FLOAT32, 1),
+                PointField('intensity', 12, PointField.FLOAT32, 1)
+            ]
+
+            msg.header.seq = self.pub_seq
+            msg.header.frame_id = "world"
+            msg.header.stamp = rospy.Time.now()
+
+            pc2 = point_cloud2.create_cloud(msg.header, msg.fields, ptcloud)
+            ###### DELETE AFTER TEST
+            pre_pub_time = time.time()
+            self.pub.publish(pc2)
+            ###### DELETE AFTER TEST
+            pub_time = time.time()
+            #rospy.loginfo("Clouds Published: " + str(self.pub_seq))
+            self.pub_seq += 1
+
+            #print("frame: ", frame_time - init_time)
+            #print("pc: ", pc_time - frame_time)
+            #print("pre_pub: ", pre_pub_time - pc_time)
+            #print("pub: ", pub_time - pre_pub_time)
+
+            rospy.loginfo("Publishing point cloud")
+            self.rate.sleep()
+
+
+
+        #z = 0.5 * np.sin(2 * x - pub_seq / 10.0) * np.sin(2 * y)
+
+
+if __name__ == "__main__":
+    publisher = Publisher()
+    publisher.run_old()

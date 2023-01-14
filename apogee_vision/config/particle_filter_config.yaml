@@ -1,0 +1,31 @@
+ParticleFilterConfig:
+  downsampling_grid_size: 0.002
+  maxParticleNum: 750
+  particleNum: 350
+  delta: 0.99
+  epsilon: 0.2
+  resampleLikelihood: 0.1
+  useNormal: false
+  step_covariance:
+    - 0.000225 # 0.015 * 0.015
+    - 0.000225 # 0.015 * 0.015
+    - 0.000225 # 0.015 * 0.015
+    - 0.009 # 0.015 * 0.015 * 40
+    - 0.009 # 0.015 * 0.015 * 40
+    - 0.009 # 0.015 * 0.015 * 40
+
+  initial_noise_covariance:
+    - 0.00001
+    - 0.00001
+    - 0.00001
+    - 0.00001
+    - 0.00001
+    - 0.00001
+
+  default_initial_mean:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0

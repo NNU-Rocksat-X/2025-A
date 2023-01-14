@@ -1,0 +1,4 @@
+TrajectoryPredictorConfig:
+    acceleration_variance: 0.5
+    measurement_variance: 0.5
+    initial_uncertainty_guess: 10
