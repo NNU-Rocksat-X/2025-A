@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>mog_ai</name>
+  <version>0.0.0</version>
+  <description>Artificial Intelligence algorithm that utilizes deep reinforcement learning to catch multiple objects</description>
+
+  <maintainer email="borger.aaron@gmail.com">Aaron Borger</maintainer>
+  <author email="aborger@nnu.edu">Aaron Borger</author>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>daedalus_msgs</build_depend>
+  <build_depend>marsha_msgs</build_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>daedalus_msgs</run_depend>
+  <run_depend>marsha_msgs</run_depend>
+
+
+  <export>
+
+  </export>
+
+</package>
