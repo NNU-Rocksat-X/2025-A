@@ -1,0 +1,4 @@
+# Contains the rates at which each node runs
+rates:
+  object_tracking: 100
+  trajectory_predictor: 30
