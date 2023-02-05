@@ -3,88 +3,6 @@
 
 using namespace Orientation;
 
-Eigen::Vector4f quat_to_v4(const Eigen::Quaternionf q)
-{
-    Eigen::Vector4f v;
-    v(0) = q.vec()(0);
-    v(1) = q.vec()(1);
-    v(2) = q.vec()(2);
-    v(3) = q.w();
-    return v;
-}
-
-void print_eigen(const Eigen::Ref<const Eigen::MatrixXf>& mat)
-{
-    for (int row = 0; row < mat.rows(); row++)
-    {
-        std::string row_str = "";
-        for (int col = 0; col < mat.cols(); col++)
-        {
-            row_str += std::to_string(mat(row, col));
-            row_str += " ";
-        }
-        ROS_INFO("%s", row_str.c_str());
-    }
-}
-
-void print_eigen(const Eigen::Quaternionf q)
-{
-    Eigen::Matrix<float, 4, 1> vector_q;
-    vector_q = quat_to_v4(q);
-    print_eigen(vector_q);
-}
-
-Eigen::Quaternionf v4_to_quat(Eigen::Vector4f v)
-{
-    Eigen::Quaternionf quat(v(3), v(0), v(1), v(2));
-    return quat;
-}
-
-// Quaternion to rotation vector (rotation vector is a part of angle axis method)
-Eigen::Vector3f quat_to_v3(Eigen::Quaternionf q)
-{
-    Eigen::Vector3f v;
-
-    v = q.vec();
-
-    float theta = 2*acos(q.w());
-
-    if (theta == 0)
-    {
-        v = v*theta;
-    }
-    else {
-        v = v*theta / sin(theta/2);
-    }
-    
-    return v;
-}
-
-// Rotation vector to quaternion (rotation vector is a part of angle axis method)
-// Inverse of quat_to_v3
-Eigen::Quaternionf v3_to_quat(Eigen::Vector3f v)
-{
-    float angle = v.norm(); // The norm of the orientation vector
-
-    if (angle == 0)
-    {
-        Eigen::Quaternionf quaternion = Eigen::Quaternionf::Identity();
-        return quaternion;
-    }
-    else {
-        Eigen::Vector3f axis = v / angle;
-        Eigen::Quaternionf quaternion(
-                            cos(angle/2),
-                            axis(0) * sin(angle/2),
-                            axis(1) * sin(angle/2),
-                            axis(2) * sin(angle/2)
-        );
-        return quaternion;
-    }
-}
-
-
-
 //------------------------------- SIGMA POINTS ---------------------------------------------
 
 /* @Brief - Performs the Chollesky-Banachiewicz algorithm
@@ -710,26 +628,143 @@ Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, float dt) {
     return angular_velocity;
 }
 
-struct CostFunctor {
-  template <typename T>
-  bool operator()(const T* const parameters, T* residuals) const {
-    // Function to be fitted: y = a*sin(b*x + c) + d
-    residuals[0] = parameters[0] * sin(parameters[1] * T(1.0) + parameters[2]) + parameters[3] - T(1.0);
-    residuals[1] = parameters[0] * sin(parameters[1] * T(2.0) + parameters[2]) + parameters[3] - T(2.0);
-    residuals[2] = parameters[0] * sin(parameters[1] * T(3.0) + parameters[2]) + parameters[3] - T(3.0);
-    return true;
-  }
+// Find A,B,C,D for the function:
+// y = Asin(B(x + C)) + D
+// amplitude: A
+// period: 2pi/B
+// phase shift: C
+// vertical shift: D
+struct LMFunctor
+{
+    // Number of data points
+    int m;
+
+    // The number of parameters, i.e. inputs
+    int n;
+
+    Eigen::MatrixXf measuredValues;
+    // Compute 'm' errors, one for each data point
+    int operator()(const Eigen::VectorXf &x, Eigen::VectorXf &fvec) const
+    {
+        // 'x' has dimensions n x 1
+        // It contains the current estimates for the parameters (amplitude, period, etc)
+
+        // 'fvec' has dimensions m x 1
+        // It contains the error for each point.
+
+        float aParam = x(0);
+        float bParam = x(1);
+        float cParam = x(2);
+        float dParam = x(3);
+
+        for (int i = 0; i < values(); i++)
+        {
+            float xValue = measuredValues(i, 0);
+            float yValue = measuredValues(i, 1);
+
+            // y = Asin(B(x + C)) + D
+            fvec(i) = yValue - (aParam * sin(bParam * (xValue + cParam)) + dParam);
+        }
+
+        return 0;
+    }
+
+    
+    // Compute jacobian of errors
+    int df(const Eigen::VectorXf &x, Eigen::MatrixXf &fjac) const 
+    {
+        // 'x' has dimensions n x 1
+        // Contains the current estimates for the parameters
+
+        // 'fjac' has dimensions m x n
+        // It contains the jacobian of the errors
+
+        float epsilon;
+        epsilon = 1e-5f;
+
+        for (int i = 0; i < x.size(); i++)
+        {
+            Eigen::VectorXf xPlus(x);
+            xPlus(i) += epsilon;
+            Eigen::VectorXf xMinus(x);
+            xMinus(i) -= epsilon;
+
+            Eigen::VectorXf fvecPlus(values());
+            operator()(xPlus, fvecPlus);
+
+            Eigen::VectorXf fvecMinus(values());
+            operator()(xMinus, fvecMinus);
+
+            Eigen::VectorXf fvecDiff(values());
+            fvecDiff = (fvecPlus - fvecMinus) / (2.0f * epsilon);
+
+            fjac.block(0, i, values(), 1) = fvecDiff;
+        }
+
+        return 0;
+    }
+
+
+    // Returns 'm', the number of values
+    int values() const { return m; }
+
+
+
+    // Returns 'n' the number of inputs
+    int inputs() const { return n; }
 };
 
 // Fit function: y = a*sin(b*x + c) + d to the points
-void characterizeW(double* parameters)
+// Apply this to each axis
+void characterizeW()
 {
+    int n = 4; // 4 parameters to describe sine wave
+    int m = 100; // 100 points
+
+    Eigen::VectorXf parameters(n); // Contains values for the 4 parameters
+
+    for (int i = 0; i < n; i++)
+    {
+        parameters(i) = 0.0;
+    }
+
+
+
+    LMFunctor functor;
+    functor.m = m;
+    functor.n = n;
+    functor.measuredValues = Eigen::MatrixXf(m, 2);
+
+    for (int i = 0; i < functor.m; i++)
+    {
+        float t = (float)i/10;
+        functor.measuredValues(i, 0) = t;
+        functor.measuredValues(i, 1) = sin(t);
+    }
+
+    print_eigen(functor.measuredValues);
+
+    Eigen::LevenbergMarquardt<LMFunctor, float> lm(functor);
+
+    // 'x' is vector of length 'n' containing the initial values for the parameters.
+	// The parameters 'x' are also referred to as the 'inputs' in the context of LM optimization.
+	// The LM optimization inputs should not be confused with the x input values.
+    Eigen::VectorXf x(n);
+    x(0) = 0.0;
+    x(1) = 0.0;
+    x(2) = 0.0;
+    x(3) = 0.0;
+
+    lm.minimize(x);
+
+    ROS_INFO("a: %f, b: %f, c: %f, d: %f", x(0), x(1), x(2), x(3));
 
 }
 
 
 // q: initial orientation
 Eigen::Quaternionf predict_orientation(float dt, float t) {
+    characterizeW();
     float A = angular_velocity.norm();  // Amplitude
     float omega = A; // angular frequency
     float phi = atan2(angular_velocity(1), angular_velocity(0)); // phase shift
@@ -745,7 +780,6 @@ Eigen::Quaternionf predict_orientation(float dt, float t) {
         k3 = A * sin(omega * (i + dt / 2) + phi) * dt;
         k4 = A * sin(omega * (i + dt) + phi) * dt;
         q = q * Eigen::Quaternionf(cos(k1/2), sin(k1/2) * k1/k1, sin(k1/2) * k2/k1, sin(k1/2) * k3/k1);
-        print_eigen(q);
     }
 
     // Quaternionf rotation = Quaternionf(AngleAxisf(0.5f * w.norm() * dt, w.normalized()));

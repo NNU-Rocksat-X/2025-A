@@ -3,8 +3,10 @@
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <apogee_vision/EigenUtil.h>
 #include <cmath>
 #include <assert.h>
+#include <unsupported/Eigen/NonLinearOptimization>
 
 #define STATEDIM (7)
 #define DOF (6)

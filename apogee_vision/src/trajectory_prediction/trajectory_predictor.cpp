@@ -2,8 +2,9 @@
 #include <Eigen/Dense>
 
 #include "apogee_vision/VelocityFilter.h"
-#include "apogee_vision/AngularFilter.h"
+//#include "apogee_vision/AngularFilter.h"
 #include "apogee_vision/ObjectDynamics.h"
+#include "apogee_vision/OrientationPredictor.h"
 
 // MSG & SRVs
 #include <geometry_msgs/Pose.h>
@@ -33,7 +34,7 @@ void quat_to_v4f(const geometry_msgs::Quaternion msg, Eigen::Vector4f &vector)
 class Predictor {
     private:
         VelocityEstimator* pos_filter;
-        OrientationFilter* orientation_estimator;
+
         Eigen::Vector3f position;
         Eigen::Vector4f orientation;
         ros::Time init_time;
@@ -197,25 +198,15 @@ class Predictor {
 
             pos_filter = new VelocityEstimator(state_guess, initial_uncertainty_guess, rate_period, acceleration_variance, measurement_variance);
 
-            // --------------------- Orientation Estimator ---------------------------
-            Orientation::StateVector orientation_state_guess;
-            orientation_state_guess << 0.707, 0, 0, 0.707, 0, 0, 0;
-
-            float orientation_uncertainty_guess = 0.1;
-            float dt = 0.5;
-            float angular_velocity_variance = 0.1;
-            float orientation_measurement_variance = 0.1;
-
-            orientation_estimator = new OrientationFilter(orientation_state_guess, orientation_uncertainty_guess, dt, angular_velocity_variance, orientation_measurement_variance);
 
             // -----------------------------------------------
 
             ros::Rate rate(rate_freq);
 
             Position::StateVector state_estimate;
+            Eigen::Matrix<float, 7, 1> orientation_estimate;
+            Eigen::Matrix<float, 6, 6> orientation_covariance; // only used for orientation kalman filter
 
-            Orientation::StateVector orientation_estimate;
-            Orientation::DOFMatrix orientation_covariance;
 
             ros::Time prediction_time;
             float prediction_duration = 5;
