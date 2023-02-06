@@ -8,7 +8,7 @@
 
 
 Eigen::Quaternionf predict_orientation(float dt, float t);
-Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, float dt);
+Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, double dt);
 
 
 #endif /* _ORIENTATION_PREDICTOR_H_ */

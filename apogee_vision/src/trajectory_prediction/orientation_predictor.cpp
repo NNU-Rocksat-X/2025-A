@@ -6,13 +6,22 @@ using ceres::CostFunction;
 using ceres::Problem;
 using ceres::Solve;
 using ceres::Solver;
+using ceres::CauchyLoss;
 
-std::vector<double> w_list;
+#define NUM_AXIS (3)
+
+std::vector<Eigen::Vector3f> w_list;
 std::vector<double> times;
+double curr_time = 0;
 
-Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, float dt)
+
+///////////////////////////////////////////////////////////////////////////////////////
+//                          CALCULATE ORIENTATION VELOCITY
+///////////////////////////////////////////////////////////////////////////////////////
+Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, double dt)
 {
     static Eigen::Quaternionf prev_q;
+    static Eigen::Vector3f prev_vel;
 
     // q = current orientation
     Eigen::Quaternionf q = v4_to_quat(q_vec);
@@ -31,38 +40,71 @@ Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, float dt)
     Eigen::Vector3f angular_velocity = dA.eulerAngles(0, 1, 2);
 
 
-    //ROS_INFO("angular velocity");
-    //print_eigen(angular_velocity);
-
-
     prev_q = q;
+    curr_time += dt;
+    w_list.push_back(angular_velocity);
+    times.push_back(curr_time);
+
+    // Only keep the most recent otherwise it takes to long to predict
+    if (w_list.size() > 5000)
+    {
+        w_list.erase(w_list.begin());
+        times.erase(times.begin());
+    }
+
+
     return angular_velocity;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////
+//                         PREDICT ORIENTATION
+///////////////////////////////////////////////////////////////////////////////////////
+
 // y = Asin(B(x + C)) + D
 struct OrientationResidual {
-    OrientationResidual(double x, double y) : x_(x), y_(y) {}
+    OrientationResidual(double y) : y_(y) {}
 
     template <typename T>
-    bool operator()(const T* const A,
-                    const T* const B,
-                    const T* const C,
-                    const T* const D, T* residual) const {
-        residual[0] = T(y_) - A[0]*sin(B[0] * T(x_) + C[0]) + D[0];
+    bool operator()(const T* const a, T* residual) const {
+        residual[0] = T(y_) - a;
         //residual[0] = y_ - A[0] + B[0] + C[0] + D[0];
         return true;
     }
 
     private:
     // Observations for a sample
-    const double x_;
     const double y_;
 };
 
-Eigen::Quaternionf predict_orientation(float dt, float t)
+void characterizeW(Eigen::Vector3f *avg_vel)
 {
-    ROS_INFO("predicting orientation");
+    for (int axis = 0; axis < NUM_AXIS; axis++)
+    {
+        // Build problem
+        Problem problem;
 
+        // Add residual block for each angular velocity point
+        for (int i = 0; i < (int)w_list.size(); ++i) {
+            CostFunction* cost_function =
+                new AutoDiffCostFunction<OrientationResidual, 1, 1>(
+                    new OrientationResidual(w_list[i][axis]));
+            problem.AddResidualBlock(cost_function, new CauchyLoss(0.5), &avg_vel[axis]);
+        }
+
+        // Run solver
+        Solver::Options options;
+        options.linear_solver_type = ceres::DENSE_QR;
+        //options.minimizer_progress_to_stdout = true;
+        Solver::Summary summary;
+        Solve(options, &problem, &summary);
+
+        ROS_INFO("summary: %s", summary.BriefReport().c_str());
+    }
+
+}
+
+/*
     // Create fake data
     int num_points = 30;
     for (int i = 0; i < num_points; i++)
@@ -75,33 +117,21 @@ Eigen::Quaternionf predict_orientation(float dt, float t)
         double c = 1;
         double d = 0;
         double y = a*sin(b * t + c) + d;
-        w_list.push_back(y);
+        Eigen::Vector3f w(y, y, y);
+        w_list.push_back(w);
         ROS_INFO("t: %f, y: %f", t, y);
     }
+*/
 
-    double A = 1;
-    double B = 1;
-    double C = 1;
-    double D = 0;
+Eigen::Quaternionf predict_orientation(float dt, float t)
+{
+    Eigen::Vector3f avg_vel;
 
-    // Build problem
-    Problem problem;
-    ROS_INFO("w_list size %i", (int)w_list.size());
-    for (int i = 0; i < (int)w_list.size(); ++i) {
-        CostFunction* cost_function =
-            new AutoDiffCostFunction<OrientationResidual, 1, 1, 1, 1, 1>(
-                new OrientationResidual(times[i], w_list[i]));
-        problem.AddResidualBlock(cost_function, nullptr, &A, &B, &C, &D);
-    }
+    characterizeW(&avg_vel);
 
-    // Run solver
-    Solver::Options options;
-    options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
-    options.minimizer_progress_to_stdout = true;
-    Solver::Summary summary;
-    Solve(options, &problem, &summary);
-
-
-    ROS_INFO("summary: %s", summary.BriefReport().c_str());
-    ROS_INFO("A: %f, B: %f, C: %f, D: %f", A, B, C, D);
+    ROS_INFO("curr ang vel:");
+    print_eigen(w_list.back());
+    
+    ROS_INFO("avg vel");
+    print_eigen(avg_vel);
 }

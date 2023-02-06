@@ -14,7 +14,8 @@
       <geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>
       <body pos="-0.5 -0.2 0.2">
           <joint type="free"/>
-          <geom type="mesh" mesh="wrench" euler="90 0 0" rgba="0 0 1 1"/>
+          <geom type="box" size="0.1 0.1 0.1" rgba="0 0 1 1"/>
+          <!--<geom type="mesh" mesh="wrench" euler="90 0 0" rgba="0 0 1 1"/>-->
       </body>
   </worldbody>
 </mujoco>
