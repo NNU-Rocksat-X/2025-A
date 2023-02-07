@@ -79,3 +79,15 @@ Eigen::Quaternionf v3_to_quat(Eigen::Vector3f v)
         return quaternion;
     }
 }
+
+
+Eigen::Vector3f quat_to_euler(Eigen::Quaternionf q)
+{
+    return q.toRotationMatrix().eulerAngles(0,1,2);
+}
+
+Eigen::Vector3f quat_to_euler(Eigen::Vector4f vq)
+{
+    Eigen::Quaternionf q = v4_to_quat(vq);
+    return quat_to_euler(q);
+}

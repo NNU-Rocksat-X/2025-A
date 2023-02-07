@@ -7,7 +7,7 @@
 #include "apogee_vision/EigenUtil.h"
 
 
-Eigen::Quaternionf predict_orientation(float dt, float t);
+Eigen::Quaternionf predict_orientation(float t);
 Eigen::Vector3f calculateAngularVelocity(Eigen::Vector4f q_vec, double dt);
 
 

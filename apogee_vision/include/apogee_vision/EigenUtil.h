@@ -16,4 +16,7 @@ Eigen::Vector3f quat_to_v3(Eigen::Quaternionf q);
 
 Eigen::Quaternionf v3_to_quat(Eigen::Vector3f v);
 
+Eigen::Vector3f quat_to_euler(Eigen::Quaternionf q);
+Eigen::Vector3f quat_to_euler(Eigen::Vector4f vq);
+
 #endif /*_EIGEN_UTIL_H_*/

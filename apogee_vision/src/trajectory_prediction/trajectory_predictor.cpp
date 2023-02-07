@@ -37,6 +37,7 @@ class Predictor {
 
         Eigen::Vector3f position;
         Eigen::Vector4f orientation;
+        Eigen::Vector3f orientation_prediction; // euler
         ros::Time init_time;
 
         ros::Time predict_time = ros::Time(0); // Time at which prediction starts
@@ -134,9 +135,9 @@ class Predictor {
         bool predict(marsha_msgs::PredictPosition::Request &req,
                      marsha_msgs::PredictPosition::Response &res)
         {
-            float dt = 0.0001; // Smaller time step means more accurate, but more computation
             float t = 1;
-            Eigen::Quaternionf orientation = predict_orientation(dt, t);
+            Eigen::Quaternionf orientation = predict_orientation(t);
+            orientation_prediction = quat_to_euler(orientation);
 
             predict_time = ros::Time::now() + ros::Duration(t);
             /*
@@ -237,8 +238,16 @@ class Predictor {
                         {
                             if (ros::Time::now() > predict_time)
                             {
-                                ROS_INFO("Actual:");
-                                print_eigen(orientation);
+                                //ROS_INFO("Actual:");
+                                //print_eigen(orientation);
+
+                                Eigen::Vector3f vector_orientation = quat_to_euler(orientation);
+
+                                ROS_INFO(" actual");
+                                print_eigen(vector_orientation);
+
+                                Eigen::Vector3f difference = vector_orientation - orientation_prediction;
+
                                 predict_time = ros::Time(0);
                             }
                         }
