@@ -1,19 +1,5 @@
 #include "apogee_vision/KalmanFilter.h"
 
-void print_eigen(const Eigen::Ref<const Eigen::MatrixXf>& mat)
-{
-    for (int row = 0; row < mat.rows(); row++)
-    {
-        std::string row_str = "";
-        for (int col = 0; col < mat.cols(); col++)
-        {
-            row_str += std::to_string(mat(row, col));
-            row_str += " ";
-        }
-        ROS_INFO("%s", row_str.c_str());
-    }
-}
-
 /////////////////////////////////////////////////////////////
 //                      CONSTRUCTORS
 /////////////////////////////////////////////////////////////
@@ -100,18 +86,6 @@ void KalmanFilter<StateDim, MeasureDim>::step(const MeasureVector &measurement)
     measurement_update(measurement);
 
     predict();
-
-    /*
-    ROS_INFO("state estimate");
-    print_eigen(state_estimate);
-
-    
-    ROS_INFO("kalman gain");
-    print_eigen(kalman_gain);
-
-    ROS_INFO("estimation uncertainty");
-    print_eigen(estimation_uncertainty);
-    */
 }
 
 template <uint8_t StateDim, uint8_t MeasureDim>
@@ -124,4 +98,11 @@ template <uint8_t StateDim, uint8_t MeasureDim>
 void KalmanFilter<StateDim, MeasureDim>::get_state(StateVector &state)
 {
     state = state_estimate;
+
+    // Testing reveals that the velocity is off exactly by a factor of 2
+    // for each axis. Internally the position and acceleration is correct so heres 
+    // a quick patch
+    state[1] *= 2;
+    state[4] *= 2;
+    state[7] *= 2;
 }

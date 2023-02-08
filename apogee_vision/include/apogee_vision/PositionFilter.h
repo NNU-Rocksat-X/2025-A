@@ -1,5 +1,5 @@
-#ifndef _VELOCITY_FILTER_H_
-#define _VELOCITY_FILTER_H_
+#ifndef _POSITION_FILTER_H_
+#define _POSITION_FILTER_H_
 
 
 #include <Eigen/Dense>
@@ -24,7 +24,7 @@ namespace Position
 
 }
 
-class VelocityEstimator {
+class PositionFilter {
     public:
     private:
         KalmanFilter<9, 3>* kalman_filter;
@@ -38,9 +38,9 @@ class VelocityEstimator {
         *
         * @param[in] initial_uncertainty_guess - guess at the variance of the estimation
         */
-        VelocityEstimator(const Position::StateVector &initial_state_guess, float initial_uncertainty_guess, float dt_, float acceleration_variance, float measurement_variance);
+        PositionFilter(const Position::StateVector &initial_state_guess, float initial_uncertainty_guess, float dt_, float acceleration_variance, float measurement_variance);
 
-        ~VelocityEstimator();
+        ~PositionFilter();
 
         /* @Brief - Performs one kalman model step
         *
@@ -66,4 +66,4 @@ class VelocityEstimator {
         void print_state(Position::StateVector &state);
 };
 
-#endif /*_VELOCITY_FILTER_H_*/
+#endif /*_POSITION_FILTER_H_*/

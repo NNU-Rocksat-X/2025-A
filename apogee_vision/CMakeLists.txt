@@ -68,25 +68,13 @@ include_directories(
 # TODO: change this to just collect all cpp files in src
 
 add_library(eigen_util src/eigen_util.cpp)
-add_dependencies(eigen_util ${catkin_EXPORTED_TARGETS})
 target_link_libraries(eigen_util ${catkin_LIBRARIES}) 
+add_dependencies(eigen_util ${catkin_EXPORTED_TARGETS})
 
 
 add_library(tracker_lib src/tracker_lib.cpp)
-add_dependencies(tracker_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tracker_lib ${catkin_LIBRARIES})
-
-add_library(velocity_filter src/trajectory_prediction/velocity_filter.cpp)
-add_dependencies(velocity_filter ${catkin_EXPORTED_TARGETS})
-target_link_libraries(velocity_filter ${catkin_LIBRARIES})
-
-add_library(orientation_predictor src/trajectory_prediction/orientation_predictor.cpp)
-add_dependencies(orientation_predictor ${catkin_EXPORTED_TARGETS})
-target_link_libraries(orientation_predictor eigen_util ${CERES_LIBRARIES} ${catkin_LIBRARIES})
-
-add_library(angular_filter src/trajectory_prediction/angular_filter.cpp)
-add_dependencies(angular_filter  ${catkin_EXPORTED_TARGETS})
-target_link_libraries(angular_filter eigen_util ${catkin_LIBRARIES})
+add_dependencies(tracker_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 ##################################################
@@ -96,7 +84,6 @@ target_link_libraries(angular_filter eigen_util ${catkin_LIBRARIES})
 add_executable(object_tracking src/object_tracking.cpp)
 target_link_libraries(object_tracking tracker_lib ${catkin_LIBRARIES})
 add_dependencies(object_tracking tracker_lib ${catkin_EXPORTED_TARGETS})
-
 
 add_executable(object_tracking_gui src/object_tracking_gui.cpp)
 target_link_libraries(object_tracking_gui tracker_lib ${catkin_LIBRARIES})
@@ -110,11 +97,8 @@ add_executable(point_cloud src/point_cloud.cpp)
 target_link_libraries(point_cloud ${catkin_LIBRARIES})
 add_dependencies(point_cloud ${catkin_EXPORTED_TARGETS})
 
-add_executable(marsha_trajectory_predictor src/trajectory_prediction/marsha_trajectory_predictor.cpp)
-target_link_libraries(marsha_trajectory_predictor ${catkin_LIBRARIES})
-add_dependencies(marsha_trajectory_predictor ${catkin_EXPORTED_TARGETS})
-
-add_executable(trajectory_predictor src/trajectory_prediction/trajectory_predictor.cpp)
-target_link_libraries(trajectory_predictor velocity_filter orientation_predictor ${catkin_LIBRARIES})
-add_dependencies(trajectory_predictor ${catkin_EXPORTED_TARGETS})
+file(GLOB TRAJECTORY_SRC "src/trajectory_prediction/*.cpp")
+add_executable(trajectory_predictor ${TRAJECTORY_SRC})
+target_link_libraries(trajectory_predictor eigen_util ${CERES_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(trajectory_predictor eigen_util  ${catkin_EXPORTED_TARGETS})
 
