@@ -6,3 +6,5 @@ A PCD can be generate using the pcl_mesh2pcd program.
 (Included in pcl-1.8.1 which is required to run to tracker)
 
  pcl_mesh2pcd takes a .ply as input, howerever an stl can be converted to a ply [here](https://imagetostl.com/convert/file/stl/to/ply)
+ 
+ A higher leaf size (1-5) is suggested to increase performance of the tracker. The higher the better performance, but less accurate.
