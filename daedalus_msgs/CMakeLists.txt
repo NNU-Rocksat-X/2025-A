@@ -14,6 +14,7 @@ add_message_files(
     FILES
     TeensyMsg.msg
     OrientationState.msg
+    RGBDFrame.msg
 )
   
 add_service_files(
