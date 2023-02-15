@@ -25,8 +25,8 @@ def main():
 
         np_frame = np.array(list(frame_buffer.data))
         frame = np.reshape(np_frame, (frame_height, frame_width, frame_channels)).astype(np.uint8)
-        frame = np.flip(frame, 0)
-        frame = np.flip(frame, 2)
+        #frame = np.flip(frame, 0)
+        #frame = np.flip(frame, 2)
         #bigger_frame = cv2.resize(frame, (1280, 720))
         cv2.imshow('Detection', frame)
 

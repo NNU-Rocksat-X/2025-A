@@ -22,7 +22,7 @@ def get_multi_array(w, h):
 def main():
     rospy.init_node('color_filter')
 
-    mask_pub = rospy.Publisher('object_mask', UInt8MultiArray, queue_size=1)
+    mask_pub = rospy.Publisher('/object_mask', UInt8MultiArray, queue_size=1)
     if cv2.cuda.getCudaEnabledDeviceCount() > 0:
         rospy.loginfo("CV2 using GPU")
     else:
@@ -38,28 +38,47 @@ def main():
         frame_width = frame_buffer.layout.dim[1].size
         frame_channels = frame_buffer.layout.dim[2].size
 
-        mask_msg = get_multi_array(frame_width, frame_height)
-
-
-
+        # Setup recieved frame
         np_frame = np.array(list(frame_buffer.data))
         frame = np.reshape(np_frame, (frame_height, frame_width, frame_channels)).astype(np.uint8)
-        frame = np.flip(frame, 0)
+        #frame = np.flip(frame, 0)
         frame = np.flip(frame, 2)
 
-
+        # Setup filter
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         lower_red = np.array([30, 0, 0])
         upper_red = np.array([255, 20, 20])
 
+        # Creating mask from color filter
         mask = cv2.inRange(rgb, lower_red, upper_red)
         #cv2.imshow('Detection', frame)
-        #cv2.imshow('Mask', mask)
+        cv2.imshow('Mask', mask)
+
+        # Remove blobs less than 12x12
+        kernel = np.ones((8,8), np.uint8)
+        morph_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        morph_mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+        # Determine object position (pixel position)
+        contours, hierarchy = cv2.findContours(morph_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if len(contours) > 0: # Only get position if object exists
+            c = max(contours, key=cv2.contourArea)
+            area = cv2.contourArea(c)
+            if area > 100: # Only use objects greater than 100 pixels
+                x,y,w,h = cv2.boundingRect(c)
+
+                cx = int(x + w/2)
+                cy = int(y + h/2)
+
+                # Need to publish pixel position
+                print("X: ", cx, " y: ", cy)
+                
 
         np_mask = np.asarray(mask, dtype=np.uint8)
 
         np_mask = np.reshape(np_mask, newshape=(np_mask.shape[0]*np_mask.shape[1]))
         
+        mask_msg = get_multi_array(frame_width, frame_height)
         mask_msg.data = np_mask.tolist()
         mask_pub.publish(mask_msg)
 
