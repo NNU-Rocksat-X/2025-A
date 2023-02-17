@@ -64,9 +64,12 @@ class TrackerLib
 
         void calculate(void);
 
+
+        // --------- GUI Only -------------
         CloudConstPtr get_reference(void);
         uint8_t get_recv_cloud(CloudPtr cloud);
         void get_transformation(Eigen::Affine3f &transformation);
         ParticleFilter::PointCloudStatePtr get_particles();
+        // --------------------------------
 
 };

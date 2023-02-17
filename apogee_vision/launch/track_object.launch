@@ -8,7 +8,7 @@
     <arg if="$(eval arg('env') == 'wrench')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/meshes/wrench_coarse.pcd"/>
     <arg if="$(eval arg('env') == 'cube')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/meshes/cube_coarse.pcd"/>
 
-    <arg name="object_stl" default="package://arm2d2_description/meshes/wrench.stl"/>
+    <arg if="$(eval arg('env') == 'payload')" name="object_stl" default="package://arm2d2_description/meshes/wrench.stl"/>
     <arg if="$(eval arg('env') == 'wrench')" name="object_stl" default="package://arm2d2_description/meshes/wrench.stl"/>
     <arg if="$(eval arg('env') == 'cube')" name="object_stl" default="package://arm2d2_description/meshes/cube.stl"/>
 
@@ -24,12 +24,12 @@
     </include>
 
     <node name="point_cloud" pkg="apogee_vision" type="point_cloud" output="screen"/>
-    <!--<node name="color_filter" pkg="apogee_vision" type="color_filter" output="screen"/>-->
+    <node name="color_filter" pkg="apogee_vision" type="color_filter" output="screen" /> <!-- args="$(arg gui)" -->
 
-    <!--    
+    
     <node if="$(arg gui)" name="tracker" pkg="apogee_vision" type="object_tracking_gui" output="$(arg output)" args="$(arg ref_pcd)"/>
     <node unless="$(arg gui)" name="tracker" pkg="apogee_vision" type="object_tracking" output="$(arg output)" args="$(arg ref_pcd)"/>
-    -->
+    
     <node name="object_marker_publisher" pkg="apogee_vision" type="rviz_tracked_object" args="$(arg object_stl)"/>
 
 </launch>
