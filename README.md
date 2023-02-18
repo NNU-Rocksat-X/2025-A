@@ -1,4 +1,17 @@
-# daedalus
+# Daedalus
+
+## Installing
+To install simply clone the daedalus repository to the home directory:
+
+```
+git clone https://github.com/Apogee-Robotics/daedalus.git
+```
+Then run the installation script:
+
+```
+cd daedalus
+./install.sh
+```
 
 ## Documention
 - [Project Introduction](./docs/introduction.md)
