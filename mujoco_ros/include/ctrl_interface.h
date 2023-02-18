@@ -26,7 +26,7 @@
 
 #include "physics.h"
 
-#define MAX_JOINTS (7) // read this from joint_config.yaml (on rosparam)
+#define MAX_JOINTS (6) // read this from joint_config.yaml (on rosparam)
 #define PI         (3.14159)
 
 

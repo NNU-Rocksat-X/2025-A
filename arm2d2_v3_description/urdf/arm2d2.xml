@@ -1,0 +1,100 @@
+<mujoco model="arm2d2_v3">
+  <visual>
+    <headlight ambient="0 0 0" diffuse="0.3 0.3 0.3" specular="1 1 1"/>
+    <quality shadowsize="8192"/>
+  </visual>
+  <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
+  <option integrator="RK4" timestep="0.00025">
+    <flag gravity="disable"/>
+  </option>
+  <size njmax="500" nconmax="100"/>
+  <default/>
+  <asset>
+    <texture type="skybox" filefront="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006000.png"
+                           fileright="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006001.png"
+                           fileleft="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006003.png"
+                           fileup="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006005.png"
+                           filedown="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006004.png"
+                           fileback="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v3_description/meshes/simulation_assets/earth006002.png"/>
+    <mesh name="base_link" file="base_link.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="link1_1" file="link1_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="link2_1" file="link2_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="link3_1" file="link3_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="link4_1" file="link4_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="link5_1" file="link5_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_1" file="gripper_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh file="wrench.stl" scale=".0015 .0015 .0015"/>
+  </asset>
+  <worldbody>     
+    <light pos=".4 .4 .5" dir="-2 -2 -1.5" diffuse="1 1 1"/>
+
+
+    <body name="wrench" pos="-0.5 -0.2 0.2">
+        <joint type="free"/>
+        <geom type="mesh" mesh="wrench" euler="90 0 180" rgba="1 0 0 1"/>
+    </body>
+
+    <body name="cube" pos="-0.5 -0.2 0.5">
+      <joint type="free"/>
+      <geom type="box" size="0.025 0.025 0.025" rgba="1 0 0 1"/>
+    </body>
+    
+    
+    <body name="ball" pos="-0.025 -0.05 0.05">
+      <joint type="free"/>
+      <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+    </body>
+      
+    <body name="base_link" pos="0 0 0.01" quat="0.707388 0.706825 0 0">
+      <!--<geom pos="0 0 0.01" quat="0.707388 0.706825 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_link"/>-->
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_link"/>
+    
+      <body name="link1_1" pos="-0.110082 0.006606 -0.055268">
+        <inertial pos="0.000929046 0.032359 0.0330344" quat="0.990044 -0.0956615 0.0346668 0.0972618" mass="0.155679" diaginertia="0.000157446 0.000152415 5.9139e-05"/>
+        <joint name="joint_1" pos="0 0 0" axis="0 1 0" range="-3.14159 0.872665"/>
+        <geom pos="0.110082 -0.006606 0.055268" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link1_1"/>
+        <geom pos="0.110082 -0.006606 0.055268" type="mesh" mesh="link1_1"/>
+        <body name="link2_1" pos="0 0.035617 -0.01">
+          <inertial pos="2.20013e-05 0.0573721 0.00951152" quat="0.5 0.5 -0.5 0.5" mass="0.113212" diaginertia="0.00013 0.000125 4.4e-05"/>
+          <joint name="joint_2" pos="0 0 0" axis="0 0 -1" range="-1.5708 1.5708"/>
+          <geom pos="0.110082 -0.042223 0.065268" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link2_1"/>
+          <geom pos="0.110082 -0.042223 0.065268" type="mesh" mesh="link2_1"/>
+          <body name="link3_1" pos="0 0.0895 0.0095">
+            <inertial pos="-9.20403e-06 0.0280444 0.00865238" quat="0.98602 -0.166629 0 0" mass="0.140493" diaginertia="0.000123 0.00011361 5.23895e-05"/>
+            <joint name="joint_3" pos="0 0 0" axis="0 -1 0"/>
+            <geom pos="0.110082 -0.131723 0.055768" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link3_1"/>
+            <geom pos="0.110082 -0.131723 0.055768" type="mesh" mesh="link3_1"/>
+            <body name="link4_1" pos="0 0.035618 -0.01">
+              <inertial pos="2.36187e-05 0.0520203 0.0095084" quat="0.5 0.5 -0.5 0.5" mass="0.0941925" diaginertia="0.000106 0.0001 2.7e-05"/>
+              <joint name="joint_4" pos="0 0 0" axis="0 0 -1"/>
+              <geom pos="0.110082 -0.167341 0.065768" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link4_1"/>
+              <geom pos="0.110082 -0.167341 0.065768" type="mesh" mesh="link4_1"/>
+              <body name="link5_1" pos="0 0.0895 0.0095">
+                <inertial pos="7.91086e-05 0.030031 0.0159086" quat="0.979515 -0.201372 0 0" mass="0.093482" diaginertia="7e-05 6.42931e-05 3.67069e-05"/>
+                <joint name="joint_5" pos="0 0 0" axis="0 -1 0"/>
+                <geom pos="0.110082 -0.256841 0.056268" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link5_1"/>
+                <geom pos="0.110082 -0.256841 0.056268" type="mesh" mesh="link5_1"/>
+                <body name="gripper_1" pos="0 0.035617 -0.01">
+                  <inertial pos="0.000565176 0.0606526 0.0113399" quat="0.419041 0.436542 -0.586477 0.538405" mass="0.0992864" diaginertia="0.000174911 0.000171846 2.92432e-05"/>
+                  <joint name="joint_6" pos="0 0 0" axis="0 0 -1" range="-1.91986 1.91986"/>
+                  <geom pos="0.110082 -0.292458 0.066268" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="gripper_1"/>
+                  <geom pos="0.110082 -0.292458 0.066268" type="mesh" mesh="gripper_1"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+
+  <actuator>
+    <velocity name="J1" joint="joint_1" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="J2" joint="joint_2" kv="1"  gear="4 0 0 0 0 0"/> 
+    <velocity name="J3" joint="joint_3" kv="1" gear="4 0 0 0 0 0"/> 
+    <velocity name="J4" joint="joint_4" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="J5" joint="joint_5" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="J6" joint="joint_6" kv="1" gear="4 0 0 0 0 0"/> 
+  </actuator>
+</mujoco>

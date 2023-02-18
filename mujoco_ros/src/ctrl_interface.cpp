@@ -11,6 +11,7 @@ extern mjData* d;
 /////////////////////////////////////////////////////// 
 
 static float vel_cmd[MAX_JOINTS];
+static std::vector<std::string> joint_names;
 static int num_joints = 0;
 static int num_grip_joints = 0;
 static int total_joints = 0;
@@ -148,6 +149,11 @@ void init_ros_node()
         nh.getParam("stepper_config/num_grip_joints", num_grip_joints);
     }
 
+    if (nh.hasParam("stepper_config/joint_names"))
+    {
+        nh.getParam("stepper_config/joint_names", joint_names);
+    }
+
     total_joints = num_joints + num_grip_joints;
 
     for (int i = 0; i < num_joints; i++)
@@ -192,16 +198,10 @@ void ctrl_robot(const mjModel* m, mjData* d)
 
 void init_robot_state(void)
 {
-
-    robotState.state.joint_state.name.push_back("joint_1");
-    robotState.state.joint_state.name.push_back("joint_2");
-    robotState.state.joint_state.name.push_back("joint_3");
-    robotState.state.joint_state.name.push_back("joint_4");
-    robotState.state.joint_state.name.push_back("joint_5");
-    robotState.state.joint_state.name.push_back("gripper_joint");
-    robotState.state.joint_state.name.push_back("actuator_joint_1");
-    robotState.state.joint_state.name.push_back("actuator_joint_2");
-    robotState.state.joint_state.name.push_back("actuator_joint_3");
+    for (int i = 0; i < joint_names.size(); i++)
+    {
+        robotState.state.joint_state.name.push_back(joint_names[i]);
+    }
 
     robotState.state.joint_state.position.resize(total_joints);
     robotState.state.joint_state.velocity.resize(total_joints);
