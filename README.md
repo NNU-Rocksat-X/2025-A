@@ -7,4 +7,5 @@
 - [Programs](./docs/programs.md)
 - [PCD Generation](./docs/pcd_generation.md)
 - [ARM2D2 Description Package](./arm2d2_description/README.md)
+- [Network Setup](./docs/network_setup.md)
 
