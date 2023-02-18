@@ -26,7 +26,6 @@ add_service_files(
     GetPosFrame.srv
     PayloadCmd.srv
     PositionCmd.srv
-    PlanGrasp.srv
     Reset.srv
     StateComm.srv
     GenerateGrasp.srv
@@ -34,8 +33,6 @@ add_service_files(
     GetFrame.srv  
     GetDepth.srv 
     JointCmd.srv
-    PredictPosition.srv
-    ObjectObservation.srv
 )
 
 add_action_files(

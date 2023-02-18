@@ -6,11 +6,17 @@ To install simply clone the daedalus repository to the home directory:
 ```
 git clone https://github.com/Apogee-Robotics/daedalus.git
 ```
-Then run the installation script:
+Then install pcl with the installation script:
 
 ```
 cd daedalus
-./install.sh
+./install/install_pcl.sh
+```
+
+Then run the installation script:
+
+```
+./install/install.sh
 ```
 
 ## Documention
