@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 
     marker.type = visualization_msgs::Marker::MESH_RESOURCE;
     //marker.type = marker.MESH_RESOURCE;
-    marker.mesh_resource = "package://arm2d2_description/meshes/wrench.stl";
+    marker.mesh_resource = argv[1];
     marker.mesh_use_embedded_materials = true;
 
     marker.action = visualization_msgs::Marker::ADD;

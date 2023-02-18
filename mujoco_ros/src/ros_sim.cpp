@@ -132,8 +132,8 @@ int main(int argc, char** argv) {
   }
 
   // create window, make OpenGL context current, request v-sync
-  // Reduce lag by reducing window size
-  GLFWwindow* window = glfwCreateWindow(1920, 1080, "Demo", NULL, NULL);
+  // Reduce lag by reducing window size (1920, 1080) or (720, 480)
+  GLFWwindow* window = glfwCreateWindow(720, 480, "Demo", NULL, NULL);
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 

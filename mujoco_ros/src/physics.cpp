@@ -131,10 +131,10 @@ void get_model_pose(geometry_msgs::Pose* pose, int model_id)
 void get_model_twist(geometry_msgs::Twist* twist, int model_id)
 {
   double vel[6];
-  mj_objectVelocity(m, d, mjOBJ_BODY, model_id, vel, true);
+  mj_objectVelocity(m, d, mjOBJ_BODY, model_id, vel, false);
 
-  Vector3* lin = (Vector3*)&vel[0];
-  Vector3* ang = (Vector3*)&vel[3];
+  Vector3* lin = (Vector3*)&vel[3];
+  Vector3* ang = (Vector3*)&vel[0];
 
   twist->linear.x = lin->x;
   twist->linear.y = lin->y;

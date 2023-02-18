@@ -14,6 +14,7 @@ add_message_files(
     FILES
     TeensyMsg.msg
     OrientationState.msg
+    RGBDFrame.msg
 )
   
 add_service_files(
@@ -24,6 +25,8 @@ add_service_files(
     PositionCmd.srv
     PostureCmd.srv
     PlanGrasp.srv
+    PredictPosition.srv
+    ObjectObservation.srv
 )
 
 

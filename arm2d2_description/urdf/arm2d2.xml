@@ -26,17 +26,19 @@
   <worldbody>
       <light pos=".4 .4 .5" dir="-2 -2 -1.5" diffuse="1 1 1"/>
       <geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>
-      <!--
+      
       <body name="wrench" pos="-0.5 -0.2 0.2">
           <joint type="free"/>
-          <geom type="mesh" mesh="wrench" euler="90 0 180" rgba="0 0 1 1"/>
+          <geom type="box" size="0.025 0.025 0.025" rgba="1 0 0 1"/>
+          <!--<geom type="mesh" mesh="wrench" euler="90 0 180" rgba="1 0 0 1"/>-->
       </body>
-      -->
+      
+      <!--
       <body name="ball" pos="-0.025 -0.05 0.05">
         <joint type="free"/>
         <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
       </body>
-
+      -->
       <!-- Depth Cam -->
       <body pos="0 0.5 0.1">
         <camera name="depth_cam" mode="fixed" fovy="45"/>

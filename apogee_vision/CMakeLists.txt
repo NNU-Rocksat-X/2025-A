@@ -24,11 +24,13 @@ find_package(catkin REQUIRED
 
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
+find_package(Ceres REQUIRED)
 
 include_directories(
     include
     ${catkin_INCLUDE_DIRS} 
     ${PCL_INCLUDE_DIRS}
+    ${CERES_INCLUDE_DIRS}
 )
 
 catkin_python_setup()
@@ -47,9 +49,11 @@ catkin_install_python(
         scripts/view
         scripts/point_cloud_py
         scripts/cam_frame
+        scripts/color_filter
         scripts/tests/view_orientation_state
         scripts/tests/orientation_axis
         scripts/tests/graph_angular_velocity
+        scripts/tests/trajectory_prediction_accuracy
         nodes/remap_object_pose
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -63,17 +67,16 @@ include_directories(
 ##################################################
 #                      LIBRARIES
 ##################################################
+# TODO: change this to just collect all cpp files in src
+
+add_library(eigen_util src/eigen_util.cpp)
+target_link_libraries(eigen_util ${catkin_LIBRARIES}) 
+add_dependencies(eigen_util ${catkin_EXPORTED_TARGETS})
+
+
 add_library(tracker_lib src/tracker_lib.cpp)
-add_dependencies(tracker_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tracker_lib ${catkin_LIBRARIES})
-
-add_library(velocity_filter src/velocity_filter.cpp)
-add_dependencies(velocity_filter ${catkin_EXPORTED_TARGETS})
-target_link_libraries(velocity_filter ${catkin_LIBRARIES})
-
-add_library(angular_filter src/angular_filter.cpp)
-add_dependencies(angular_filter ${catkin_EXPORTED_TARGETS})
-target_link_libraries(angular_filter ${catkin_LIBRARIES})
+add_dependencies(tracker_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 ##################################################
@@ -83,7 +86,6 @@ target_link_libraries(angular_filter ${catkin_LIBRARIES})
 add_executable(object_tracking src/object_tracking.cpp)
 target_link_libraries(object_tracking tracker_lib ${catkin_LIBRARIES})
 add_dependencies(object_tracking tracker_lib ${catkin_EXPORTED_TARGETS})
-
 
 add_executable(object_tracking_gui src/object_tracking_gui.cpp)
 target_link_libraries(object_tracking_gui tracker_lib ${catkin_LIBRARIES})
@@ -97,11 +99,8 @@ add_executable(point_cloud src/point_cloud.cpp)
 target_link_libraries(point_cloud ${catkin_LIBRARIES})
 add_dependencies(point_cloud ${catkin_EXPORTED_TARGETS})
 
-add_executable(marsha_trajectory_predictor src/marsha_trajectory_predictor.cpp)
-target_link_libraries(marsha_trajectory_predictor ${catkin_LIBRARIES})
-add_dependencies(marsha_trajectory_predictor ${catkin_EXPORTED_TARGETS})
-
-add_executable(trajectory_predictor src/trajectory_predictor.cpp)
-target_link_libraries(trajectory_predictor velocity_filter angular_filter ${catkin_LIBRARIES})
-add_dependencies(trajectory_predictor ${catkin_EXPORTED_TARGETS})
+file(GLOB TRAJECTORY_SRC "src/trajectory_prediction/*.cpp")
+add_executable(trajectory_predictor ${TRAJECTORY_SRC})
+target_link_libraries(trajectory_predictor eigen_util ${CERES_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(trajectory_predictor eigen_util  ${catkin_EXPORTED_TARGETS})
 

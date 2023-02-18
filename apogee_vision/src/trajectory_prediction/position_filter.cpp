@@ -1,11 +1,11 @@
-#include "apogee_vision/VelocityFilter.h"
+#include "apogee_vision/PositionFilter.h"
 
 using namespace Position;
 
 /////////////////////////////////////////////////////////////
 //                      CONSTRUCTORS
 /////////////////////////////////////////////////////////////
-VelocityEstimator::VelocityEstimator(const StateVector &state_guess, float initial_uncertainty_guess, float dt, float acceleration_variance, float measurement_variance)
+PositionFilter::PositionFilter(const StateVector &state_guess, float initial_uncertainty_guess, float dt, float acceleration_variance, float measurement_variance)
 {
     float dt2 = pow(dt, 2);
     float dt3 = pow(dt, 3);
@@ -61,13 +61,13 @@ VelocityEstimator::VelocityEstimator(const StateVector &state_guess, float initi
 //                      DESTRUCTOR
 /////////////////////////////////////////////////////////////
 
-VelocityEstimator::~VelocityEstimator() {}
+PositionFilter::~PositionFilter() {}
 
 
 /////////////////////////////////////////////////////////////
 //                      PRIVATE FUNCTIONS
 /////////////////////////////////////////////////////////////
-void VelocityEstimator::set_transition_matrix(float dt, StateMatrix &transition_matrix)
+void PositionFilter::set_transition_matrix(float dt, StateMatrix &transition_matrix)
 {
     float dt2 = pow(dt, 2);
 
@@ -83,7 +83,7 @@ void VelocityEstimator::set_transition_matrix(float dt, StateMatrix &transition_
                          0, 0,  0,     0, 0,  0,     0, 0,  1;  
 }
 
-State VelocityEstimator::vector_to_state(StateVector vector)
+State PositionFilter::vector_to_state(StateVector vector)
 {
     State state;
     state.position(0) = vector(0);
@@ -102,13 +102,13 @@ State VelocityEstimator::vector_to_state(StateVector vector)
 //                      PUBLIC FUNCTIONS
 /////////////////////////////////////////////////////////////
 
-void VelocityEstimator::step(const MeasureVector &measurement)
+void PositionFilter::step(const MeasureVector &measurement)
 {
     kalman_filter->step(measurement);
 
 }
 
-void VelocityEstimator::predict_state(float secs_until_prediction, State &predicted_state)
+void PositionFilter::predict_state(float secs_until_prediction, State &predicted_state)
 {
     StateVector predicted_state_vector;
     StateMatrix prediction_transition;
@@ -118,19 +118,19 @@ void VelocityEstimator::predict_state(float secs_until_prediction, State &predic
     predicted_state = vector_to_state(predicted_state_vector);
 }
 
-void VelocityEstimator::get_state(State &state)
+void PositionFilter::get_state(State &state)
 {
     StateVector state_vector;
     kalman_filter->get_state(state_vector);
     state = vector_to_state(state_vector);
 }
 
-void VelocityEstimator::get_state(StateVector &state)
+void PositionFilter::get_state(StateVector &state)
 {
     kalman_filter->get_state(state);
 }
 
-void VelocityEstimator::print_state(StateVector &state)
+void PositionFilter::print_state(StateVector &state)
 {
     ROS_DEBUG("x: %f, dx: %f, ddx: %f, y: %f, dy: %f, ddy: %f, z: %f, dz: %f, ddz: %f", state(0), state(1), state(2), state(3), state(4), state(5), state(6), state(7), state(8));
 }

@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+
+import rospy
+import math
+
+from daedalus_msgs.srv import ObjectObservation
+from daedalus_msgs.srv import PredictPosition
+from std_srvs.srv import Trigger
+from mujoco_ros.srv import ApplyForce, ApplyForceRequest
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Twist
+
+def q_to_rpy(q):
+    sinr_cosp = 2 * (q.w * q.x * + q.y * q.z)
+    cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y)
+    x = math.atan2(sinr_cosp, cosr_cosp)
+
+    sinp = math.sqrt(1 + 2 * (q.w * q.y - q.x * q.z))
+    cosp = math.sqrt(1 - 2 * (q.w * q.y - q.x * q.z))
+    y = 2 * math.atan2(sinp, cosp) - math.pi / 2
+
+    siny_cosp = 2 * (q.w * q.z + q.x * q.y)
+    cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
+    z = math.atan2(siny_cosp, cosy_cosp)
+
+    return (x,y,z)
+
+
+class Tester():
+    def __init__(self):
+        rospy.init_node("trajectory_tester")
+
+        self.observe = rospy.ServiceProxy('/trajectory_predictor/observe', ObjectObservation)
+        self.predict = rospy.ServiceProxy('/trajectory_predictor/predict', PredictPosition)
+        self.trajectory_ready = rospy.ServiceProxy('/trajectory_predictor/ready', Trigger)
+        self.apply_force = rospy.ServiceProxy('/mujoco/apply_force', ApplyForce)
+        rospy.Subscriber("/mujoco/object_pose", Pose, self.pose_cb)
+        rospy.Subscriber("/mujoco/object_twist", Twist, self.twist_cb)
+
+        self.measured_pose = None
+        self.measured_twist = None
+
+    def pose_cb(self, msg):
+        self.measured_pose = msg
+
+    def twist_cb(self, msg):
+        self.measured_twist = msg
+
+
+    def check_error(self, observation):
+        error_sum = 0
+        error_sum += (observation.pose.position.x - self.measured_pose.position.x)**2
+        error_sum += (observation.pose.position.y - self.measured_pose.position.y)**2
+        error_sum += (observation.pose.position.z - self.measured_pose.position.z)**2
+        position_error = math.sqrt(error_sum)
+        rospy.loginfo("Position error: " + str(position_error))
+
+        error_sum = 0
+        observe_orientation = q_to_rpy(observation.pose.orientation)
+        measure_orientation = q_to_rpy(self.measured_pose.orientation)
+        error_sum += (observe_orientation[0] - measure_orientation[0])**2
+        error_sum += (observe_orientation[1] - measure_orientation[1])**2
+        error_sum += (observe_orientation[2] - measure_orientation[2])**2
+        orientation_error = math.sqrt(error_sum)
+        rospy.loginfo("Orientation error: " + str(orientation_error))
+
+        error_sum = 0
+        error_sum += (observation.velocity.linear.x - self.measured_twist.linear.x)**2
+        error_sum += (observation.velocity.linear.y - self.measured_twist.linear.y)**2
+        error_sum += (observation.velocity.linear.z - self.measured_twist.linear.z)**2
+        vel_err = math.sqrt(error_sum)
+        rospy.loginfo("Velocity error: " + str(vel_err))
+
+        error_sum = 0
+        error_sum += (observation.velocity.angular.x - self.measured_twist.angular.x)**2
+        error_sum += (observation.velocity.angular.y - self.measured_twist.angular.y)**2
+        error_sum += (observation.velocity.angular.z - self.measured_twist.angular.z)**2
+        ang_vel_err = math.sqrt(error_sum)
+        rospy.loginfo("Angular Velocity error: " + str(ang_vel_err))
+
+
+
+    def run(self):
+
+        print("waiting for convergence")
+        rospy.loginfo("Waiting for trajectory to converge")
+
+        while self.measured_pose is None:
+            rospy.sleep(0.1)
+
+        while not self.trajectory_ready().success:
+            rospy.sleep(0.1)
+            print(ready)
+
+        rospy.loginfo("Trajectory converged")
+
+        # No motion test
+        observation = self.observe()
+        self.check_error(observation)
+
+        # With motion test
+        force = ApplyForceRequest()
+        force.body_id = 1
+        force.wrench.force.x = 1
+        self.apply_force(force)
+        rospy.sleep(1)
+
+        observation = self.observe()
+        self.check_error(observation)
+
+
+
+def main():
+    tester = Tester()
+    tester.run()
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
