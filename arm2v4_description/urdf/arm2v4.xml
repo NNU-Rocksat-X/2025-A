@@ -32,7 +32,7 @@
         <geom pos="0.1101 -0.00635 0.0551" type="mesh" mesh="link_1"/>
         <body name="link_2" pos="0 0.035617 -0.003">
           <inertial pos="-4.23295e-05 0.0492156 0.00307385" quat="0.5 0.5 -0.5 0.5" mass="0.0072516" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-          <joint name="joint_2" armature="0" pos="0 0 0" axis="0 0 1" range="-1.5708 1.5708"/>
+          <joint name="joint_2" springref="-1.57" pos="0 0 0" axis="0 0 1" range="-1.5708 1.5708"/>
           <geom pos="0.1101 -0.041967 0.0581" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_2"/>
           <geom pos="0.1101 -0.041967 0.0581" type="mesh" mesh="link_2"/>
           <body name="link_3" pos="0 0.089 0.003">
@@ -52,7 +52,7 @@
                 <geom pos="0.1101 -0.255585 0.0551" type="mesh" mesh="link_5"/>
                 <body name="link_6" pos="0 0.035617 -0.003">
                   <inertial pos="6.94042e-10 0.0491711 0.00307282" quat="0.5 0.5 -0.5 0.5" mass="0.0870349" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-                  <joint name="joint_6" pos="0 0 0" axis="0 0 1" range="-1.91986 1.91986"/>
+                  <joint name="joint_6" armature="1" pos="0 0 0" axis="0 0 1" range="-1.91986 1.91986"/>
                   <geom pos="0.1101 -0.291202 0.0581" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_6"/>
                   <geom pos="0.1101 -0.291202 0.0581" type="mesh" mesh="link_6"/>
                   <body name="gripper" pos="0 0.089 0.003">
@@ -74,8 +74,9 @@
     <exclude name="j1_contact" body1="base_link" body2="link_1"/>
     
     <exclude name="j2_contact" body1="link_1" body2="link_2"/>
-    <!--
+
     <exclude name="j3_contact" body1="link_2" body2="link_3"/>
+    <!--
     <exclude name="j4_contact" body1="link_3" body2="link_4"/>
     <exclude name="j5_contact" body1="link_4" body2="link_5"/>
     <exclude name="j6_contact" body1="link_5" body2="link_6"/>
@@ -86,12 +87,11 @@
 
   <actuator>
     <velocity name="J1" joint="joint_1" kv="10" gear="5 0 0 0 0 0"/> 
-    
-    <velocity name="J2" joint="joint_2" kv="1" gear="4 0 0 0 0 0"/>
+    <velocity name="J2" joint="joint_2" kv="2" gear="5 0 0 0 0 0"/>
     <velocity name="J3" joint="joint_3" kv="1" gear="1 0 0 0 0 0"/> 
     <velocity name="J4" joint="joint_4" kv="1" gear="2 0 0 0 0 0"/>
     <velocity name="J5" joint="joint_5" kv="1" gear="1 0 0 0 0 0"/>
     <velocity name="J6" joint="joint_6" kv="1" gear="1 0 0 0 0 0"/>
-    <velocity name="J7" joint="joint_7" kv="1" gear="1 0 0 0 0 0"/>
+    <velocity name="J7" joint="joint_7" kv="2" gear="1 0 0 0 0 0"/>
   </actuator>
 </mujoco>
