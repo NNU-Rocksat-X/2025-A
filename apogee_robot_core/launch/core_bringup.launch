@@ -1,8 +1,6 @@
 <launch>
     <arg name="launch_rviz" default="true"/>
-    <rosparam file="$(find arm2d2_description)/config/poses.yaml" command="load"/>
-
-
+    
     <node name="moveit_interface" pkg="apogee_robot_core" type="moveit_interface" output="screen"/>
     <node name="hardware_interface" pkg="apogee_robot_core" type="hardware_interface_node" output="screen"/>
 

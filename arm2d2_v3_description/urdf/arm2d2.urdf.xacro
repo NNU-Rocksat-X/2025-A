@@ -139,7 +139,7 @@
   </collision>
 </link>
 
-<link name="gripper_1">
+<link name="gripper">
   <inertial>
     <origin xyz="0.0005651763785821801 0.06065258242303184 0.01133988363017737" rpy="0 0 0"/>
     <mass value="0.09928638713059858"/>
@@ -148,14 +148,14 @@
   <visual>
     <origin xyz="0.110082 -0.292458 0.066268" rpy="0 0 0"/>
     <geometry>
-      <mesh filename="package://arm2d2_v3_description/meshes/gripper_1.stl" scale="0.01 0.01 0.01"/>
+      <mesh filename="package://arm2d2_v3_description/meshes/gripper.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin xyz="0.110082 -0.292458 0.066268" rpy="0 0 0"/>
     <geometry>
-      <mesh filename="package://arm2d2_v3_description/meshes/gripper_1.stl" scale="0.01 0.01 0.01"/>
+      <mesh filename="package://arm2d2_v3_description/meshes/gripper.stl" scale="0.01 0.01 0.01"/>
     </geometry>
   </collision>
 </link>
@@ -200,7 +200,7 @@
 <joint name="joint_6" type="revolute">
   <origin xyz="0.0 0.035617 -0.01" rpy="0 0 0"/>
   <parent link="link_5"/>
-  <child link="gripper_1"/>
+  <child link="gripper"/>
   <axis xyz="0.0 -0.0 -1.0"/>
   <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
 </joint>

@@ -21,7 +21,7 @@
     <mesh name="actuator_1_2" file="actuator_1_2.stl" scale="0.001 0.001 0.001"/>
     <mesh name="actuator_2_1" file="actuator_2_1.stl" scale="0.001 0.001 0.001"/>
     <mesh name="actuator_3_1" file="actuator_3_1.stl" scale="0.001 0.001 0.001"/>
-    <mesh file="wrench.stl" scale=".0015 .0015 .0015"/>
+    <mesh file="../../object_description/objects/wrench.stl" scale=".0015 .0015 .0015"/>
   </asset>
   <worldbody>
       <light pos=".4 .4 .5" dir="-2 -2 -1.5" diffuse="1 1 1"/>

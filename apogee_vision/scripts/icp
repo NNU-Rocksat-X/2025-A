@@ -121,7 +121,7 @@ class Transformer:
         rospy.Subscriber("/point_cloud", PointCloud2, self.pc_cb)
 
         self.target_pc = None
-        self.src_pc = open3d.io.read_point_cloud("/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/meshes/wrench.pcd")
+        self.src_pc = open3d.io.read_point_cloud("/home/cyborg/catkin_ws/src/daedalus/object_description/objects/wrench.pcd")
         self.rate = rospy.Rate(5)
 
     def pc_cb(self, msg):

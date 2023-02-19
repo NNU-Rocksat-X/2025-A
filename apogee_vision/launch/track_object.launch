@@ -5,12 +5,12 @@
     <arg name="output" default="screen"/>
 
 
-    <arg if="$(eval arg('env') == 'wrench')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/meshes/wrench_coarse.pcd"/>
-    <arg if="$(eval arg('env') == 'cube')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_description/meshes/cube_coarse.pcd"/>
+    <arg if="$(eval arg('env') == 'wrench')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/object_description/objects/wrench_coarse.pcd"/>
+    <arg if="$(eval arg('env') == 'cube')" name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/object_description/objects/cube_coarse.pcd"/>
 
-    <arg if="$(eval arg('env') == 'payload')" name="object_stl" default="package://arm2d2_description/meshes/wrench.stl"/>
-    <arg if="$(eval arg('env') == 'wrench')" name="object_stl" default="package://arm2d2_description/meshes/wrench.stl"/>
-    <arg if="$(eval arg('env') == 'cube')" name="object_stl" default="package://arm2d2_description/meshes/cube.stl"/>
+    <arg if="$(eval arg('env') == 'payload')" name="object_stl" default="package://object_description/objects/wrench.stl"/>
+    <arg if="$(eval arg('env') == 'wrench')" name="object_stl" default="package://object_description/objects/wrench.stl"/>
+    <arg if="$(eval arg('env') == 'cube')" name="object_stl" default="package://object_description/objects/cube.stl"/>
 
     <rosparam file="$(find apogee_vision)/config/particle_filter_config.yaml" command="load"/>
     <rosparam file="$(find daedalus_core)/config/schedule_rates.yaml" command="load"/>

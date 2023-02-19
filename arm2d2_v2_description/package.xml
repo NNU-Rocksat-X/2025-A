@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>arm2d2_description</name>
+  <name>arm2d2_v2_description</name>
   <version>1.0.1</version>
   <description>The ARM2D2_description package</description>
 

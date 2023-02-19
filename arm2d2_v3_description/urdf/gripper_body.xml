@@ -1,0 +1,62 @@
+<mujoco model="arm2d2_v3"> 
+    <body name="gripper" pos="0 0.025 0" euler="-1.57 0 0">
+        <inertial pos="0.000565176 0.0606526 0.0113399" quat="0.419041 0.436542 -0.586477 0.538405" mass="0.0992864" diaginertia="0.000174911 0.000171846 2.92432e-05"/>
+        <joint name="joint_6" pos="0 0 0" axis="0 0 -1" range="-1.91986 1.91986"/>
+        <geom pos="0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="gripper"/>
+        <geom pos="0 0 0" type="mesh" mesh="gripper"/>
+        <body name="finger_1a" pos="0.02165 -0.019744 0.11291">
+        <inertial pos="-0.00157739 -0.00535918 0.0147248" mass="0.00261935" diaginertia="3.33334e-06 3.33334e-06 3.33334e-06"/>
+        <joint name="F1J1" pos="0 0 0" axis="1 0 0" stiffness="0.001"/>
+        <geom pos="-0.02165 0.019744 -0.11291" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_1a"/>
+        <geom pos="-0.02165 0.019744 -0.11291" type="mesh" mesh="finger_1a"/>
+        <body name="finger_1b" pos="5e-05 -0.009918 0.027251">
+            <inertial pos="-0.00150154 0.0059248 0.0102624" mass="0.00161827" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F1J2" pos="0 0 0" axis="-1 0 0" stiffness="0.025" springref="0"/>
+            <geom pos="-0.0217 0.029662 -0.140161" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_1b"/>
+            <geom pos="-0.0217 0.029662 -0.140161" type="mesh" mesh="finger_1b"/>
+            <body name="finger_1c" pos="5e-05 0.0105 0.018186">
+            <inertial pos="-0.00170001 0.00811429 0.00295382" mass="0.000960393" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F1J3" pos="0 0 0" axis="-1 0 0" stiffness="0.025" springref="0"/>
+            <geom pos="-0.02175 0.019162 -0.158347" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_1c"/>
+            <geom pos="-0.02175 0.019162 -0.158347" type="mesh" mesh="finger_1c"/>
+            </body>
+        </body>
+        </body>
+        <body name="finger_3a" pos="-0.02185 -0.019744 0.11291">
+        <inertial pos="0.00182261 -0.00535918 0.0147248" mass="0.00261935" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+        <joint name="F3J1" pos="0 0 0" axis="-1 0 0" stiffness="0.001"/>
+        <geom pos="0.02185 0.019744 -0.11291" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_3a"/>
+        <geom pos="0.02185 0.019744 -0.11291" type="mesh" mesh="finger_3a"/>
+        <body name="finger_3b" pos="-5e-05 -0.009918 0.027251">
+            <inertial pos="0.00189846 0.0059248 0.0102624" mass="0.00161827" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F3J2" pos="0 0 0" axis="1 0 0" stiffness="0.025" springref="0"/>
+            <geom pos="0.0219 0.029662 -0.140161" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_3b"/>
+            <geom pos="0.0219 0.029662 -0.140161" type="mesh" mesh="finger_3b"/>
+            <body name="finger_3c" pos="-5e-05 0.0105 0.018186">
+            <inertial pos="0.00169999 0.00811429 0.00295382" mass="0.000960393" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F3J3" pos="0 0 0" axis="1 0 0" stiffness="0.025" springref="0"/>
+            <geom pos="0.02195 0.019162 -0.158347" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_3c"/>
+            <geom pos="0.02195 0.019162 -0.158347" type="mesh" mesh="finger_3c"/>
+            </body>
+        </body>
+        </body>
+        <body name="finger_2a" pos="-0.00185 0.019256 0.11291">
+        <inertial pos="0.00182261 0.00535983 0.0147248" mass="0.00261931" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+        <joint name="F2J1" pos="0 0 0" axis="-1 0 0" stiffness="0.001"/>
+        <geom pos="0.00185 -0.019256 -0.11291" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_2a"/>
+        <geom pos="0.00185 -0.019256 -0.11291" type="mesh" mesh="finger_2a"/>
+        <body name="finger_2b" pos="-5e-05 0.009919 0.027251">
+            <inertial pos="0.00189846 -0.00592523 0.0102624" mass="0.00161828" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F2J2" pos="0 0 0" axis="1 0 0" stiffness="0.025" springref="0"/>
+            <geom pos="0.0019 -0.029175 -0.140161" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_2b"/>
+            <geom pos="0.0019 -0.029175 -0.140161" type="mesh" mesh="finger_2b"/>
+            <body name="finger_2c" pos="-5e-05 -0.0105 0.018186">
+            <inertial pos="0.00169999 -0.0081147 0.00295382" mass="0.000960393" diaginertia="3.33333e-06 3.33333e-06 3.33333e-06"/>
+            <joint name="F2J3" pos="0 0 0" axis="1 0 0" stiffness="0.25" springref="0"/>
+            <geom pos="0.00195 -0.018675 -0.158347" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="finger_2c"/>
+            <geom pos="0.00195 -0.018675 -0.158347" type="mesh" mesh="finger_2c"/>
+            </body>
+        </body>
+        </body>
+    </body>
+</mujoco>
