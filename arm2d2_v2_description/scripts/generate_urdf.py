@@ -23,7 +23,7 @@ def main(from_file, to_file):
 
     # add mujoco elements
     mujoco_element = ET.Element("mujoco")
-    compiler_element = ET.Element("compiler", {"meshdir": "meshes", 
+    compiler_element = ET.Element("compiler", {"meshdir": "../meshes", 
                                                "balanceinertia": "true",
                                                "discardvisual": "false"})
     asset_element = ET.Element("asset")
