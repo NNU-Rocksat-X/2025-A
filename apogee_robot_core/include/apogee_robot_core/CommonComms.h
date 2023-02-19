@@ -20,13 +20,13 @@ inline unsigned short crc16(const unsigned char* data_p, unsigned char length){
 typedef struct cmd_packet
 {
 
+    // Header 
+    uint8_t seq;
+    uint8_t led;
+    uint16_t crc;
+
     float joint_velocity_cmd[NUM_JOINTS];
 
-    // Header 
-    // (which is placed last because of struct packing and so the crc is last)
-    uint8_t seq;
-    uint8_t reserved;
-    uint16_t crc;
 
 } CMDPacket;
 

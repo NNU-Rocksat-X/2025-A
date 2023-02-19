@@ -20,7 +20,7 @@ RESPacket rx;
 
 void led_cb(const std_msgs::Bool::ConstPtr& msg)
 {
-    //tx.led = msg->data; // note the different data typess
+    tx.led = msg->data; // note the different data typess
 }
 
 int main(int argc, char** argv)
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     ros::Rate rate(50);
 
 
-    ROS_INFO("Size: %i", sizeof(CMDPacket));
+    //ROS_INFO("Size: %i", sizeof(CMDPacket));
 
     
     while(ros::ok())
