@@ -1,7 +1,7 @@
 <launch>
-  <arg name="model" default="$(find arm2_v4_description)/urdf/arm2_v4.xacro"/>
+  <arg name="model" default="$(find arm2v4_description)/urdf/arm2v4.xacro"/>
   <arg name="gui" default="true"/>
-  <arg name="rvizconfig" default="$(find arm2_v4_description)/launch/urdf.rviz"/>
+  <arg name="rvizconfig" default="/home/cyborg/catkin_ws/src/daedalus/apogee_moveit_config/config/moveit.rviz"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
   <param name="use_gui" value="$(arg gui)"/>
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>

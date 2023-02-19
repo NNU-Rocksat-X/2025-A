@@ -14,6 +14,8 @@
 
   <link name="world"/>
 
+
+
   <link name="base_link">
     <inertial>
         <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
