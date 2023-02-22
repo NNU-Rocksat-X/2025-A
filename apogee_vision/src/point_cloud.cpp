@@ -83,7 +83,7 @@ void depthCB(const std_msgs::Float32MultiArray::ConstPtr& msg)
 
     
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloudPtr(new pcl::PointCloud<pcl::PointXYZ>);
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>);
 
     for (int c = 0; c < cam_.width; c++)
     {
@@ -103,8 +103,10 @@ void depthCB(const std_msgs::Float32MultiArray::ConstPtr& msg)
                 }
             } else {
                 filteredCloudPtr->points.push_back(p);
+                
 
             }
+            cloudPtr->points.push_back(p);
             // If no mask has been recieved just add all points
 
         }
@@ -114,37 +116,37 @@ void depthCB(const std_msgs::Float32MultiArray::ConstPtr& msg)
     pcl::PCLPointCloud2::Ptr filtered_pcl_pc2(new pcl::PCLPointCloud2);
     pcl::toPCLPointCloud2(*filteredCloudPtr, *filtered_pcl_pc2);
 
-    //pcl::PCLPointCloud2::Ptr pcl_pc2(new pcl::PCLPointCloud2);
-    //pcl::toPCLPointCloud2(*cloudPtr, *pcl_pc2);
+    pcl::PCLPointCloud2::Ptr pcl_pc2(new pcl::PCLPointCloud2);
+    pcl::toPCLPointCloud2(*cloudPtr, *pcl_pc2);
 
     // Reduce number of points for performance
-    
+    /*
     pcl::PCLPointCloud2::Ptr filtered_cloud(new pcl::PCLPointCloud2());
     pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
     sor.setInputCloud(filtered_pcl_pc2);
     sor.setLeafSize(0.01f, 0.01f, 0.01f);
     sor.filter(*filtered_cloud);
-    
+    */
 
 
     // Convert pcl::PointCloud2 to sensor_msgs::PointCloud2
-    //sensor_msgs::PointCloud2 pc2;
-    //pcl_conversions::fromPCL(*pcl_pc2, pc2);
+    sensor_msgs::PointCloud2 pc2;
+    pcl_conversions::fromPCL(*pcl_pc2, pc2);
 
     sensor_msgs::PointCloud2 filtered_pc2;
-    pcl_conversions::fromPCL(*filtered_cloud, filtered_pc2);
+    pcl_conversions::fromPCL(*filtered_pcl_pc2, filtered_pc2);
 
-    /*
+    
     pc2.header.seq = seq_;
     pc2.header.frame_id = "world";
     pc2.header.stamp = ros::Time::now();
-    */
+    
 
     filtered_pc2.header.seq = seq_;
     filtered_pc2.header.frame_id = "world";
     filtered_pc2.header.stamp = ros::Time::now();
 
-    //pc_pub.publish(pc2);
+    pc_pub.publish(pc2);
     filtered_pc_pub.publish(filtered_pc2);
     seq_++;
 
@@ -160,7 +162,7 @@ int main(int argc, char** argv)
 
     ros::Subscriber mask_sub = nh.subscribe("/object_mask", 1, &maskCB);
     ros::Subscriber frame_sub = nh.subscribe("/depth", 1, &depthCB);
-    //pc_pub = nh.advertise<sensor_msgs::PointCloud2>("/point_cloud", 10);
+    pc_pub = nh.advertise<sensor_msgs::PointCloud2>("/non_filtered_pc", 10);
     filtered_pc_pub = nh.advertise<sensor_msgs::PointCloud2>("/point_cloud", 10);
 
     ros::spin();
