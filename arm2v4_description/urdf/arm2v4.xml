@@ -30,82 +30,12 @@
     <body name="base_link" pos="0 0 0.1" euler="1.57 0 0">
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_link"/>
       <geom type="mesh" mesh="base_link"/>
-      <body name="link_1" pos="-0.1101 0.00635 -0.0551">
-        <inertial pos="0.000994556 0.0321926 0.0346314" quat="0.983573 -0.108607 0.0374803 0.139225" mass="0.04795" diaginertia="0.000146434 0.000143118 5.64483e-05"/>
-        <joint name="joint_1" armature="0.01" pos="0 0 0" axis="0 -1 0" range="-1.0472 3.14159"/>
-        <geom pos="0.1101 -0.00635 0.0551" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_1"/>
-        <geom pos="0.1101 -0.00635 0.0551" type="mesh" mesh="link_1"/>
-        <body name="link_2" pos="0 0.035617 -0.003">
-          <inertial pos="-4.23295e-05 0.0492156 0.00307385" quat="0.5 0.5 -0.5 0.5" mass="0.0072516" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-          <joint name="joint_2" pos="0 0 0" axis="0 0 1" range="-2.5 2.5"/>
-          <geom pos="0.1101 -0.041967 0.0581" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_2"/>
-          <geom pos="0.1101 -0.041967 0.0581" type="mesh" mesh="link_2"/>
-          <body name="link_3" pos="0 0.089 0.003">
-            <inertial pos="-1.38234e-05 0.0302244 0.0200511" quat="0.980785 -0.19509 0 0" mass="0.0010804" diaginertia="7.1e-05 6.69706e-05 3.30294e-05"/>
-            <joint name="joint_3" armature="0.01" pos="0 0 0" axis="0 1 0"/>
-            <geom pos="0.1101 -0.130967 0.0551" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_3"/>
-            <geom pos="0.1101 -0.130967 0.0551" type="mesh" mesh="link_3"/>
-            <body name="link_4" pos="0 0.035618 -0.003">
-              <inertial pos="-4.23295e-05 0.0491281 0.00307385" quat="0.5 0.5 -0.5 0.5" mass="0.0872515" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-              <joint name="joint_4" armature="0.005" pos="0 0 0" axis="0 0 1" range="-1.91986 1.91986"/>
-              <geom pos="0.1101 -0.166585 0.0581" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_4"/>
-              <geom pos="0.1101 -0.166585 0.0581" type="mesh" mesh="link_4"/>
-              <body name="link_5" pos="0 0.089 0.003">
-                <inertial pos="6.10956e-05 0.0293393 0.017904" quat="0.984034 -0.177983 0 0" mass="0.0774864" diaginertia="6.5e-05 6.07398e-05 3.02602e-05"/>
-                <joint name="joint_5" pos="0 0 0" axis="0 1 0"/>
-                <geom pos="0.1101 -0.255585 0.0551" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_5"/>
-                <geom pos="0.1101 -0.255585 0.0551" type="mesh" mesh="link_5"/>
-                <body name="link_6" pos="0 0.035617 -0.003">
-                  <inertial pos="6.94042e-10 0.0491711 0.00307282" quat="0.5 0.5 -0.5 0.5" mass="0.0870349" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-                  <joint name="joint_6" armature="1" pos="0 0 0" axis="0 0 1" range="-1.91986 1.91986"/>
-                  <geom pos="0.1101 -0.291202 0.0581" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_6"/>
-                  <geom pos="0.1101 -0.291202 0.0581" type="mesh" mesh="link_6"/>
-                  <body name="gripper" pos="0 0.089 0.003">
-                    <inertial pos="-0.000535302 0.026156 0.00350696" quat="0.626688 0.77927 0 0" mass="0.0501715" diaginertia="4.4e-05 3.86589e-05 2.43411e-05"/>
-                    <joint name="joint_7" armature="1" pos="0 0 0" axis="0 1 0"/>
-                    <geom pos="0.1101 -0.380202 0.0551" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="gripper"/>
-                    <geom pos="0.1101 -0.380202 0.0551" type="mesh" mesh="gripper"/>
-                  </body>
-                </body>
-              </body>
-            </body>
-          </body>
-        </body>
-      </body>
+
     </body>
   </worldbody>
 
-  <contact>
-    <exclude name="j1_contact" body1="base_link" body2="link_1"/>
-    
-    <exclude name="j2_contact" body1="link_1" body2="link_2"/>
-
-    <!-- without j2_base_contact j2 doesn't reach full range even though it is possible -->
-    <exclude name="j2_base_contact" body1="link_2" body2="base_link"/>
-    <exclude name="j3_contact" body1="link_2" body2="link_3"/>
-    <exclude name="j4_contact" body1="link_4" body2="link_5"/>
-    <exclude name="j7_contact" body1="link_6" body2="gripper"/>
-  </contact>
+  <include file="mujoco/R1_arm2v4_body.xml"/>
+  <include file="mujoco/R2_arm2v4_body.xml"/>
 
 
-  <actuator>
-    <velocity name="J1" joint="joint_1" kv="10" gear="5 0 0 0 0 0"/> 
-    <velocity name="J2" joint="joint_2" kv="2" gear="6 0 0 0 0 0"/>
-    <velocity name="J3" joint="joint_3" kv="1" gear="1 0 0 0 0 0"/> 
-    <velocity name="J4" joint="joint_4" kv="1" gear="6 0 0 0 0 0"/>
-    <velocity name="J5" joint="joint_5" kv="1" gear="1 0 0 0 0 0"/>
-    <velocity name="J6" joint="joint_6" kv="1" gear="2 0 0 0 0 0"/>
-    <velocity name="J7" joint="joint_7" kv="2" gear="1 0 0 0 0 0"/>
-  </actuator>
-
-  <sensor>
-    <jointpos name="J1_encoder" joint="joint_1" noise="0.001"/>
-    <jointpos name="J2_encoder" joint="joint_2" noise="0.001"/>
-    <jointpos name="J3_encoder" joint="joint_3" noise="0.001"/>
-    <jointpos name="J4_encoder" joint="joint_4" noise="0.001"/>
-    <jointpos name="J5_encoder" joint="joint_5" noise="0.001"/>
-    <jointpos name="J6_encoder" joint="joint_6" noise="0.001"/>
-    <jointpos name="J7_encoder" joint="joint_7" noise="0.001"/>
-
-  </sensor>
 </mujoco>
