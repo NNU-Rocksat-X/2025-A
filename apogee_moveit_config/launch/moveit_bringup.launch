@@ -1,5 +1,6 @@
 <launch>
     <arg name="launch_rviz" default="true"/>
+    <arg name="ns" default="ARM1"/>
 
     <!-- Defines kinematics package -->
     <group ns="robot_description_kinematics">
@@ -9,13 +10,15 @@
     <include file="$(find apogee_moveit_config)/launch/move_group.launch"/>
 
     
-    <include if="$(arg launch_rviz)" file="$(find apogee_moveit_config)/launch/moveit_rviz.launch"/>
+    <include if="$(arg launch_rviz)" file="$(find apogee_moveit_config)/launch/moveit_rviz.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
 
 
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    args="  --namespace=/ARM1
-            /ARM1/arm2d2/controllers/state
-            /ARM1/arm2d2/controllers/velocity"
+    args="  --namespace=/$(arg ns)
+            /$(arg ns)/arm2d2/controllers/state
+            /$(arg ns)/arm2d2/controllers/velocity"
     />
 
 </launch>
