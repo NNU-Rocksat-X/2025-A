@@ -41,6 +41,7 @@
         <mass value="1.5479093566761954"/>
         <inertia ixx="0.010238" iyy="0.01139" izz="0.021617" ixy="-0.0" iyz="0.0" ixz="0.0"/>
     </inertial>
+    <!--
     <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -48,6 +49,7 @@
         </geometry>
         <material name="silver"/>
     </visual>
+    -->
     <collision>
         <origin xyz="0 0 0.279654" rpy="0 0 0"/>
         <geometry>
