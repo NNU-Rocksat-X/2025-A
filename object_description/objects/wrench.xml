@@ -1,0 +1,20 @@
+<mujoco model="arm2d2">
+  <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
+  <option integrator="RK4" timestep="0.00025">
+    <flag gravity="disable"/>
+  </option>
+  <size njmax="500" nconmax="100"/>
+  <default/>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1=".03 .05 .07" rgb2="0 0 0" width="512" height="512"/>
+    <mesh file="wrench.stl" scale=".0015 .0015 .0015"/>
+  </asset>
+  <worldbody>
+      <light diffuse=".5 .5 .5" pos="0 0 3" dir="0 0 -1"/>
+      <geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>
+      <body pos="-0.5 -0.2 0.2">
+          <joint type="free"/>
+          <geom type="mesh" mesh="wrench" euler="90 0 0" rgba="1 0 0 1"/>
+      </body>
+  </worldbody>
+</mujoco>

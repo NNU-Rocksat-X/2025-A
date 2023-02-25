@@ -1,7 +1,30 @@
-# daedalus
+# Daedalus
 
+## Installing
+To install simply clone the daedalus repository to the home directory:
 
-## Installation
-This repository contains submodules clone with:
+```
+git clone https://github.com/Apogee-Robotics/daedalus.git
+```
+Then install pcl with the installation script:
 
-`git clone --recurse-submodules https://github.com/Apogee-Robotics/daedalus.git`
+```
+cd daedalus
+./install/install_pcl.sh
+```
+
+Then run the installation script:
+
+```
+./install/install.sh
+```
+
+## Documention
+- [Project Introduction](./docs/introduction.md)
+- [Background Literature](./docs/literature.md)
+- [Jetson Setup](./docs/jetson_setup.md)
+- [Programs](./docs/programs.md)
+- [PCD Generation](./docs/pcd_generation.md)
+- [ARM2D2 Description Package](./arm2d2_description/README.md)
+- [Network Setup](./docs/network_setup.md)
+

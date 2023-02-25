@@ -10,7 +10,12 @@
   <size njmax="500" nconmax="100"/>
   <default/>
   <asset>
-    <texture type="skybox" builtin="gradient" rgb1=".03 .05 .07" rgb2="0 0 0" width="512" height="512"/>
+      <texture type="skybox" filefront="../simulation_assets/earth006000.png"
+                        fileright="../simulation_assets/earth006001.png"
+                        fileleft="../simulation_assets/earth006003.png"
+                        fileup="../simulation_assets/earth006005.png"
+                        filedown="../simulation_assets/earth006004.png"
+                        fileback="../simulation_assets/earth006002.png"/>
     <mesh name="base_plate" file="base_plate.stl" scale="0.001 0.001 0.001"/>
     <mesh name="link_1_1" file="link_1_1.stl" scale="0.001 0.001 0.001"/>
     <mesh name="link_2_1" file="link_2_1.stl" scale="0.001 0.001 0.001"/>
@@ -25,7 +30,7 @@
   </asset>
   <worldbody>
       <light pos=".4 .4 .5" dir="-2 -2 -1.5" diffuse="1 1 1"/>
-      <geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>
+      <!--<geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>-->
       
       <body name="wrench" pos="-0.5 -0.2 0.2">
           <joint type="free"/>
