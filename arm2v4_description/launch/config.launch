@@ -1,10 +1,14 @@
 <launch>
     <arg name="ns" default="ARM1"/>
+    <arg name="dual" default="False"/>
 
     <rosparam file="$(find arm2v4_description)/config/joint_config.yaml" command="load"/>
     <rosparam file="$(find arm2v4_description)/config/controllers.yaml" command="load"/>
     <param name="robot_description" command="$(find xacro)/xacro $(find arm2v4_description)/urdf/arm2v4.urdf.xacro"/> 
     <param name="robot_description_semantic" textfile="$(find arm2v4_description)/config/arm2d2.srdf"/>
+
+    <rosparam param="mujoco_env">"$(find arm2v4_description)/urdf/dual_arm2v4.xml"</rosparam>
+
 
     <rosparam ns="move_group" file="$(find arm2v4_description)/config/$(arg ns)_apogee_controllers.yaml"/>
 

@@ -35,6 +35,7 @@
   </worldbody>
 
   <include file="mujoco/R1_arm2v4_body.xml"/>
+  <include file="mujoco/R2_arm2v4_body.xml"/>
 
 
 </mujoco>
