@@ -1,4 +1,0 @@
-string body_name
-geometry_msgs/Point pose
----
-bool success
