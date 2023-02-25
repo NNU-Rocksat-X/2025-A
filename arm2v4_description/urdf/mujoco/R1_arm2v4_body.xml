@@ -62,7 +62,7 @@
     <velocity name="R1_J4" joint="R1_joint_4" kv="1" gear="6 0 0 0 0 0"/>
     <velocity name="R1_J5" joint="R1_joint_5" kv="1" gear="1 0 0 0 0 0"/>
     <velocity name="R1_J6" joint="R1_joint_6" kv="1" gear="2 0 0 0 0 0"/>
-    <velocity name="R1_J7" joint="R1_joint_7" kv="2" gear="1 0 0 0 0 0"/>
+    <velocity name="R1_J7" joint="R1_joint_7" kv="1" gear="2 0 0 0 0 0"/>
   </actuator>
 
   <sensor>
