@@ -26,7 +26,5 @@
   <run_depend>tf2_ros</run_depend>
   <run_depend>xacro</run_depend>
 
-  <run_depend>arm2d2_description</run_depend>
-
 
 </package>

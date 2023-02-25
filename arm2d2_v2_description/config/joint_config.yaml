@@ -1,0 +1,21 @@
+stepper_config:
+  num_joints: 9 # The extra joint is a fake 6th dof
+  num_sim_joints: 5
+  num_grip_joints: 3
+  joint_names:
+    - joint_1
+    - joint_2
+    - joint_3
+    - joint_4
+    - joint_5
+    - actuator_joint_1
+    - actuator_joint_2
+    - actuator_joint_3
+    - gripper_joint
+  deg_per_step:
+  # current values are estimates
+    - 0.0225 #0.09    # 360 / 4000
+    - 0.0128 #0.018   # 5000 / 90
+    - 0.0134 #0.036   # 90 / 2500
+    - 0.1 #0.3     # 90 / 300
+    - 0.1 #0.3     # 90 / 300

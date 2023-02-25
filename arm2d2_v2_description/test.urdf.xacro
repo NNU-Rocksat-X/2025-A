@@ -1,0 +1,184 @@
+<robot name="Arm-2_V1URDF">
+	<link name="base_link">
+		<inertial>
+			<origin rpy="0 0 0" xyz="-0.005868898297150748 0.018544858634100537 0.01074244393022906" />
+			<mass value="5.16374633153995" />
+			<inertia ixx="0.036378" ixy="0.002209" ixz="0.000775" iyy="0.033803" iyz="-0.002211" izz="0.068031" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0 0" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/base_link.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0 0 0" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/base_link.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link1_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="0.0008668239708100461 -0.03235905919292468 0.034270418852732853" />
+			<mass value="1.331768512564607" />
+			<inertia ixx="0.001543" ixy="4e-05" ixz="-8e-06" iyy="0.000699" iyz="0.000315" izz="0.001276" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.103463 -0.073925 -0.00218" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link1_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.103463 -0.073925 -0.00218" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link1_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link2_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="0.00885628604246215 0.10896016396576427 0.02730508616705983" />
+			<mass value="0.7539249014676617" />
+			<inertia ixx="0.000828" ixy="0.0" ixz="-0.000112" iyy="0.000888" iyz="1e-06" izz="0.000214" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.103463 0.035005 -0.066104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link2_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.103463 0.035005 -0.066104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link2_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link3_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="0.005360008478953127 0.1776573471216161 0.08448711877025672" />
+			<mass value="0.6772707599652037" />
+			<inertia ixx="0.000499" ixy="1.5e-05" ixz="-1.2e-05" iyy="0.00026" iyz="8.3e-05" izz="0.00043" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.088182 0.121668 -0.076104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link3_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.088182 0.121668 -0.076104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link3_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link4_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="0.047624769213463 0.23206116075750152 0.08325711095900992" />
+			<mass value="0.7539249011033631" />
+			<inertia ixx="0.000271" ixy="1e-06" ixz="0.00021" iyy="0.000888" iyz="-0.0" izz="0.000771" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.081757 0.158106 -0.066104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link4_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.081757 0.158106 -0.066104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link4_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link5_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="0.03513967110106558 0.20193353665850716 0.06672552749902405" />
+			<mass value="0.6772707164247346" />
+			<inertia ixx="0.000355" ixy="-0.0" ixz="-0.000118" iyy="0.000501" iyz="-0.0" izz="0.000334" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="-0.000936 0.128009 -0.076104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link5_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="-0.000936 0.128009 -0.076104" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link5_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<link name="Arm-2_Link6_1">
+		<inertial>
+			<origin rpy="0 0 0" xyz="-0.07000104593540465 -0.0038609675865449306 -0.18597980979262876" />
+			<mass value="0.7539249011033623" />
+			<inertia ixx="0.000784" ixy="0.000198" ixz="3.7e-05" iyy="0.000271" iyz="-7.1e-05" izz="0.000874" />
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="-0.12203 -0.030202 -0.303884" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link6_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+			<material name="silver" />
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="-0.12203 -0.030202 -0.303884" />
+			<geometry>
+				<mesh filename="package://Arm-2_V1URDF_description/meshes/Arm-2_Link6_1.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
+	<joint name="Rev1" type="continuous">
+		<origin rpy="0 0 0" xyz="-0.103463 0.073925 0.00218" />
+		<parent link="base_link" />
+		<child link="Arm-2_Link1_1" />
+		<axis xyz="0.0 -0.0 1.0" />
+	</joint>
+	<joint name="Rev2" type="continuous">
+		<origin rpy="0 0 0" xyz="0.0 -0.10893 0.063924" />
+		<parent link="Arm-2_Link1_1" />
+		<child link="Arm-2_Link2_1" />
+		<axis xyz="-0.0 -1.0 -0.0" />
+	</joint>
+	<joint name="Rev3" type="continuous">
+		<origin rpy="0 0 0" xyz="0.015281 -0.086663 0.01" />
+		<parent link="Arm-2_Link2_1" />
+		<child link="Arm-2_Link3_1" />
+		<axis xyz="0.173648 -0.0 0.984808" />
+	</joint>
+	<joint name="Rev4" type="continuous">
+		<origin rpy="0 0 0" xyz="0.006425 -0.036438 -0.01" />
+		<parent link="Arm-2_Link3_1" />
+		<child link="Arm-2_Link4_1" />
+		<axis xyz="0.0 -1.0 -0.0" />
+	</joint>
+	<joint name="Rev5" type="continuous">
+		<origin rpy="0 0 0" xyz="0.082693 0.030097 0.01" />
+		<parent link="Arm-2_Link4_1" />
+		<child link="Arm-2_Link5_1" />
+		<axis xyz="0.939693 0.0 -0.34202" />
+	</joint>
+	<joint name="Rev6" type="continuous">
+		<origin rpy="0 0 0" xyz="0.121094 0.158211 0.22778" />
+		<parent link="Arm-2_Link5_1" />
+		<child link="Arm-2_Link6_1" />
+		<axis xyz="0.34202 -0.0 0.939693" />
+	</joint>
+	<mujoco>
+		<compiler balanceinertia="true" discardvisual="false" meshdir="meshes" />
+		<asset>
+			<material name="grid" reflectance="0.2" texrepeat="1 1" texture="grid" texuniform="true" />
+		</asset>
+	</mujoco>
+</robot>

@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="env" default="wrench"/>
+    <arg name="env" default="arm2v4_wrench"/>
     <arg name="gui" default="false"/>
     <arg name="output" default="screen"/>
 
