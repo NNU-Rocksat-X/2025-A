@@ -1,5 +1,5 @@
 stepper_config:
-  num_joints: 7
+  num_joints: 11
   num_grip_joints: 4
   joint_names:
     - joint_1
@@ -20,3 +20,4 @@ stepper_config:
     - 0.0134 #0.036   # 90 / 2500
     - 0.1 #0.3     # 90 / 300
     - 0.1 #0.3     # 90 / 300
+  gripper_gain: 50
