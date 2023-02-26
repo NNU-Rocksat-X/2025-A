@@ -16,7 +16,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
 
     enc_sub = nh.subscribe("display_robot_state", 100, &Arm2D2Interface::encoderCallBack, this);
 
-    for (int i = 0; i < num_joints; i++) { // Dont initialize fake dof here
+    for (int i = 0; i < num_joints; i++) {
         ROS_INFO("Initiallizing joint: %s", joint_names[i].c_str());
         hardware_interface::JointStateHandle state_handle(joint_names[i], &pos[i], &vel[i], &eff[i]);
         joint_state_interface.registerHandle(state_handle);

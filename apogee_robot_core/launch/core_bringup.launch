@@ -4,8 +4,9 @@
     <arg name="dual" default="false"/>
     
     <node name="moveit_interface" pkg="apogee_robot_core" type="moveit_interface" output="screen"/>
+    
     <node name="hardware_interface" pkg="apogee_robot_core" type="hardware_interface_node" output="screen"/>
-
+    
     <include file="$(find apogee_moveit_config)/launch/moveit_bringup.launch">
         <arg name="launch_rviz" value="$(arg launch_rviz)"/>
         <arg name="ns" value="$(arg ns)"/>

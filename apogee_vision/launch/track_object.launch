@@ -3,6 +3,7 @@
     <arg name="env" default="arm2v4_wrench"/>
     <arg name="gui" default="false"/>
     <arg name="output" default="screen"/>
+    <arg name="launch_sim" defautl="false"/>
 
 
     <arg if="$(eval arg('env') == 'wrench')" name="ref_pcd" default="package://object_description/meshes/wrench_coarse.pcd"/>
@@ -17,7 +18,7 @@
     <include file="$(find apogee_moveit_config)/launch/moveit_rviz.launch"/>
 
 
-    <include file="$(find mujoco_ros)/launch/sim.launch">
+    <include if="$(arg launch_sim)" file="$(find mujoco_ros)/launch/sim.launch">
         <arg name="env" value="$(arg env)"/>
         <arg name="fixed_cam" value="false"/>
     </include>

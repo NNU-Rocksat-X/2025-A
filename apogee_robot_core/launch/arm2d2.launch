@@ -27,9 +27,10 @@
         </include>
     </group>
 
+    
     <include file="$(find mujoco_ros)/launch/sim.launch" >
         <arg name="env" value="$(arg version)"/>
         <arg name="dual" value="$(arg dual)"/>
     </include>
-
+    
 </launch>
