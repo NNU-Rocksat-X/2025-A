@@ -5,6 +5,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
     
     try {
         ros::param::get("stepper_config/num_joints", num_joints);
+        ros::param::get("stepper_config/num__grip_joints", num_grip_joints);
         ros::param::get("stepper_config/joint_names", joint_names);
         ros::param::get("stepper_config/deg_per_step", deg_per_steps);
     }
@@ -16,7 +17,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
 
     enc_sub = nh.subscribe("display_robot_state", 100, &Arm2D2Interface::encoderCallBack, this);
 
-    for (int i = 0; i < num_joints; i++) {
+    for (int i = 0; i < num_joints + num_grip_joints; i++) {
         ROS_INFO("Initiallizing joint: %s", joint_names[i].c_str());
         hardware_interface::JointStateHandle state_handle(joint_names[i], &pos[i], &vel[i], &eff[i]);
         joint_state_interface.registerHandle(state_handle);
@@ -40,7 +41,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
     registerInterface(&joint_velocity_interface);
 
     // Initialize values
-    for (int i = 0; i < num_joints; i++) {
+    for (int i = 0; i < num_joints + num_grip_joints; i++) {
         cmd[i] = 0.0;
         pos[i] = 0.0;
         vel[i] = 0.0;
@@ -69,7 +70,7 @@ void Arm2D2Interface::write() {
 }
 
 void Arm2D2Interface::encoderCallBack(const moveit_msgs::DisplayRobotState &msg) {
-    for(int i = 0; i < num_joints; i++) {
+    for(int i = 0; i < num_joints + num_grip_joints; i++) {
         pos[i] = msg.state.joint_state.position[i];
         vel[i] = msg.state.joint_state.velocity[i];
         eff[i] = 0.0;

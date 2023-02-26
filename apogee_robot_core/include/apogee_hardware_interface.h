@@ -48,6 +48,7 @@ class Arm2D2Interface : public hardware_interface::RobotHW
 
         
         int num_joints = 0;
+        int num_grip_joints = 0;
 
         std::vector<std::string> joint_names;
         std::vector<float> deg_per_steps;
