@@ -371,10 +371,17 @@ class MarshaMoveInterface {
         bool grasp(std::string pose) {
             std::string param = "grip_pose/" + pose;
             std_msgs::Float32 grip_position;
-            ros::param::get(param, grip_position.data);
-            graspPub.publish(grip_position);
+            if(ros::param::has(param))
+            {
+                ros::param::get(param, grip_position.data);
+                graspPub.publish(grip_position);
 
-            return true;
+                return true;
+            } else {
+                ROS_ERROR("Poses parameters not set!");
+                return false;
+            }
+
         }        
 
         bool graspCmd(daedalus_msgs::MoveCmd::Request &req,
