@@ -1,0 +1,127 @@
+<mujoco model="arm2d2">
+  <visual>
+    <headlight ambient="0 0 0" diffuse="0.3 0.3 0.3" specular="1 1 1"/>
+    <quality shadowsize="8192"/>
+  </visual>
+  <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
+  <option integrator="RK4" timestep="0.00025">
+    <flag gravity="disable"/>
+  </option>
+  <size njmax="500" nconmax="100"/>
+  <default/>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1=".03 .05 .07" rgb2="0 0 0" width="512" height="512"/>
+    <!--<mesh name="base_plate" file="base_plate.stl" scale="0.001 0.001 0.001"/>-->
+    <mesh name="link_1_1" file="link_1_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="link_2_1" file="link_2_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="link_3_1" file="link_3_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="link_4_1" file="link_4_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="link_5_1" file="link_5_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="palm" file="palm.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="actuator_1_2" file="actuator_1_2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="actuator_2_1" file="actuator_2_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="actuator_3_1" file="actuator_3_1.stl" scale="0.001 0.001 0.001"/>
+    <mesh file="wrench.stl" scale=".0015 .0015 .0015"/>
+  </asset>
+  <worldbody>
+      <light pos=".4 .4 .5" dir="-2 -2 -1.5" diffuse="1 1 1"/>
+      <geom type="plane" size="5 5 0.1" rgba="0 0 0 0.1"/>
+      
+      <!--
+      <body name="wrench" pos="-0.5 0.3 0.2">
+          <joint type="free"/>
+          <geom type="mesh" mesh="wrench" euler="90 0 180" rgba="0 0 1 1"/>
+      </body>
+      -->
+      
+      <body name="ball" pos="-0.75 0.3 0.2">
+        <joint type="free"/>
+        <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
+      </body>
+    
+
+      <!-- Depth Cam -->
+      <body pos="0 0.5 0.1">
+        <camera name="depth_cam" mode="fixed" fovy="45"/>
+        <geom type="box" size="0.03 0.01 0.01"/>
+      </body>
+      
+    <!--<geom pos="0 0 0.0025" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_plate"/>
+    <geom pos="0 0 0.0025" type="mesh" mesh="base_plate"/>-->
+    <geom size="0.0005 0.0005 0.0005" pos="0 0 -0.005" quat="0.707388 0.706825 0 0" type="box" contype="0" conaffinity="0" group="1" density="0"/>
+    <geom size="0.0005 0.0005 0.0005" pos="0 0 -0.005" quat="0.707388 0.706825 0 0" type="box"/>
+    <body name="link_1" pos="0.085 0.0850052 0.00153631" quat="0.696584 0.69603 -0.123162 -0.123064">
+      <inertial pos="-0.0232342 0.0329334 0.00292066" quat="0.122355 0.742981 -0.123191 0.6464" mass="0.226665" diaginertia="0.000233154 0.000212377 0.000114469"/>
+      <joint name="joint_1" pos="0 0 0" axis="0 -1 0" range="-3.1415 3.1415"/>
+      <geom pos="-0.0851 -0.006604 0.0851" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_1_1"/>
+      <geom pos="-0.0851 -0.006604 0.0851" type="mesh" mesh="link_1_1"/>
+      <body name="link_2" pos="-0.005205 0.04 -0.000685" quat="0.00502682 0.018996 0.976111 0.216382">
+        <inertial pos="-0.00429858 0.0724 0.0167443" quat="0.509426 0.558187 -0.536736 0.375269" mass="0.259512" diaginertia="0.000592904 0.000568437 8.36586e-05"/>
+        <joint name="joint_2" pos="0 0 0" axis="-0.991445 0 0.130526" range="-1.91986 1.39626"/>
+        <geom pos="-0.090305 -0.046604 0.085785" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_2_1"/>
+        <geom pos="-0.090305 -0.046604 0.085785" type="mesh" mesh="link_2_1"/>
+        <body name="link_3" pos="-0.005959 0.136681 0.031347" quat="-0.136415 -0.983543 -0.00160187 0.118454">
+          <inertial pos="-0.0162418 -0.00664333 0.0190772" quat="0.725289 -0.020766 -0.264198 0.635392" mass="0.130452" diaginertia="6.59474e-05 5.72331e-05 3.78195e-05"/>
+          <joint name="joint_3" pos="0 0 0" axis="-0.991445 0 0.130526" range="-4.10152 0.698132" armature="1"/>
+          <geom pos="-0.084346 -0.183285 0.054438" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_3_1"/>
+          <geom pos="-0.084346 -0.183285 0.054438" type="mesh" mesh="link_3_1"/>
+          <body name="link_4" pos="-0.02498 -0.014567 0.040864">
+            <inertial pos="0.0232656 -0.0178071 0.0422285" quat="0.684567 0.265317 0.00653564 0.67892" mass="0.210705" diaginertia="0.000326344 0.000314447 6.12087e-05"/>
+            <joint name="joint_4" pos="0 0 0" axis="0.121444 -0.366501 0.922458" range="-3.1415 3.1415"/>
+            <geom pos="-0.059366 -0.168718 0.013574" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_4_1"/>
+            <geom pos="-0.059366 -0.168718 0.013574" type="mesh" mesh="link_4_1"/>
+            <body name="link_5" pos="0.032067 -0.036743 0.089586" quat="0.361267 -0.923711 -0.00271055 0.127423">
+              <inertial pos="-0.0166273 -0.0186579 0.00928919" quat="0.405518 0.876309 -0.170318 -0.196543" mass="0.173563" diaginertia="0.000265451 0.000246315 7.66429e-05"/>
+              <joint name="joint_5" pos="0 0 0" axis="-0.991445 0 0.130526" range="-3.22886 0.785398"/>
+              <geom pos="-0.091433 -0.131975 -0.076012" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_5_1"/>
+              <geom pos="-0.091433 -0.131975 -0.076012" type="mesh" mesh="link_5_1"/>
+              <geom pos="-0.03 -0.041 0.0045" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="palm"/>
+              <geom pos="-0.03 -0.041 0.0045" type="mesh" mesh="palm"/>
+              <body name="actuator_1" pos="-0.021203 -0.055908 0.025591">
+                <inertial pos="0.00549108 -0.032062 -0.00237455" quat="0.707107 0.707107 0 0" mass="0.018363" diaginertia="8e-06 8e-06 1e-06"/>
+                <joint name="actuator_joint_1" pos="0 0 0" axis="-0.792929 0.002094 0.609311" range="-0.1 1.22173" armature="1"/>
+                <geom pos="-0.008797 0.014908 -0.021091" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="actuator_1_2"/>
+                <geom pos="-0.008797 0.014908 -0.021091" type="mesh" mesh="actuator_1_2"/>
+              </body>
+              <body name="actuator_2" pos="-0.016178 -0.056067 -0.013499">
+                <inertial pos="-0.00489128 -0.0320713 -0.00335355" quat="0.707107 0.707107 0 0" mass="0.018363" diaginertia="8e-06 8e-06 1e-06"/>
+                <joint name="actuator_joint_2" pos="0 0 0" axis="0.924146 0.002094 0.382034" range="-0.1 1.22173" armature="1"/>
+                <geom pos="-0.013822 0.015067 0.017999" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="actuator_2_1"/>
+                <geom pos="-0.013822 0.015067 0.017999" type="mesh" mesh="actuator_2_1"/>
+              </body>
+              <body name="actuator_3" pos="-0.052563 -0.056024 0.00171">
+                <inertial pos="-0.000547503 -0.0320294 0.00612684" quat="0.707107 0.707107 0 0" mass="0.018363" diaginertia="8e-06 8e-06 1e-06"/>
+                <joint name="actuator_joint_3" pos="0 0 0" axis="-0.131217 -0.004189 -0.991345" range="-0.1 1.22173" armature="1"/>
+                <geom pos="0.022563 0.015024 0.00279" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="actuator_3_1"/>
+                <geom pos="0.022563 0.015024 0.00279" type="mesh" mesh="actuator_3_1"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <velocity name="J1" joint="joint_1" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="J2" joint="joint_2" kv="1"  gear="4 0 0 0 0 0"/> 
+    <velocity name="J3" joint="joint_3" kv="1" gear="4 0 0 0 0 0"/> 
+    <velocity name="J4" joint="joint_4" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="J5" joint="joint_5" kv="1" gear="1 0 0 0 0 0"/> 
+    <velocity name="F1" joint="actuator_joint_1" kv="50" gear="1 0 0 0 0 0"/>
+    <velocity name="F2" joint="actuator_joint_2" kv="50" gear="1 0 0 0 0 0"/>
+    <velocity name="F3" joint="actuator_joint_3" kv="50" gear="1 0 0 0 0 0"/>
+  </actuator>
+
+  <sensor>
+    <jointpos name="J1_encoder" joint="joint_1" noise="0.001"/>
+    <jointpos name="J2_encoder" joint="joint_2" noise="0.001"/>
+    <jointpos name="J3_encoder" joint="joint_3" noise="0.001"/>
+    <jointpos name="J4_encoder" joint="joint_4" noise="0.001"/>
+    <jointpos name="J5_encoder" joint="joint_5" noise="0.001"/>
+    <jointpos name="actuator_1" joint="actuator_joint_1" noise="0.001"/>
+    <jointpos name="actuator_2" joint="actuator_joint_2" noise="0.001"/>
+    <jointpos name="actuator_3" joint="actuator_joint_3" noise="0.001"/>
+  </sensor>
+
+</mujoco>

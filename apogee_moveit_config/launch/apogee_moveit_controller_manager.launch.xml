@@ -4,5 +4,4 @@
 
     <param name="moveit_controller_manager" value="$(arg moveit_controller_manager)" />
 
-    <rosparam file="$(find apogee_moveit_config)/config/apogee_controllers.yaml"/>
 </launch>

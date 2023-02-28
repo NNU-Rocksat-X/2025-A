@@ -40,14 +40,15 @@ class Arm2D2Interface : public hardware_interface::RobotHW
         hardware_interface::VelocityJointInterface joint_velocity_interface;
 
         // Note: This isnt ideal because this 9 is static but num joints is dynamic
-        double cmd[9];
+        double cmd[15];
 
-        double pos[9];
-        double vel[9];
-        double eff[9];
+        double pos[15];
+        double vel[15];
+        double eff[15];
 
         
         int num_joints = 0;
+        int num_grip_joints = 0;
 
         std::vector<std::string> joint_names;
         std::vector<float> deg_per_steps;

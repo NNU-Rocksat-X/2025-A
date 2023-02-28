@@ -23,7 +23,11 @@
     <mesh name="link_4" file="link_4.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_5" file="link_5.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_6" file="link_6.stl" scale="0.01 0.01 0.01"/>
-    <mesh name="gripper" file="gripper.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_base" file="gripper_base.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_1_1" file="finger_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_4_1" file="finger_4.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_1" file="finger_3.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_2_1" file="finger_2.stl" scale="0.01 0.01 0.01"/>
   </asset>
   <worldbody>
     <light pos="0.1 1 1" dir="-0.1 -1 -1" diffuse="1 1 1"/>

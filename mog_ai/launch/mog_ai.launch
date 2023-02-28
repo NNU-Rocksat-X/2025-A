@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find apogee_robot_core)/launch/arm2d2.launch"/>
+    <include file="$(find apogee_vision)/launch/predict_trajectory.launch"/>
+
+</launch>

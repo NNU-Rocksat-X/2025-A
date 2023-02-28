@@ -5,6 +5,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
     
     try {
         ros::param::get("stepper_config/num_joints", num_joints);
+        ros::param::get("stepper_config/num__grip_joints", num_grip_joints);
         ros::param::get("stepper_config/joint_names", joint_names);
         ros::param::get("stepper_config/deg_per_step", deg_per_steps);
     }
@@ -12,11 +13,11 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
         ROS_ERROR("Stepper Config Parameters Not Loaded!");
     }
 
-    step_pub = nh.advertise<daedalus_msgs::TeensyMsg>("ARM1/joint_position_cmd", 10);
+    step_pub = nh.advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 10);
 
-    enc_sub = nh.subscribe("ARM1/display_robot_state", 100, &Arm2D2Interface::encoderCallBack, this);
+    enc_sub = nh.subscribe("display_robot_state", 100, &Arm2D2Interface::encoderCallBack, this);
 
-    for (int i = 0; i < num_joints; i++) { // Dont initialize fake dof here
+    for (int i = 0; i < num_joints; i++) {
         ROS_INFO("Initiallizing joint: %s", joint_names[i].c_str());
         hardware_interface::JointStateHandle state_handle(joint_names[i], &pos[i], &vel[i], &eff[i]);
         joint_state_interface.registerHandle(state_handle);
