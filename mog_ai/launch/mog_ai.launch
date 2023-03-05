@@ -1,5 +1,9 @@
 <launch>
-    <include file="$(find apogee_robot_core)/launch/arm2d2.launch"/>
-    <include file="$(find apogee_vision)/launch/predict_trajectory.launch"/>
+    <include file="$(find apogee_robot_core)/launch/arm2d2.launch">
+        <arg name="version" value="arm2v4_wrench"/>
+    </include>
+    <include file="$(find apogee_vision)/launch/predict_trajectory.launch">
+        <arg name="launch_sim" value="false"/>
+    </include>
 
 </launch>

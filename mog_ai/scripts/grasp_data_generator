@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+
+import rospy
+import numpy as np
+
+from mujoco_ros.srv import SetBody
+from mujoco_ros.srv import ApplyForce
+from daedalus_msgs.srv import GraspDetect
+from std_srvs.srv import Trigger
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import Wrench
+from std_msgs.msg import Float32
+from mog_ai.quaternion import *
+import math
+
+import open3d as o3d
+
+GRASPS_FILE = "/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy"
+OBJECT_PCD = "/home/cyborg/catkin_ws/src/daedalus/object_description/objects/cube.pcd"
+OBJECT_ID = 1 # ball=0 cube=1 wrench=2
+
+rospy.init_node("grasp_data_generator")
+
+rospy.wait_for_service("/mujoco/reset")
+reset = rospy.ServiceProxy("/mujoco/reset", Trigger)
+rospy.wait_for_service("/mujoco/set_body")
+set_body = rospy.ServiceProxy("/mujoco/set_body", SetBody)
+rospy.wait_for_service("/mujoco/apply_force")
+apply_force = rospy.ServiceProxy("/mujoco/apply_force", ApplyForce)
+rospy.wait_for_service("/ARM1/is_grasped")
+is_grasped = rospy.ServiceProxy("/ARM1/is_grasped", GraspDetect)
+
+grasp_pub = rospy.Publisher("/ARM1/grip_position_cmd", Float32, queue_size=1)
+
+# Get point cloud of object
+pcd = o3d.io.read_point_cloud(OBJECT_PCD)
+object_points = np.asarray(pcd.points)
+pcd.estimate_normals()
+pcd.orient_normals_to_align_with_direction([0, 0, 0])
+normal_points = np.asarray(pcd.normals)
+
+# pos_x, pos_y, pos_z, q_x, q_y, q_z, q_w
+#successful_grasps = []
+successful_grasps = np.load(GRASPS_FILE).tolist()
+
+def add_successful_grasp(grasp):
+    successful_grasps.append([OBJECT_ID,
+                            grasp.position.x, 
+                            grasp.position.y,
+                            grasp.position.z,
+                            grasp.orientation.x,
+                            grasp.orientation.y,
+                            grasp.orientation.z,
+                            grasp.orientation.w])
+
+    rospy.loginfo("num success: " + str(len(successful_grasps)))
+    if len(successful_grasps) % 10 == 0:
+        np_grasps = np.array(successful_grasps)
+        np.save(GRASPS_FILE, np_grasps)
+
+def attempt_grasp():
+    grasp_pub.publish(-0.9)
+
+def open_gripper():
+    grasp_pub.publish(0.8)
+
+
+
+def point_gripper(ax, ay, az):
+    point_vector = [ax, ay, az]
+    z = [0, 0, -1]
+
+    rot_axis = np.cross(point_vector, z)
+    rot_angle = np.arccos(np.dot(point_vector, z))
+
+    other_axis = np.cross(rot_axis, z)
+    dot_product = np.dot(other_axis, point_vector)
+
+    if (dot_product < 0):
+        rot_angle = np.pi - rot_angle
+
+    rot_angle += np.pi
+
+    q = angle_axis_to_quat(rot_axis[0], rot_axis[1], rot_axis[2], rot_angle)
+    return q
+
+def push_gripper(force_vector):
+    force = 0
+    wrench = Wrench()
+    wrench.force.x = force_vector[0] * force
+    wrench.force.y = force_vector[1] * force
+    wrench.force.z = force_vector[2] * force
+    apply_force(3, wrench, 0.1)
+
+def generate_random_grasp():
+    grasp = Pose()
+    point_id = int(np.random.uniform(low=0, high=len(object_points))) #318
+    point = object_points[point_id]
+    
+    grasp.position.x = point[0] * 0.001
+    grasp.position.y = point[1] * 0.001
+    grasp.position.z = point[2] * 0.001
+
+    dist = np.random.uniform(low=0.07, high=0.1) #0.095 #0.095
+
+
+    x_norm = normal_points[point_id][0]
+    y_norm = normal_points[point_id][1]
+    z_norm = normal_points[point_id][2]
+
+    grasp.position.x += x_norm*dist
+    grasp.position.y += y_norm*dist 
+    grasp.position.z += z_norm*dist
+
+    normal_q = point_gripper(x_norm, y_norm, z_norm)
+    z_angle = np.random.uniform(low=0, high=2*np.pi) #5.885330677833356 
+    z_q = euler_to_quat(0, 0, z_angle)
+
+    #rospy.loginfo("point_id: " + str(point_id) + " z_angle: " + str(z_angle))
+
+    grasp.orientation = quaternion_multiply(normal_q, z_q)
+    return (grasp, [-1*x_norm, -1*y_norm, -1*z_norm])
+
+def main():
+
+    while not rospy.is_shutdown():
+        open_gripper()
+        reset()
+        rospy.sleep(0.2)
+        grasp, force_vector = generate_random_grasp()
+        set_body('gripper', grasp)
+        rospy.sleep(0.1)
+        push_gripper(force_vector)
+        rospy.sleep(0.5)
+        attempt_grasp()
+        rospy.sleep(2)
+        status = is_grasped()
+        rospy.loginfo("Status: " + str(status.is_grasped))
+        if (status.is_grasped):
+            add_successful_grasp(grasp)
+
+
+if __name__ == "__main__":
+    main()

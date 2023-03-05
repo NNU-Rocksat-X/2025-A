@@ -1,0 +1,5 @@
+<!-- This launch file is used to setup the gripper only. -->
+<!-- The arm2v4 config.launch is used to setup the arm and the gripper -->
+<launch>
+    <rosparam file="$(find arm2v4_description)/config/gripper_config/joint_config.yaml" command="load"/>
+</launch>

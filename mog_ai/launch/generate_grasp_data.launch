@@ -1,0 +1,9 @@
+<launch>
+    <group ns="ARM1">
+        <include file="$(find arm2v4_description)/launch/gripper_config.launch"/>
+    </group>
+    <include file="$(find mujoco_ros)/launch/sim.launch" >
+        <arg name="env" value="gripper"/>
+    </include>
+
+</launch>

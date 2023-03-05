@@ -1,5 +1,5 @@
 <launch>
-    <arg name="launch_rviz" default="true"/>
+    <arg name="launch_rviz" default="false"/>
     <arg name="ns" default="ARM1"/>
     <arg name="dual" default="false"/>
     

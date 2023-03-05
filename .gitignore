@@ -3,4 +3,4 @@ __pycache__
 *.py[cod]
 *$py.class
 *.pyc
-training.*
+mog_ai/training/

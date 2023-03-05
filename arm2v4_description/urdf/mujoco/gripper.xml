@@ -1,6 +1,34 @@
 <mujoco model="v5_gripper">
+  <visual>
+    <headlight ambient="0 0 0" diffuse="0.5 0.5 0.5" specular="1 1 1"/>
+    <quality shadowsize="8192"/>
+  </visual>
+  <compiler angle="radian" meshdir="../../meshes/" autolimits="true"/>
+  <option integrator="RK4" timestep="0.0001">
+    <flag gravity="disable"/>
+  </option>
+  <size njmax="500" nconmax="100"/>
+  <default/>
+  <asset>
+    <mesh name="gripper_base" file="gripper_base.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_1_1" file="finger_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_4_1" file="finger_4.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_1" file="finger_3.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_2_1" file="finger_2.stl" scale="0.01 0.01 0.01"/>
+    <!-- .0015-->
+    <mesh file="../../object_description/meshes/wrench.stl" scale=".0011 .0011 .0011"/>
+  </asset>
   <worldbody>
-    <body name="gripper_base">
+
+    <body name="wrench" pos="0 0 0">
+        <joint type="free"/>
+        <geom type="box" size="0.015 0.015 0.015" rgba="1 0 0 1"/>
+        <!--<geom type="mesh" mesh="wrench" euler="0 0 0" rgba="1 0 0 1"/>-->
+    </body>
+
+
+    <body name="gripper" pos="0 0 0.5">
+      <joint name="gripper_joint" type="free"/>
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="gripper_base"/>
       <geom type="mesh" mesh="gripper_base"/>
       <body name="finger_1" pos="0.005959 -0.022452 0.054853">
@@ -30,10 +58,10 @@
     </body>
   </worldbody>
   <contact>
-    <exclude name="gj1_contact" body1="gripper_base" body2="finger_1"/>
-    <exclude name="gj2_contact" body1="gripper_base" body2="finger_2"/>
-    <exclude name="gj3_contact" body1="gripper_base" body2="finger_3"/>
-    <exclude name="gj4_contact" body1="gripper_base" body2="finger_4"/>
+    <exclude name="gj1_contact" body1="gripper" body2="finger_1"/>
+    <exclude name="gj2_contact" body1="gripper" body2="finger_2"/>
+    <exclude name="gj3_contact" body1="gripper" body2="finger_3"/>
+    <exclude name="gj4_contact" body1="gripper" body2="finger_4"/>
   </contact>
 
   <actuator>
@@ -42,4 +70,11 @@
     <velocity name="GJ3" joint="gripper_joint_3" kv="3" gear="6 0 0 0 0 0"/>
     <velocity name="GJ4" joint="gripper_joint_4" kv="3" gear="6 0 0 0 0 0"/>
   </actuator>
+
+  <sensor>
+    <jointpos name="GJ1_encoder" joint="gripper_joint_1" noise="0.001"/>
+    <jointpos name="GJ2_encoder" joint="gripper_joint_2" noise="0.001"/>
+    <jointpos name="GJ3_encoder" joint="gripper_joint_3" noise="0.001"/>
+    <jointpos name="GJ4_encoder" joint="gripper_joint_4" noise="0.001"/>
+  </sensor>
 </mujoco>

@@ -31,6 +31,7 @@ catkin_install_python(
     PROGRAMS
     scripts/marsha_ai
     scripts/reset_server
+    scripts/grasp_data_generator
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
