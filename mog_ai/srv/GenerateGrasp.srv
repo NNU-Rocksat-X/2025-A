@@ -1,0 +1,4 @@
+int16 object_id
+float64[] latent_space
+---
+geometry_msgs/Pose grasp

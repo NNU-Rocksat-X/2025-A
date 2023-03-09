@@ -1,0 +1,21 @@
+#!/usr/bin/env python3.7
+
+import gym
+from stable_baselines3 import TD3
+
+from mog_ai.gym_env import ApogeeGym
+from mog_ai.catch_interface import CatchInterface
+
+def train():
+    interface = CatchInterface()
+    env = ApogeeGym(interface)
+
+    model = TD3("MlpPolicy", env, verbose=1)
+
+    model.learn(total_timesteps=1000)
+
+
+
+
+if __name__ == "__main__":
+    train()

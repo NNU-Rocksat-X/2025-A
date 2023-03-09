@@ -3,6 +3,7 @@ project(mog_ai)
 
 find_package(catkin REQUIRED
     COMPONENTS
+        message_generation
         rospy
         roscpp
         std_msgs
@@ -13,6 +14,17 @@ find_package(catkin REQUIRED
 
 
 catkin_python_setup()
+
+add_service_files(
+    FILES 
+    GenerateGrasp.srv
+)
+
+generate_messages(
+    DEPENDENCIES 
+    std_msgs
+    geometry_msgs
+)
 
 catkin_package(
     CATKIN_DEPENDS
@@ -29,9 +41,12 @@ include_directories(
 
 catkin_install_python(
     PROGRAMS
-    scripts/marsha_ai
-    scripts/reset_server
+    nodes/marsha_ai
+    nodes/reset_server
+    nodes/catch_ai
+    nodes/vae_server
     scripts/grasp_data_generator
+    scripts/test_vae_grasps
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

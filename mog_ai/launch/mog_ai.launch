@@ -1,9 +1,24 @@
 <launch>
+    <rosparam file="$(find mog_ai)/config/model_config.yaml" command="load"/>
+
+    <!--
     <include file="$(find apogee_robot_core)/launch/arm2d2.launch">
         <arg name="version" value="arm2v4_wrench"/>
     </include>
+    -->
+    <group ns="ARM1">
+        <include file="$(find arm2v4_description)/launch/gripper_config.launch"/>
+    </group>
+    <include file="$(find mujoco_ros)/launch/sim.launch" >
+        <arg name="env" value="gripper"/>
+    </include>
+
+
     <include file="$(find apogee_vision)/launch/predict_trajectory.launch">
         <arg name="launch_sim" value="false"/>
     </include>
+
+    <node name="catch_ai" pkg="mog_ai" type="catch_ai" output="screen"/>
+    <node name="vae_server" pkg="mog_ai" type="vae_server"/>
 
 </launch>

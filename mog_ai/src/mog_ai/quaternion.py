@@ -1,5 +1,6 @@
 import numpy as np
 from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import Pose
 
 # Note: quaternions in this module all use JPL convention
 
@@ -54,6 +55,12 @@ def quaternion_multiply(q0, q1):
     if q_type == 'a':
         return np.array([Q0Q1_x, Q0Q1_y, Q0Q1_z, Q0Q1_w])
         
+def normalize_quat(q):
+    if isinstance(q0, np.ndarray) and isinstance(q1, np.ndarray):
+        sum = tf.sum(q)
+    else:
+        print(type(q0), type(q1))
+        raise
 
 def quat_conjugate(q):
     q_conj = np.array([-q[0], -q[1], -q[2], q[3]])

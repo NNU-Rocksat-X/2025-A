@@ -2,9 +2,17 @@
 
 import gym
 
+MAX_EPISODE_LENGTH = 0
+
 class ApogeeGym(gym.Env):
     def __init__(self, ros_interface):
         self.ros_interface = ros_interface
+
+        # action space: (Trajectory slice, Latent Space)
+        self.action_space = gym.spaces.Box(low=0, high=1, shape=(ros_interface.model_params['latent_dim']+1,))
+
+        # Observation space: (Position, Orientation Quaternion, Velocity, Angular Velocity)
+        self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(13,))
 
     def step(self, action):
         reward, move_success, info = self.ros_interface.perform_action(action)

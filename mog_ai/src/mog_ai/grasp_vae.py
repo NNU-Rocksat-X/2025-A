@@ -1,11 +1,18 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 from mog_ai.quaternion import *
+import sys
+
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 print("tf version: ", tf.__version__)
+print("python version: ", sys.version)
 
-MODEL_DIR = "../../training/grasp_vae_models/"
+MODEL_DIR = "/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/grasp_vae_models/"
+MODEL_NUM = 4
 
 GRIPPER_POINTS = [
     [0.005959, -0.022452, 0.054853],
@@ -13,14 +20,14 @@ GRIPPER_POINTS = [
     [-0.007093, 0.024302, 0.053188],
     [0.022822, 0.00746, 0.054188]]
 
-KL_DIVERGENCE_WEIGHT = 0.01 # 6-DOF grasp paper used 0.01
+KL_DIVERGENCE_WEIGHT = 0.005 # 6-DOF grasp paper used 0.01
 optimizer = tf.keras.optimizers.Adam(1e-4)
 
 class GraspVae(tf.keras.Model):
     """ Variational Autoencoder that produces grasps from the latent space and 
         the ID of the object to grasp """
 
-    def __init__(self, latent_dim):
+    def __init__(self, latent_dim, model_name=None):
         super(GraspVae, self).__init__()
         self.latent_dim = latent_dim
 
@@ -40,20 +47,45 @@ class GraspVae(tf.keras.Model):
                 # Input is (Object_ID, latent_space)
                 tf.keras.layers.InputLayer(input_shape=(latent_dim+1,)),
                 tf.keras.layers.Dense(32, activation='relu'),
-                tf.keras.layers.Dense(7,)
+                tf.keras.layers.Dense(7)
             ]
         )
 
+        if model_name != None:
+            print("loading model: " + MODEL_DIR + model_name)
+            self.load_weights(MODEL_DIR + "model_" + str(3))
     # Get a grasp from the VAE
     # Either input the latent space
     # Or generate a random grasp from the latent distribution
     # Note: latent space here is referred to as epsilon in literature
-    @tf.function
-    def sample(self, latent=None):
+    #@tf.function
+    def sample(self, object_id, latent=None):
         if latent is None:
-            # Not sure why shape=100
-            latent = tf.random.normal(shape=(100, self.latent_dim))
-        return self.decode(latent)
+            # Concatenate the object id with the latent space
+            latent = tf.random.normal(shape=(1,self.latent_dim))
+
+        object_id = tf.reshape(object_id, shape=(latent.shape[0], 1))
+        object_id = tf.cast(object_id, tf.float32)
+        object_latent = tf.concat([latent, object_id], axis=1)
+        
+        return self.decode(object_latent), latent
+
+    def generate_grasp(self, object_id, latent=None):
+        if isinstance(latent, list):
+            latent = np.array(latent)
+            latent = np.reshape(latent, newshape=(1, self.latent_dim))
+
+        grasp_out, latent = self.sample(object_id, latent)
+        grasp_out = grasp_out.numpy()[0]
+        grasp = Pose()
+        grasp.position.x = grasp_out[0]
+        grasp.position.y = grasp_out[1]
+        grasp.position.z = grasp_out[2]
+        grasp.orientation.x = grasp_out[3]
+        grasp.orientation.y = grasp_out[4]
+        grasp.orientation.z = grasp_out[5]
+        grasp.orientation.w = grasp_out[6]
+        return grasp
         
     def encode(self, x):
         # split the mean and std_dev from the encoder output
@@ -100,6 +132,20 @@ def rotate_vect_by_quat(v, q):
 
     return vprime
 
+def normalize_quat(q):
+    square = tf.math.square(q)
+    sum = tf.math.reduce_sum(square, axis=1)
+    norm = tf.math.sqrt(sum)
+    norm = tf.broadcast_to(norm[:, np.newaxis], q.shape)
+    q = q/norm
+    return q
+
+
+def normalize_output(logit):
+    normal = logit[:,:3]
+    normal = tf.concat([normal, normalize_quat(logit[:,3:])], axis=1)
+    return normal
+
 # grasp = [pos_x, pos_y, pos_z, q_x, q_y, q_z, q_w]
 def grasp_to_gripper_points(grasp):
     transformed_points = []
@@ -132,6 +178,7 @@ def calculate_reconstruction_loss(x_grasp, logit_grasp):
 
 def compute_loss(model, x):
     # Encode the grasp, but do not encode the object id
+    #print("x: ", x)
     mean, std_dev = model.encode(x[:,1:])
     latent = model.reparameterize(mean, std_dev)
     
@@ -142,6 +189,8 @@ def compute_loss(model, x):
     object_latent = tf.concat([latent, object_id], axis=1)
 
     x_logit = model.decode(object_latent)
+    x_logit = normalize_output(x_logit)
+    #print("logit: ", x_logit)
 
     # rl = reconstruction loss
     rl = calculate_reconstruction_loss(x, x_logit)
@@ -153,7 +202,20 @@ def compute_loss(model, x):
 
     return tf.reduce_mean(rl - kl_loss)
 
-@tf.function 
+def visualize_latent_space(model, x):
+    mean, std_dev = model.encode(x[:, 1:])
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    # Adjust c=x[:, GraspVal] to see map with different grasp attributes
+    sc = ax.scatter(mean[:,0], mean[:,1], mean[:,2], c=x[:,6], cmap='brg')
+    ax.set_title('Position Y Map')
+    ax.set_xlabel('dim 1')
+    ax.set_ylabel('dim 2')
+    ax.set_zlabel('dim 3')
+    plt.colorbar(sc)
+    plt.show()
+
+#@tf.function 
 def train_step(model, x):
     """Executes one training step and returns the loss.
 
@@ -166,18 +228,13 @@ def train_step(model, x):
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return loss # for logging
 
-def train(epochs, validate_ratio):
-    dataset = np.load("/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy")
+def train(model, dataset, epochs, validate_ratio):
     print("dataset: ", dataset.shape)
-
     num_validate = int(dataset.shape[0] * validate_ratio)
     validation_elements = np.random.choice(dataset.shape[0], num_validate)
 
     validation_set = np.array([dataset[x,:] for x in validation_elements])
     dataset = np.delete(dataset, validation_elements, axis=0)
-
-    model = GraspVae(latent_dim=3)
-    model.load_weights(MODEL_DIR + "model_1")
 
 
     losses = []
@@ -198,8 +255,12 @@ def train(epochs, validate_ratio):
             losses = []
             valid_loss = []
 
-    model.save_weights(MODEL_DIR + "model_1")
+    model.save_weights(MODEL_DIR + "model_" + str(MODEL_NUM))
 
 if __name__ == "__main__":
-    train(10000, 0.1)
+    dataset = np.load("/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy")
+    model = GraspVae(latent_dim=3, model_name="model_4")
 
+    compute_loss(model, dataset[1:3,:])
+    #train(model, dataset, 10000, 0.1)
+    visualize_latent_space(model, dataset)
