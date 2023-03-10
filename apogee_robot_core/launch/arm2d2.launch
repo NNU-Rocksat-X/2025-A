@@ -16,6 +16,7 @@
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
+            <arg name="launch_rviz" value="$(arg launch_rviz)"/>
             <arg name="ns" value="ARM1"/>
         </include>
     </group>
@@ -28,8 +29,8 @@
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
-            <arg name="ns" value="ARM2"/>
             <arg name="launch_rviz" value="$(arg launch_rviz)"/>
+            <arg name="ns" value="ARM2"/>
         </include>
     </group>
 

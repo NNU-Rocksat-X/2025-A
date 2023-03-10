@@ -36,6 +36,13 @@ include_directories(
     ${EIGEN3_INCLUDE_DIRS}
 )
 
+catkin_install_python(
+    PROGRAMS
+    scripts/tests/test_catch_planning
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+
 add_library(apogee_hardware_interface src/apogee_hardware_interface.cpp)
 target_link_libraries(apogee_hardware_interface ${catkin_LIBRARIES})
 add_dependencies(apogee_hardware_interface ${catkin_EXPORTED_TARGETS})
