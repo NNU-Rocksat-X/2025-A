@@ -3,6 +3,7 @@
 
 #include "apogee_vision/PositionFilter.h"
 #include "apogee_vision/OrientationPredictor.h"
+#include "apogee_vision/TrajectorySearch.h"
 
 // MSG & SRVs
 #include <geometry_msgs/Pose.h>
@@ -138,29 +139,31 @@ class Predictor {
         return true;
     }
 
-    /* Predict uses time until prediction, norm dist is calculated else where
-        Searcher searcher(state.position, state.velocity, state.acceleration);
-
-        Find time until object is at closest point to base of arm
-        float delta_time = searcher.solve();
-    */
     bool predict(daedalus_msgs::PredictPosition::Request &req,
                     daedalus_msgs::PredictPosition::Response &res)
     {
-        // Orientation prediction
-        float t = (float)req.time_until_prediction;
-        Eigen::Quaternionf orientation = ori_predictor->predict(t);
-        res.orientation = quat_to_msg(orientation);
-        
-        // Position prediction
-        Position::State state_prediction;
-        pos_filter->predict_state(t, state_prediction);
+        // Get current state
+        Position::State curr_state;
+        pos_filter->get_state(curr_state);
 
+        // Setup to convert trajectory slice to position and delta time
+        Searcher searcher(curr_state.position, curr_state.velocity, curr_state.acceleration);
+
+        // Convert trajectory slice
+        float delta_time;
+        Vector3f predicted_position = searcher.solve(req.trajectory_slice, delta_time);
+
+        // Orientation prediction
+        Eigen::Quaternionf orientation = ori_predictor->predict(delta_time);
+
+        // Fill in response msg
         geometry_msgs::Point position_msg;
-        position_msg.x = state_prediction.position(0);
-        position_msg.y = state_prediction.position(1);
-        position_msg.z = state_prediction.position(2);
+        position_msg.x = predicted_position(0);
+        position_msg.y = predicted_position(1);
+        position_msg.z = predicted_position(2);
         res.position = position_msg;  
+        res.orientation = quat_to_msg(orientation);
+        res.delta_time = delta_time;
 
         return true;
     }

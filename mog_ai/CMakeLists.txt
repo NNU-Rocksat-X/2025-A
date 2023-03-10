@@ -47,6 +47,7 @@ catkin_install_python(
     nodes/vae_server
     scripts/grasp_data_generator
     scripts/test_vae_grasps
+    scripts/spawn_tensorboard
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

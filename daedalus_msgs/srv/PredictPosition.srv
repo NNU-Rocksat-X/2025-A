@@ -1,4 +1,5 @@
-float64 time_until_prediction
+float32 trajectory_slice
 ---
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
+float32 delta_time

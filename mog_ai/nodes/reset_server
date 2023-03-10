@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Empty
-from std_srvs.srv import Trigger
+from std_srvs.srv import Trigger, TriggerResponse
 from geometry_msgs.msg import Wrench
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Pose
 from mujoco_ros.srv import ApplyForce
 from mujoco_ros.srv import SetBody
 
@@ -19,29 +19,35 @@ set_body = rospy.ServiceProxy('/mujoco/set_body', SetBody)
 reset = rospy.ServiceProxy('/mujoco/reset', Trigger)
 
 
-def reset_cb(msg):
+def reset_cb(req):
     #reset()
 
-    point = Point()
-    point.x = np.random.uniform(low=-0.8, high=-0.7)
-    point.y = np.random.uniform(low=0.25, high=0.35)
-    point.z = np.random.uniform(low=0.015, high=0.25)
-    set_body("ball", point)
+    pose = Pose()
+    pose.position.x = np.random.uniform(low=-0.8, high=-0.7)
+    pose.position.y = np.random.uniform(low=0.25, high=0.35)
+    pose.position.z = np.random.uniform(low=0.015, high=0.25)
+    status = set_body("wrench", pose)
+    rospy.loginfo("status: " + str(status))
+    if status.success == False:
+        return TriggerResponse(False, 'Setting object position failed.')
+    
     
     sleep(0.1)
     wrench = Wrench()
     wrench.force.x = np.random.uniform(low=0.75, high=1)
     wrench.force.y = np.random.uniform(low=-0.05, high=0.05)
     wrench.force.z = np.random.uniform(low=-0.1, high=0.1)
-    wrench.torque.x = np.random.uniform(low=0.005, high=0.02)
-    wrench.torque.y = np.random.uniform(low=0.0005, high=0.02)
-    wrench.torque.z = np.random.uniform(low=0.005, high=0.02)
+    wrench.torque.x = np.random.uniform(low=-0.001, high=0.001)
+    wrench.torque.y = np.random.uniform(low=-0.001, high=0.001)
+    wrench.torque.z = np.random.uniform(low=-0.001, high=0.001)
     apply_duration = 0.1
     apply_force(OBJECT_ID, wrench, apply_duration)
 
+    return TriggerResponse(True, 'Applying object force failed.')
+
 def main():
     rospy.init_node('reset_server')
-    rospy.Subscriber("reset", Empty, reset_cb)
+    rospy.Service('random_reset', Trigger, reset_cb)
     rospy.loginfo("Running...")
     rospy.spin()
 

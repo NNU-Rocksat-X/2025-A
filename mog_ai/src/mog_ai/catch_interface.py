@@ -1,10 +1,13 @@
 import rospy
 import numpy as np
+import math
 
 from mog_ai.ros_interface import RosInterface
 from mog_ai.grasp_vae import GraspVae
+from mog_ai.quaternion import *
 
 from std_srvs.srv import Trigger, TriggerRequest
+from geometry_msgs.msg import Pose
 from daedalus_msgs.srv import ObjectObservation
 from daedalus_msgs.srv import GraspDetect
 from daedalus_msgs.srv import PredictPosition
@@ -14,6 +17,21 @@ from mog_ai.srv import GenerateGrasp
 # only for testing with gripper
 from std_msgs.msg import Float32 
 from mujoco_ros.srv import SetBody
+
+
+def object_to_world(obj_grasp: Pose, obj_pose: Pose):
+    world = Pose()
+    world.position.x = obj_pose.position.x + obj_grasp.position.x 
+    world.position.y = obj_pose.position.y + obj_grasp.position.y 
+    world.position.z = obj_pose.position.z + obj_grasp.position.z 
+    world.orientation = quaternion_multiply(obj_grasp.orientation, obj_pose.orientation)
+    return world
+
+def distance(pose1: Pose, pose2: Pose):
+    dist = math.sqrt((pose1.position.x - pose2.position.x)**2 +
+                     (pose1.position.y - pose2.position.y)**2 +
+                     (pose1.position.z - pose2.position.z)**2)
+    return dist
 
 class CatchInterface(RosInterface):
     """
@@ -30,8 +48,8 @@ class CatchInterface(RosInterface):
     def setup_services(self):
         rospy.loginfo("Setting up services...")
         rospy.loginfo("Reset")
-        rospy.wait_for_service("/mujoco/reset")
-        self.reset = rospy.ServiceProxy("/mujoco/reset", Trigger)
+        rospy.wait_for_service("/random_reset")
+        self.reset = rospy.ServiceProxy("/random_reset", Trigger)
 
         rospy.loginfo("Trajectory predictor")
         rospy.wait_for_service("/trajectory_predictor/ready")
@@ -71,27 +89,39 @@ class CatchInterface(RosInterface):
     # action space (time slice, latent grasp)
     def perform_action(self, action):
         reward = 0
-        rospy.loginfo("Action: " +  str(action))
+        #rospy.loginfo("Action: " +  str(action))
+
+        prediction = self.predict(action[0])
+        rospy.loginfo("Prediction: " + str(prediction))
+        if prediction.delta_time < 0:
+            rospy.loginfo("Object out of reach.")
+            return 0, 0, {'catch_success': False}
 
         # Generate grasp in object coordinate frame
-        grasp = self.generate_grasp(1, action[1:]).grasp
-        rospy.loginfo("grasp: " + str(grasp))
+        object_grasp = self.generate_grasp(1, action[1:]).grasp
+        rospy.loginfo("obj grasp: " + str(object_grasp))
+
+        grasp = object_to_world(object_grasp, prediction)
 
         self.set_body('gripper', grasp)
 
-        rospy.sleep(0.5)
+        rospy.sleep(prediction.delta_time - 0.5)
 
         # reward, move_success, info
         self.grasp_cmd("close") # TODO make this command block
+        dist_at_grasp = distance(self.observe().pose, grasp)
+
         rospy.sleep(1.5)
         status = self.is_grasped()
         if status.is_grasped:
-
+            rospy.logwarn("Successful Grasp!")
             reward += 10
+        else:
+            reward -= dist_at_grasp
 
         self.grasp_cmd("open")
         rospy.sleep(1)
-        info = {}
+        info = {'catch_success': status.is_grasped}
         return reward, 0, info
 
 
@@ -108,7 +138,7 @@ class CatchInterface(RosInterface):
 
         raw_observation = self.observe()
         observation = np.empty(shape=(13,))
-        rospy.loginfo("observation: " + str(raw_observation))
+        #rospy.loginfo("observation: " + str(raw_observation))
 
         observation[0] = raw_observation.pose.position.x
         observation[1] = raw_observation.pose.position.y 
@@ -128,5 +158,7 @@ class CatchInterface(RosInterface):
 
 
     def reset_simulation(self):
-        self.reset()
+        status = self.reset()
+        if status.success == False:
+            rospy.logerr("Reset Failed: " + status.message)
         rospy.sleep(0.1)
