@@ -3,6 +3,8 @@
 
 typedef Arm2D2Interface MarshaArm;
 
+#define RATE (50.0)
+
 int main(int argc, char** argv)
 {
     
@@ -21,7 +23,7 @@ int main(int argc, char** argv)
     spinner.start();
 
     ros::Time prev_time = ros::Time::now();
-    ros::Rate rate(10.0);
+    ros::Rate rate(RATE);
 
 
     while(ros::ok()) {
@@ -31,7 +33,6 @@ int main(int argc, char** argv)
         arm.read();
 
         cm.update(time, period);
-        arm.update_time(time);
 
 
         arm.write();

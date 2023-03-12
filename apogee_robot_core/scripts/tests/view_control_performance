@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+import rospy
+from control_msgs.msg import FollowJointTrajectoryActionGoal
+from sensor_msgs.msg import JointState
+import matplotlib.pyplot as plt
+import sys
+
+# Initialize lists to store time, desired positions, and actual positionss
+desired_positions = {}
+desired_velocity = {}
+actual_positions = []
+actual_velocity = []
+actual_time = []
+JOINT_NAME = "joint_2"
+
+mutex = False
+
+def joint_state_sub(msg):
+    if not mutex:
+        global actual_positions
+        actual_positions.append(dict(zip(msg.name, msg.position)))
+        actual_velocity.append(dict(zip(msg.name, msg.velocity)))
+        actual_time.append(msg.header.stamp.to_sec())
+
+def trajectory_sub(msg):
+    #actual_positions = []
+    #actual_time = []
+    if not mutex:
+        for i in range(len(msg.goal.trajectory.joint_names)):
+            joint_name = msg.goal.trajectory.joint_names[i]
+            start_time = msg.header.stamp.to_sec()
+            positions = [(p.time_from_start.to_sec() + start_time, p.positions[i]) for p in msg.goal.trajectory.points]
+            desired_positions[joint_name] = positions
+
+            velocities = [(p.time_from_start.to_sec() + start_time, p.velocities[i]) for p in msg.goal.trajectory.points]
+            desired_velocity[joint_name] = velocities
+
+
+        
+
+def plot_positions(time_msg):
+    if JOINT_NAME in desired_positions:
+        # If the actual position has been tracked for the full trajectory
+        rospy.loginfo("Desired time: " + str(desired_positions[JOINT_NAME][-1][0]) + " Actual: " + str(actual_time[-1]))
+        if actual_time[-1] > desired_positions[JOINT_NAME][-1][0]:
+            mutex = True
+            time = [p[0] for p in desired_positions[JOINT_NAME]]
+            desired_pos = [p[1] for p in desired_positions[JOINT_NAME]]
+            desired_vel = [p[1] for p in desired_velocity[JOINT_NAME]]
+            actual_pos = [p[JOINT_NAME] for p in actual_positions]
+            actual_vel = [p[JOINT_NAME] for p in actual_velocity]
+            rospy.loginfo("Desired vel: " + str(desired_vel))
+
+            adjusted_actual_time = []
+            if actual_time > actual_pos:
+                for i in range(0, len(actual_pos)):
+                    adjusted_actual_time.append(actual_time[i])
+
+            
+
+            rospy.loginfo("time: " + str(len(actual_time)) + " pos: " + str(len(actual_pos)))
+            rospy.loginfo("time: " + str(len(time)) + " pos: " + str(len(desired_pos)))
+
+            plt.plot(adjusted_actual_time, actual_pos, label='Actual Position')
+            plt.plot(time, desired_pos, label='Desired Position')
+            plt.plot(adjusted_actual_time, actual_vel, label='Actual Velocity')
+            #plt.plot(time, desired_vel, label='Desired Velocity')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Joint Position (rad)')
+            plt.title(JOINT_NAME + ' Position over Time')
+            plt.legend()
+            plt.show()
+            mutex = False
+            rospy.signal_shutdown("Done")
+
+            # Reset
+            #actual_positions = []
+            #actual_time = []
+            #desired_positions = {}
+
+def main():
+    rospy.init_node('plot_joint_positions')
+    rospy.Subscriber('/ARM1/joint_states', JointState, joint_state_sub)
+    rospy.Subscriber('/ARM1/arm2d2/controllers/position/follow_joint_trajectory/goal', FollowJointTrajectoryActionGoal, trajectory_sub)
+    rospy.Timer(rospy.Duration(1), plot_positions)
+    rospy.spin()
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        JOINT_NAME = sys.argv[1]
+    rospy.loginfo("joint name: " + JOINT_NAME)
+    main()

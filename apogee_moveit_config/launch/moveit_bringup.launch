@@ -18,7 +18,7 @@
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     args="  --namespace=/$(arg ns)
             /$(arg ns)/arm2d2/controllers/state
-            /$(arg ns)/arm2d2/controllers/velocity"
+            /$(arg ns)/arm2d2/controllers/position"
     />
 
 </launch>

@@ -19,7 +19,7 @@ def main():
     plan.Grasp.orientation.y = -0.708
     plan.Grasp.orientation.z = -0.01209
     plan.Grasp.orientation.w = 0.7066
-    plan.time_to_maneuver.data = rospy.Time.from_sec(rospy.get_time() + 5)
+    plan.time_to_maneuver.data = rospy.Time.from_sec(rospy.get_time() + 12)
     plan.grasp_time = 1.0
 
     print("plan:", plan)

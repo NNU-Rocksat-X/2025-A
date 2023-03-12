@@ -6,6 +6,7 @@
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
 
 #include <Eigen/Dense>
 
@@ -15,6 +16,7 @@
 #include <geometry_msgs/Point.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Empty.h>
+#include <moveit_msgs/DisplayTrajectory.h>
 
 #include <daedalus_msgs/MoveCmd.h>
 #include <daedalus_msgs/PositionCmd.h>
@@ -60,6 +62,7 @@ class MoveInterface {
         ros::ServiceServer planGraspService;
 
         ros::Publisher graspPub;
+        ros::Publisher display_publisher;
         ros::ServiceClient graspDetectClient;
 
 

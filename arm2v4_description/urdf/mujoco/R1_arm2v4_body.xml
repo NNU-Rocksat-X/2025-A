@@ -2,7 +2,7 @@
 <worldbody>
     <body name="R1_link_1" pos="-0.1101 0.00635 0.1" euler="1.57 0 0">
       <inertial pos="0.000994556 0.0321926 0.0346314" quat="0.983573 -0.108607 0.0374803 0.139225" mass="0.04795" diaginertia="0.000146434 0.000143118 5.64483e-05"/>
-      <joint name="R1_joint_1" armature="0.01" pos="0 0 0" axis="0 -1 0" range="-1.0472 3.14159"/>
+      <joint name="R1_joint_1" armature="0.01" pos="0 0 0" axis="0 -1 0" /> <!-- range="-1.0472 3.14159" -->
       <geom pos="0.1101 -0.00635 0.0551" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_1"/>
       <geom pos="0.1101 -0.00635 0.0551" type="mesh" mesh="link_1"/>
       <body name="R1_link_2" pos="0 0.035617 -0.003">

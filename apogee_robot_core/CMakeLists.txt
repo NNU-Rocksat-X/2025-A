@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
     daedalus_msgs
     moveit_core
     moveit_ros_planning_interface
+    moveit_visual_tools
     moveit_msgs
 )
 
@@ -25,6 +26,7 @@ catkin_package(
         daedalus_msgs
         moveit_core
         moveit_ros_planning_interface
+        moveit_visual_tools
         moveit_msgs
 )
 
@@ -39,6 +41,7 @@ include_directories(
 catkin_install_python(
     PROGRAMS
     scripts/tests/test_catch_planning
+    scripts/tests/view_control_performance
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

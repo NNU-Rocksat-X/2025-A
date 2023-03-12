@@ -11,6 +11,41 @@
 
 #include "moveit_interface.h"
 
+
+MoveInterface::MoveInterface(ros::NodeHandle *nh) {
+    move_group = new moveit::planning_interface::MoveGroupInterface(ARM_PLANNING_GROUP);
+
+    ros::param::get(ros::this_node::getNamespace() + "/IK_timeout", ik_timeout);
+    ROS_INFO("Planning time: %f", ik_timeout);
+    move_group->setPlanningTime(ik_timeout);
+    
+    poseService = nh->advertiseService("pose_cmd", &MoveInterface::poseCmd, this);
+    asyncPoseService = nh->advertiseService("async_pose_cmd", &MoveInterface::asyncPoseCmd, this);
+
+    jointPoseService = nh->advertiseService("joint_pose_cmd", &MoveInterface::jointPoseCmd, this);
+    asyncJointPoseService = nh->advertiseService("async_joint_pose_cmd", &MoveInterface::asyncJointPoseCmd, this);
+
+    positionService = nh->advertiseService("position_cmd", &MoveInterface::positionCmd, this);
+
+    getPosService = nh->advertiseService("get_pos", &MoveInterface::getPose, this);
+
+    postureService = nh->advertiseService("posture_cmd", &MoveInterface::postureCmd, this);
+
+    graspService = nh->advertiseService("grasp_cmd", &MoveInterface::graspCmd, this);
+
+    planGraspService = nh->advertiseService("plan_grasp", &MoveInterface::planGrasp, this);
+    graspPub = nh->advertise<std_msgs::Float32>("/ARM1/grip_position_cmd", 1);
+    graspDetectClient = nh->serviceClient<daedalus_msgs::GraspDetect>("ARM1/is_grasped");
+    display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
+
+    ros::param::get(ros::this_node::getNamespace() + "/stepper_config/num_joints", num_joints);
+    ROS_INFO("Running with %i joints", num_joints);
+
+    pose_param = ros::this_node::getNamespace() + "/pose/";
+    //joint_param = ros::this_node::getNamespace() + "/joints/"; commented because there currently is no namespace
+    joint_param = "joints/";
+}
+
 //////////////////////////////////////////////////////////////////
 ///                         HELPER FUNCTIONS                  
 /////////////////////////////////////////////////////////////////
@@ -233,7 +268,14 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
     // Open gripper before planning TODO: Ensure this does not block as that would slow down planning
     bool g_success = grasp("open");
 
+    const robot_state::JointModelGroup* joint_model_group =
+        move_group->getCurrentState()->getJointModelGroup(ARM_PLANNING_GROUP);
     geometry_msgs::Pose pre_grasp = calculate_pre_grasp(req.Grasp, 0.2);
+
+    // Set start position
+    robot_state::RobotState start_state(*move_group->getCurrentState());
+    //start_state.setFromIK(joint_model_group, req.Grasp);
+    move_group->setStartState(start_state);
 
     // Plan maneuver to preGrasp position
     move_group->setPoseTarget(pre_grasp);
@@ -246,74 +288,73 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
     // Current method plans pregrasp then grasp if successfull, this causes the arm to move to preGrasp even if postGrasp isnt possible
     if (res.pre_grasp_success) {
         ROS_INFO("Pre grasp success");
+        // Visualize
+        moveit_msgs::DisplayTrajectory pre_grasp_display_trajectory;
+        pre_grasp_display_trajectory.trajectory_start = grasp_plan.pre_grasp.start_state_;
+        pre_grasp_display_trajectory.trajectory.push_back(grasp_plan.pre_grasp.trajectory_);
+        display_publisher.publish(pre_grasp_display_trajectory);
+
+        // Execute
         move_group->execute(grasp_plan.pre_grasp);
-        /*
-        // An attempt at constraining to the grasp vector. It doesnt work great, but is ok for now I suppose
-        moveit_msgs::OrientationConstraint ocm;
-        ocm.link_name = "gripper_connector";
-        ocm.header.frame_id = "world";
-        ocm.orientation = req.preGrasp.orientation;
-        ocm.absolute_x_axis_tolerance = 0.1;
-        ocm.absolute_y_axis_tolerance = 0.1;
-        ocm.absolute_z_axis_tolerance = 0.1;
-        ocm.weight = 1.0;
-
-        moveit_msgs::Constraints ee_constraint;
-        ee_constraint.orientation_constraints.push_back(ocm);
-        move_group->setPathConstraints(ee_constraint);
-
-        robot_state::RobotState start_state(*move_group->getCurrentState());
-        move_group->setStartState(start_state);
-        
-
-        /* Other constraint method
-        planning_interface::MotionPlanRequest motionReq;
-        planning_interface::MotionPlanResponse motionRes;
-        planning_interface::PlannerManagerPtr planner_interface;
-        geometry_msgs::PoseStamped grasp_pose;
-
-        motionReq.group_name = ARM_PLANNING_GROUP;
-        grasp_pose.header.frame_id = "base_link";
-        std::vector<double> tolerance_pose(3, 0.01);
-        std::vector<double> tolerance_angle(3, 0.01);
-
-        grasp_pose.pose = req.Grasp;
-        moveit_msgs::Constrains grasp_pose_goal = 
-            kinematic_constraints::constructGoalConstraints("gripper_connector", grasp_pose, tolerance_pose, tolerance_angle);
-
-        // Add path constraint
-        geometry_msgs::QuaternionStamped constraint_quaternion;
-        constraint_quaternion.header.frame_id = "base_link";
-        constraint_quaternion.quaternion = req.Grasp.orientation;
-        req.path_constraints = kinematic_constraints::constructGoalConstraints("gripper_connector", constraint_quaternion);
-        
-        // Set bounding box for arm workspace from (-1, 1) for all directions.
-        req.workspace_parameters.min_corner.x = req.workspace_parameters.min_corner.y = req.workspace_parameters.min_corner.z = -1.0;
-        req.workspace_parameters.max_corner.x = req.workspace_parameters.max_corner.y = req.workspace_parameters.max_corner.z = 1.0;
-
-        planning_interfacce::PlanningContextPtr context = 
-        */
-
-        move_group->setPoseTarget(req.Grasp);
-        res.grasp_success = (move_group->plan(grasp_plan.grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS); // Plan and check if succeeded
-        ROS_INFO("Grasp plan: %s", res.grasp_success ? "SUCCESSFUL" : "FAILED");
 
         // Perform grasp if successful
-        if (res.grasp_success) {
-            ROS_INFO("Grasp success");
-            ROS_INFO("Now: %f, grasp: %f", ros::Time::now().toSec(), req.time_to_maneuver.data.toSec());
-            while (ros::Time::now() < req.time_to_maneuver.data) {
-                // Not a good way of waiting because it blocks
-                ros::Duration(0.1).sleep();
-            }
-            
+        ROS_INFO("Grasp success");
+        ROS_INFO("Now: %f, grasp: %f", ros::Time::now().toSec(), req.time_to_maneuver.data.toSec());
+        while (ros::Time::now() < req.time_to_maneuver.data) {
+            // Not a good way of waiting because it blocks
+            ros::Duration(0.1).sleep();
+        }
+
+
+        moveit_msgs::OrientationConstraint ocm;
+        ocm.link_name = "gripper";
+        ocm.header.frame_id = "base_link";
+        ocm.orientation = req.Grasp.orientation;
+        ocm.absolute_x_axis_tolerance = 1;
+        ocm.absolute_y_axis_tolerance = 1;
+        ocm.absolute_z_axis_tolerance = 2;
+        ocm.weight = 1;
+
+        moveit_msgs::Constraints grasp_constraints;
+        grasp_constraints.orientation_constraints.push_back(ocm);
+        move_group->setPathConstraints(grasp_constraints);
+
+
+
+        robot_state::RobotState start_state(*move_group->getCurrentState());
+        const double* j1_start = start_state.getJointPositions("joint_1");
+        ROS_WARN("j1 start = %f", *j1_start);
+        //start_state.setFromIK(joint_model_group, req.Grasp);
+        move_group->setStartState(start_state);
+
+        ROS_WARN("Beginning to plan!");
+
+        const double* j1_ik_start = start_state.getJointPositions("joint_1");
+        ROS_WARN("j1 start = %f", *j1_ik_start);
+
+        move_group->setPoseTarget(req.Grasp);
+        move_group->setPlanningTime(10);
+        res.grasp_success = (move_group->plan(grasp_plan.grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS); 
+        ROS_INFO("Grasp plan: %s", res.grasp_success ? "SUCCESSFUL" : "FAILED");
+
+        if (res.grasp_success)
+        {
+            // Visualize for debugging
+            moveit_msgs::DisplayTrajectory display_trajectory;
+            display_trajectory.trajectory_start = grasp_plan.grasp.start_state_;
+            display_trajectory.trajectory.push_back(grasp_plan.grasp.trajectory_);
+            display_publisher.publish(display_trajectory);
+
             // Move to grasp, wait grasp time, then close gripper
             move_group->asyncExecute(grasp_plan.grasp);
             ros::Duration(req.grasp_time).sleep();
             res.gripper_success = grasp("close");
-        }
+            
 
-        move_group->clearPathConstraints();
+            move_group->clearPathConstraints();
+        }
+        
+
 
     }
     
@@ -429,41 +470,6 @@ bool MoveInterface::getPose(daedalus_msgs::GetPos::Request &req,
     res.position = position;
     return true;
 }
-
-
-MoveInterface::MoveInterface(ros::NodeHandle *nh) {
-    move_group = new moveit::planning_interface::MoveGroupInterface(ARM_PLANNING_GROUP);
-
-    ros::param::get(ros::this_node::getNamespace() + "/IK_timeout", ik_timeout);
-    ROS_INFO("Planning time: %f", ik_timeout);
-    move_group->setPlanningTime(ik_timeout);
-    
-    poseService = nh->advertiseService("pose_cmd", &MoveInterface::poseCmd, this);
-    asyncPoseService = nh->advertiseService("async_pose_cmd", &MoveInterface::asyncPoseCmd, this);
-
-    jointPoseService = nh->advertiseService("joint_pose_cmd", &MoveInterface::jointPoseCmd, this);
-    asyncJointPoseService = nh->advertiseService("async_joint_pose_cmd", &MoveInterface::asyncJointPoseCmd, this);
-
-    positionService = nh->advertiseService("position_cmd", &MoveInterface::positionCmd, this);
-
-    getPosService = nh->advertiseService("get_pos", &MoveInterface::getPose, this);
-
-    postureService = nh->advertiseService("posture_cmd", &MoveInterface::postureCmd, this);
-
-    graspService = nh->advertiseService("grasp_cmd", &MoveInterface::graspCmd, this);
-
-    planGraspService = nh->advertiseService("plan_grasp", &MoveInterface::planGrasp, this);
-    graspPub = nh->advertise<std_msgs::Float32>("/ARM1/grip_position_cmd", 1);
-    graspDetectClient = nh->serviceClient<daedalus_msgs::GraspDetect>("ARM1/is_grasped");
-
-    ros::param::get(ros::this_node::getNamespace() + "/stepper_config/num_joints", num_joints);
-    ROS_INFO("Running with %i joints", num_joints);
-
-    pose_param = ros::this_node::getNamespace() + "/pose/";
-    //joint_param = ros::this_node::getNamespace() + "/joints/"; commented because there currently is no namespace
-    joint_param = "joints/";
-}
-
 
 
 int main(int argc, char** argv)
