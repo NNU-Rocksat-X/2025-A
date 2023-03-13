@@ -12,6 +12,7 @@ from daedalus_msgs.srv import ObjectObservation
 from daedalus_msgs.srv import GraspDetect
 from daedalus_msgs.srv import PredictPosition
 from daedalus_msgs.srv import MoveCmd
+from daedalus_msgs.srv import PlanGrasp, PlanGraspRequest
 from mog_ai.srv import GenerateGrasp
 
 # only for testing with gripper
@@ -62,21 +63,25 @@ class CatchInterface(RosInterface):
         self.predict = rospy.ServiceProxy('/trajectory_predictor/predict', PredictPosition)
     
         rospy.loginfo("grasp")
-        #rospy.wait_for_service("/ARM1/grasp_cmd")
-        #self.grasp_cmd = rospy.ServiceProxy("/ARM1/grasp_cmd", MoveCmd)
+        rospy.wait_for_service("/ARM1/grasp_cmd")
+        self.grasp_cmd = rospy.ServiceProxy("/ARM1/grasp_cmd", MoveCmd)
+
+        rospy.wait_for_service("/ARM1/plan_grasp")
+        self.plan_grasp = rospy.ServiceProxy("/ARM1/plan_grasp", PlanGrasp)
 
         # Allows for testing with just gripper without the rest of arm
-        self.grasp_pub = rospy.Publisher("/ARM1/grip_position_cmd", Float32, queue_size=1)
-        rospy.wait_for_service("/mujoco/set_body")
-        self.set_body = rospy.ServiceProxy("/mujoco/set_body", SetBody)
+        #self.grasp_pub = rospy.Publisher("/ARM1/grip_position_cmd", Float32, queue_size=1)
+        #rospy.wait_for_service("/mujoco/set_body")
+        #self.set_body = rospy.ServiceProxy("/mujoco/set_body", SetBody)
 
-        rospy.wait_for_service("/ARM1/is_grasped")
+        #rospy.wait_for_service("/ARM1/is_grasped")
         self.is_grasped = rospy.ServiceProxy("/ARM1/is_grasped", GraspDetect)
 
-        rospy.wait_for_service("/mog_ai/generate_grasp")
+        #rospy.wait_for_service("/mog_ai/generate_grasp")
         self.generate_grasp = rospy.ServiceProxy("/mog_ai/generate_grasp", GenerateGrasp)
 
     # temporary replacement for grasp_cmd service
+    """
     def grasp_cmd(self, cmd):
         if cmd == "close":
             self.grasp_pub.publish(-0.9)
@@ -84,6 +89,7 @@ class CatchInterface(RosInterface):
             self.grasp_pub.publish(0.8)
         else:
             rospy.logerr("Grasp cmd: " + str(cmd) + " not known.")
+    """
         
 
     # action space (time slice, latent grasp)
@@ -103,12 +109,16 @@ class CatchInterface(RosInterface):
 
         grasp = object_to_world(object_grasp, prediction)
 
-        self.set_body('gripper', grasp)
+        grasp_plan = PlanGraspRequest()
+        grasp_plan.Grasp = grasp 
+        grasp_plan.time_to_maneuver.data = rospy.Time.from_sec(rospy.get_time() + prediction.delta_time)
+        grasp_plan.grasp_time = 1.0
 
-        rospy.sleep(prediction.delta_time - 0.5)
+        status = self.plan_grasp(grasp_plan)
+        rospy.loginfo("Plan Status: " + str(status))
+
 
         # reward, move_success, info
-        self.grasp_cmd("close") # TODO make this command block
         dist_at_grasp = distance(self.observe().pose, grasp)
 
         rospy.sleep(1.5)
@@ -138,7 +148,7 @@ class CatchInterface(RosInterface):
 
         raw_observation = self.observe()
         observation = np.empty(shape=(13,))
-        #rospy.loginfo("observation: " + str(raw_observation))
+        rospy.loginfo("observation: " + str(raw_observation))
 
         observation[0] = raw_observation.pose.position.x
         observation[1] = raw_observation.pose.position.y 
@@ -161,4 +171,4 @@ class CatchInterface(RosInterface):
         status = self.reset()
         if status.success == False:
             rospy.logerr("Reset Failed: " + status.message)
-        rospy.sleep(0.1)
+        rospy.sleep(0.5)

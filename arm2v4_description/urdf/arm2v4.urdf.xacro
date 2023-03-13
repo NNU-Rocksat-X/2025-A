@@ -9,6 +9,7 @@
 
 
 <link name="base_link">
+  <!--
   <inertial>
     <origin xyz="-0.01036605995280163 0.008118725780222396 -0.010698521307181049" rpy="0 0 0"/>
     <mass value="0.6714813076324946"/>
@@ -28,6 +29,7 @@
       <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
     </geometry>
   </collision>
+  -->
 </link>
 
 <joint name="world_joint" type="fixed">

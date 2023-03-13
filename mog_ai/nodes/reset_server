@@ -11,7 +11,7 @@ import numpy as np
 from time import sleep
 
 # Currently only using 1 object, this will change as we move to more
-OBJECT_ID = 1
+OBJECT_ID = 2
 
 rospy.wait_for_service('/mujoco/apply_force')
 apply_force = rospy.ServiceProxy('/mujoco/apply_force', ApplyForce)
@@ -24,8 +24,8 @@ def reset_cb(req):
 
     pose = Pose()
     pose.position.x = np.random.uniform(low=-0.8, high=-0.7)
-    pose.position.y = np.random.uniform(low=0.25, high=0.35)
-    pose.position.z = np.random.uniform(low=0.015, high=0.25)
+    pose.position.y = np.random.uniform(low=-0.1, high=0.1)
+    pose.position.z = np.random.uniform(low=0.02, high=0.5)
     status = set_body("wrench", pose)
     rospy.loginfo("status: " + str(status))
     if status.success == False:

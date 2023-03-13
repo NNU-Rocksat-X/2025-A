@@ -20,7 +20,7 @@
   </asset>
   <worldbody>
 
-    <body name="wrench" pos="0 0 0">
+    <body name="wrench" pos="-0.5 -0.2 0.3">
         <joint type="free"/>
         <geom type="box" size="0.015 0.015 0.015" rgba="1 0 0 1"/>
         <!--<geom type="mesh" mesh="wrench" euler="0 0 0" rgba="1 0 0 1"/>-->
