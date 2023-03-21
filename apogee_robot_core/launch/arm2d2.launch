@@ -1,5 +1,5 @@
 <launch>
-    <arg name="version" default="arm2d2_v2"/>
+    <arg name="version" default="arm2v4"/>
     <arg name="dual" default="false"/>
 
     <group ns="ARM1">
@@ -27,10 +27,10 @@
         </include>
     </group>
 
-    
+    <!--
     <include file="$(find mujoco_ros)/launch/sim.launch" >
         <arg name="env" value="$(arg version)"/>
         <arg name="dual" value="$(arg dual)"/>
     </include>
-    
+    -->
 </launch>
