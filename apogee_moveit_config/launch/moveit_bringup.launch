@@ -2,6 +2,8 @@
     <arg name="launch_rviz" default="true"/>
     <arg name="ns" default="ARM1"/>
 
+    <rosparam param="/IK_timeout">0.7</rosparam>
+
     <!-- Defines kinematics package -->
     <group ns="robot_description_kinematics">
         <rosparam command="load" file="$(find apogee_moveit_config)/config/kinematics.yaml"/>

@@ -11,7 +11,7 @@ import numpy as np
 from time import sleep
 
 # Currently only using 1 object, this will change as we move to more
-OBJECT_ID = 1
+OBJECT_ID = 2
 
 rospy.wait_for_service('/mujoco/apply_force')
 apply_force = rospy.ServiceProxy('/mujoco/apply_force', ApplyForce)
@@ -25,8 +25,8 @@ def reset_cb(req):
     pose = Pose()
     pose.position.x = np.random.uniform(low=-1.5, high=-1.2)
     pose.position.y = np.random.uniform(low=-0.1, high=0.1)
-    pose.position.z = np.random.uniform(low=-0.1, high=0.1)
-    status = set_body("wrench", pose)
+    pose.position.z = np.random.uniform(low=0, high=0.5)
+    status = set_body("object", pose)
     rospy.loginfo("status: " + str(status))
     if status.success == False:
         return TriggerResponse(False, 'Setting object position failed.')
@@ -41,7 +41,7 @@ def reset_cb(req):
     wrench.torque.y = np.random.uniform(low=-0.001, high=0.001)
     wrench.torque.z = np.random.uniform(low=-0.001, high=0.001)
     apply_duration = 0.1
-    apply_force(OBJECT_ID, wrench, apply_duration)
+    apply_force("object", wrench, apply_duration)
 
     return TriggerResponse(True, 'Applying object force failed.')
 

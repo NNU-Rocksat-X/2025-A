@@ -28,11 +28,11 @@ def generate_successful_grasp():
 
 def generate_basic_grasp():
     grasp = Pose()
-    grasp.position.z = 0.1
-    grasp.orientation.x = 0.707
+    grasp.position.z = 0
+    grasp.orientation.x = 0
     grasp.orientation.y = 0
     grasp.orientation.z = 0
-    grasp.orientation.w = 0.707
+    grasp.orientation.w = 1
     return grasp
 
 def generate_vae_grasp(req):

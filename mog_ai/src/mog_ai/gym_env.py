@@ -2,7 +2,7 @@
 
 import gym
 
-MAX_EPISODE_LENGTH = 75
+MAX_EPISODE_LENGTH = 20
 
 class ApogeeGym(gym.Env):
     def __init__(self, ros_interface):

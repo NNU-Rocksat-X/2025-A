@@ -24,6 +24,7 @@
 #include <daedalus_msgs/PostureCmd.h>
 #include <daedalus_msgs/GraspDetect.h>
 #include <daedalus_msgs/PlanGrasp.h>
+#include <daedalus_msgs/ExecuteGrasp.h>
 
 
 // Testing
@@ -35,6 +36,7 @@
 
 // delete
 struct GraspPlan {
+    bool planned;
     moveit::planning_interface::MoveGroupInterface::Plan pre_grasp;
     moveit::planning_interface::MoveGroupInterface::Plan grasp;
 };
@@ -60,10 +62,10 @@ class MoveInterface {
         ros::ServiceServer postureService;
         ros::ServiceServer graspService;
         ros::ServiceServer planGraspService;
+        ros::ServiceServer executeGraspService;
 
         ros::Publisher graspPub;
         ros::Publisher display_publisher;
-        ros::ServiceClient graspDetectClient;
 
 
         std::string pose_param;
@@ -76,6 +78,8 @@ class MoveInterface {
 
 
         bool grasp(std::string pose);
+
+        GraspPlan grasp_plan;
 
     public:
         MoveInterface(ros::NodeHandle *nh);
@@ -101,6 +105,9 @@ class MoveInterface {
 
         bool planGrasp(daedalus_msgs::PlanGrasp::Request &req,
                        daedalus_msgs::PlanGrasp::Response &res);
+
+        bool executeGrasp(daedalus_msgs::ExecuteGrasp::Request &req,
+                          daedalus_msgs::ExecuteGrasp::Response &res);
 
         bool postureCmd(daedalus_msgs::PostureCmd::Request &req,
                         daedalus_msgs::PostureCmd::Response &res);

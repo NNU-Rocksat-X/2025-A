@@ -34,8 +34,10 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
     graspService = nh->advertiseService("grasp_cmd", &MoveInterface::graspCmd, this);
 
     planGraspService = nh->advertiseService("plan_grasp", &MoveInterface::planGrasp, this);
+
+    executeGraspService = nh->advertiseService("execute_grasp", &MoveInterface::executeGrasp, this);
+
     graspPub = nh->advertise<std_msgs::Float32>("/ARM1/grip_position_cmd", 1);
-    graspDetectClient = nh->serviceClient<daedalus_msgs::GraspDetect>("ARM1/is_grasped");
     display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
 
     ros::param::get(ros::this_node::getNamespace() + "/stepper_config/num_joints", num_joints);
@@ -44,6 +46,8 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
     pose_param = ros::this_node::getNamespace() + "/pose/";
     //joint_param = ros::this_node::getNamespace() + "/joints/"; commented because there currently is no namespace
     joint_param = "joints/";
+
+    grasp_plan.planned = false;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -94,8 +98,8 @@ Eigen::Quaternionf msg_to_quat(const geometry_msgs::Quaternion msg)
 
 Eigen::Vector3f rotate_vector(const Eigen::Vector3f v, const Eigen::Quaternionf q)
 {
-    ROS_INFO("q:");
-    print_eigen(q);
+    //ROS_INFO("q:");
+    //print_eigen(q);
     Eigen::Quaternionf quat_v = Eigen::Quaternionf(0, v[0], v[1], v[2]);
     Eigen::Quaternionf rotated_v = q*quat_v*q.conjugate();
     return rotated_v.vec();
@@ -108,8 +112,8 @@ geometry_msgs::Pose calculate_pre_grasp(const geometry_msgs::Pose grasp, float d
     Eigen::Vector3f grasp_direction = rotate_vector(up_vector, msg_to_quat(grasp.orientation));
     grasp_direction.normalize();
     grasp_direction *= dist;
-    ROS_INFO("grasp_direction: ");
-    print_eigen(grasp_direction);
+    //ROS_INFO("grasp_direction: ");
+    //print_eigen(grasp_direction);
 
     geometry_msgs::Pose pre_grasp;
     pre_grasp.position.x = grasp.position.x - grasp_direction[0];
@@ -119,8 +123,6 @@ geometry_msgs::Pose calculate_pre_grasp(const geometry_msgs::Pose grasp, float d
     return pre_grasp;
 
 }
-
-
 
 //////////////////////////////////////////////////////////////////
 ///                         SERVICE CALLBACKS                  
@@ -253,20 +255,17 @@ bool MoveInterface::asyncJointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
     }            
 }
 
-// Plan Grasp will need to be re-written
-// Moveit has cartesian path planning with waypoints, but either it is broken or I cannot get it to work
-// Errors involve waypoints not stricly increasing in time and not having a reliable success rate for planning the path.
-// Also moveit does not provide any documentation for how to execute the trajectory after planning it.
-
 // Moveit RobotModel also provides a distance function between different states which could be usefull for ensuring the planned path
 // is optimized to the shortest path
-
-
+// Look into planning grasp after pre-grasp is planned, but not executed
 bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
                               daedalus_msgs::PlanGrasp::Response &res) 
 {
     // Open gripper before planning TODO: Ensure this does not block as that would slow down planning
     bool g_success = grasp("open");
+
+    // Reset grasp plan
+    grasp_plan.planned = false;
 
     const robot_state::JointModelGroup* joint_model_group =
         move_group->getCurrentState()->getJointModelGroup(ARM_PLANNING_GROUP);
@@ -279,7 +278,7 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
 
     // Plan maneuver to preGrasp position
     move_group->setPoseTarget(pre_grasp);
-    GraspPlan grasp_plan;
+    
     res.pre_grasp_success = (move_group->plan(grasp_plan.pre_grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS); // Plan and check if succeeded
     ROS_INFO("Pre Grasp plan: %s", res.pre_grasp_success ? "SUCCESSFUL" : "FAILED");
 
@@ -299,12 +298,6 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
 
         // Perform grasp if successful
         ROS_INFO("Grasp success");
-        ROS_INFO("Now: %f, grasp: %f", ros::Time::now().toSec(), req.time_to_maneuver.data.toSec());
-        while (ros::Time::now() < req.time_to_maneuver.data) {
-            // Not a good way of waiting because it blocks
-            ros::Duration(0.1).sleep();
-        }
-
 
         moveit_msgs::OrientationConstraint ocm;
         ocm.link_name = "gripper";
@@ -333,31 +326,41 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
         ROS_WARN("j1 start = %f", *j1_ik_start);
 
         move_group->setPoseTarget(req.Grasp);
-        move_group->setPlanningTime(10);
-        res.grasp_success = (move_group->plan(grasp_plan.grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS); 
-        ROS_INFO("Grasp plan: %s", res.grasp_success ? "SUCCESSFUL" : "FAILED");
+        move_group->setPlanningTime(2);
+        res.grasp_plan_success = (move_group->plan(grasp_plan.grasp) == moveit::planning_interface::MoveItErrorCode::SUCCESS); 
+        ROS_INFO("Grasp plan: %s", res.grasp_plan_success ? "SUCCESSFUL" : "FAILED");
 
-        if (res.grasp_success)
+        if (res.grasp_plan_success)
         {
             // Visualize for debugging
             moveit_msgs::DisplayTrajectory display_trajectory;
             display_trajectory.trajectory_start = grasp_plan.grasp.start_state_;
             display_trajectory.trajectory.push_back(grasp_plan.grasp.trajectory_);
             display_publisher.publish(display_trajectory);
-
-            // Move to grasp, wait grasp time, then close gripper
-            move_group->asyncExecute(grasp_plan.grasp);
-            ros::Duration(req.grasp_time).sleep();
-            res.gripper_success = grasp("close");
-            
-
+        
             move_group->clearPathConstraints();
         }
-        
+        move_group->setPlanningTime(ik_timeout);
 
 
     }
     
+    return true;
+}
+
+bool MoveInterface::executeGrasp(daedalus_msgs::ExecuteGrasp::Request &req,
+                                 daedalus_msgs::ExecuteGrasp::Response &res)
+{
+    if (grasp_plan.planned)
+    {
+        move_group->asyncExecute(grasp_plan.grasp);
+        ros::Duration(req.grasp_time).sleep();
+        res.grasp_attempted = grasp("close");
+    } else {
+        res.grasp_attempted = false;
+    }
+
+    grasp_plan.planned = false;
     return true;
 }
 

@@ -25,6 +25,7 @@ add_service_files(
     PositionCmd.srv
     PostureCmd.srv
     PlanGrasp.srv
+    ExecuteGrasp.srv
     PredictPosition.srv
     ObjectObservation.srv
     TrajectoryPoints.srv 

@@ -30,7 +30,8 @@ int main(int argc, char** argv)
 
     
     float norm_time;
-    Vector3f predicted_position = searcher.solve(0.5, norm_time);
+    bool in_range;
+    Vector3f predicted_position = searcher.solve(0.5, norm_time, in_range);
     ROS_INFO("Delta closest pass: %f", norm_time);
 
 }

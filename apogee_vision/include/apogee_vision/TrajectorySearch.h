@@ -155,7 +155,7 @@ class Searcher {
         // Returns a vector with the position of the object at the chosen trajectory slice
         // Updates norm_time with the duration until the selected point in the trajectory
         // A norm time of -1 indicates the object is out of reach
-        Vector3f solve(float trajectory_slice, float &norm_time, Vector3f* traj_points) {
+        Vector3f solve(float trajectory_slice, float &norm_time, bool &in_range, Vector3f* traj_points) {
             float closest_point;
             if (is_linear) {
                 ROS_WARN("Using linear solver!");
@@ -167,12 +167,15 @@ class Searcher {
                 closest_point = min_time_delta;
             if (closest_point > max_time_delta)
                 closest_point = max_time_delta;
+                
             if (distance(closest_point) > robot_length)
             {
                 ROS_INFO("Out of reach. Closest point: %f - Length: %f", distance(closest_point), robot_length);
-                norm_time = -1;
+                in_range = false;
                 return Vector3f(0, 0, 0);
             }
+            in_range = true;
+
             ROS_INFO("Closest point: %f - dist: %f", closest_point, distance(closest_point));
 
             float furthest_before = search_before(closest_point);
@@ -198,10 +201,10 @@ class Searcher {
 
 
         // Without traj points
-        Vector3f solve(float trajectory_slice, float &norm_time)
+        Vector3f solve(float trajectory_slice, float &norm_time, bool &in_range)
         {
             Vector3f points[3];
-            return solve(trajectory_slice, norm_time, points);
+            return solve(trajectory_slice, norm_time, in_range, points);
             
         }
 

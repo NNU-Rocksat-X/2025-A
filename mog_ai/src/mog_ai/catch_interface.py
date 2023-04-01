@@ -19,14 +19,16 @@ from daedalus_msgs.srv import ObjectObservation
 from daedalus_msgs.srv import GraspDetect
 from daedalus_msgs.srv import PredictPosition
 from daedalus_msgs.srv import MoveCmd
-from daedalus_msgs.srv import PlanGrasp, PlanGraspRequest, PlanGraspResponse
+from daedalus_msgs.srv import PlanGrasp
+from daedalus_msgs.srv import ExecuteGrasp
+
 from mog_ai.srv import GenerateGrasp
 
 # only for testing with gripper
 from std_msgs.msg import Float32 
 from mujoco_ros.srv import SetBody
 
-GRASP_DISTANCE_THRESHOLD = 2
+GRASP_DISTANCE_THRESHOLD = 4
 
 
 def object_to_world(obj_grasp: Pose, obj_pose: Pose):
@@ -37,9 +39,10 @@ def object_to_world(obj_grasp: Pose, obj_pose: Pose):
 
     norm_obj_orientation = normalize_quat(obj_pose.orientation)
 
-    world.orientation = quaternion_multiply(norm_obj_orientation, obj_grasp.orientation)
-    #rospy.logwarn("obj orientation: " + str(norm_obj_orientation))
-    rospy.logwarn("obj_grasp: " + str(obj_grasp.position))
+    # Multiplying it adds complexity. Trying without for now
+    #world.orientation = quaternion_multiply(norm_obj_orientation, obj_grasp.orientation)
+    world.orientation = obj_grasp.orientation
+
     return world
 
 def distance(pose1: Pose, pose2: Pose):
@@ -85,8 +88,6 @@ def calculate_pointing_reward(grasp: Pose, obj_pos: Pose):
 def adjust_grasp_to_trajectory(grasp: Pose, pos0: Point, pos1: Point):
     grasp_point = np.array([grasp.position.x, grasp.position.y, grasp.position.z])
 
-    print("pos0: " + str(pos0))
-    print("pos1: " + str(pos1))
     trajectory = np.array([[pos0.x, pos0.y, pos0.z], [pos1.x, pos1.y, pos1.z]])
 
     grasp_point = place_point_on_vector(grasp_point, trajectory)
@@ -132,14 +133,16 @@ class CatchInterface(RosInterface):
         rospy.wait_for_service("/trajectory_predictor/reset")
         self.reset_trajectory_predictor = rospy.ServiceProxy('/trajectory_predictor/reset', Trigger)
 
-        """
         rospy.loginfo("grasp")
         rospy.wait_for_service("/ARM1/grasp_cmd")
         self.grasp_cmd = rospy.ServiceProxy("/ARM1/grasp_cmd", MoveCmd)
 
         rospy.wait_for_service("/ARM1/plan_grasp")
         self.plan_grasp = rospy.ServiceProxy("/ARM1/plan_grasp", PlanGrasp)
-        """
+
+        rospy.wait_for_service("/ARM1/execute_grasp")
+        self.execute_grasp = rospy.ServiceProxy("/ARM1/execute_grasp", ExecuteGrasp)
+        
 
         rospy.wait_for_service("/ARM1/is_grasped")
         self.is_grasped = rospy.ServiceProxy("/ARM1/is_grasped", GraspDetect)
@@ -147,15 +150,8 @@ class CatchInterface(RosInterface):
         rospy.wait_for_service("/mog_ai/generate_grasp")
         self.generate_grasp = rospy.ServiceProxy("/mog_ai/generate_grasp", GenerateGrasp)
 
-    # temporary replacement for grasp_cmd service
-
-    def grasp_cmd(self, cmd):
-        if cmd == "close":
-            self.grasp_pub.publish(-0.9)
-        elif cmd == "open":
-            self.grasp_pub.publish(0.8)
-        else:
-            rospy.logerr("Grasp cmd: " + str(cmd) + " not known.")
+        rospy.wait_for_service("/mujoco/reset")
+        self.reset_mujoco = rospy.ServiceProxy("/mujoco/reset", Trigger)
     
     def calculate_large_motion_punishment(self, grasp: Pose):
         step_distance = distance(grasp, self.previous_grasp)
@@ -202,16 +198,18 @@ class CatchInterface(RosInterface):
         info = {"catch_success": False,
                 "out_of_reach": False,
                 "pre_grasp_plan": False,
-                "grasp_plan": False}
+                "grasp_plan": False,
+                "motion_punishment": 0,
+                "pointing_reward": 0}
         #rospy.loginfo("Action: " +  str(action))
 
         prediction = self.predict(action[0])
+        rospy.sleep(0.1)
 
-        #rospy.loginfo("Prediction: " + str(prediction))
-        if prediction.prediction_time.data.to_sec() < 0:
+        if not prediction.in_range:
             rospy.loginfo("Object out of reach.")
             info["out_of_reach"] = True
-            return 0, 0, info
+            return 0, True, info
 
         # Generate grasp in object coordinate frame
         object_grasp = self.generate_grasp(1, action[1:]).grasp
@@ -225,9 +223,6 @@ class CatchInterface(RosInterface):
         info["motion_punishment"] = large_motion_punishment
         reward -= large_motion_punishment
 
-        """
-        Puts gripper opening on object path
-        """
         # Pointing reward
         # Increase reward as the gripper points closer to the object
         # Could try replacing observation with prediction!
@@ -237,15 +232,11 @@ class CatchInterface(RosInterface):
         #rospy.loginfo("Point reward: " + str(pointing_reward))
         reward += pointing_reward
 
-        grasp, aiming_point = adjust_grasp_to_trajectory(grasp, observation.pose.position, prediction.position)
-
-        grasp_plan = PlanGraspRequest()
-        grasp_plan.Grasp = grasp 
-        grasp_plan.time_to_maneuver = prediction.prediction_time
-        grasp_plan.grasp_time = 1.0
-
+        # Puts gripper opening on object path
+        #grasp, aiming_point = adjust_grasp_to_trajectory(grasp, observation.pose.position, prediction.position)
 
         ### Debug
+        """
         rospy.sleep(0.2)
         set_body_status = self.set_body("gripper", grasp_plan.Grasp)
         rospy.sleep(0.1)
@@ -255,26 +246,34 @@ class CatchInterface(RosInterface):
         status = PlanGraspResponse()
         status.pre_grasp_success = True
         status.grasp_success = True
+        """
+
+        status = self.plan_grasp(grasp)
+
+        info["pre_grasp_plan"] = status.pre_grasp_success
+        info["grasp_plan"] = status.grasp_plan_success
+
+        rospy.loginfo("Pre grasp Plan: " + str(status.pre_grasp_success) + " Grasp Plan: " + str(status.grasp_plan_success))
+
+        if not status.pre_grasp_success or not status.grasp_plan_success:
+            reward -= 1
+            return reward, False, info
+        reward += 2
+
 
         rospy.loginfo("Time left: " + str((prediction.prediction_time.data - rospy.get_rostime()).to_sec()))
         if (prediction.prediction_time.data - rospy.get_rostime()).to_sec() < GRASP_DISTANCE_THRESHOLD:
             in_range = self.wait_for_grasp(prediction)
 
             if in_range:
-                self.grasp_cmd("close")
+                grasp_time = 1.0
+                status = self.execute_grasp(grasp_time)
             else:
                 reward, False, info
 
-            ## Debug
-            #status = self.plan_grasp(grasp_plan)
-            #rospy.loginfo("Plan Status: " + str(status))
-
-            info["pre_grasp_plan"] = status.pre_grasp_success
-            info["grasp_plan"] = status.grasp_success
-
 
             # reward, move_success, info
-            if status.pre_grasp_success and status.grasp_success:
+            if status.grasp_attempted:
                 dist_at_grasp = distance(self.observe().pose, grasp)
 
                 rospy.sleep(1.5)
@@ -288,7 +287,9 @@ class CatchInterface(RosInterface):
                 self.grasp_cmd("open")
                 info['catch_success'] = status.is_grasped
 
-            return reward, True, info
+                return reward, True, info
+            else:
+                return reward, False, info
 
         return reward, False, info
 

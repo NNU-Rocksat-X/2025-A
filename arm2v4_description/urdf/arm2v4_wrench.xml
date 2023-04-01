@@ -32,6 +32,10 @@
   </asset>
   <worldbody>
     <light pos="0.1 1 1" dir="-0.1 -1 -1" diffuse="1 1 1"/>
+
+    
+
+    
     <body name="base_link" pos="0 0 0" euler="1.57 0 0">
       <!--
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_link"/>
@@ -39,7 +43,7 @@
       -->
     </body>
 
-      <body name="wrench" pos="-0.5 -0.2 0.3">
+      <body name="object" pos="-0.5 -0.2 0.3">
           <joint type="free"/>
           <geom type="box" size="0.015 0.015 0.015" rgba="1 0 0 1"/>
           <!--
@@ -47,6 +51,8 @@
           -->
       </body>
   </worldbody>
+
+  <include file="mujoco/trajectory_markers.xml"/>
 
   <include file="mujoco/R1_arm2v4_body.xml"/>
 

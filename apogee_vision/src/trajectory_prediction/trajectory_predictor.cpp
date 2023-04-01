@@ -208,7 +208,16 @@ class Predictor {
         // Convert trajectory slice
         float delta_time;
         Vector3f traj_points[3];
-        Vector3f predicted_position = searcher.solve(req.trajectory_slice, delta_time, traj_points);
+        bool in_range;
+        Vector3f predicted_position = searcher.solve(req.trajectory_slice, delta_time, in_range, traj_points);
+
+        if (!in_range)
+        {
+            res.in_range = false;
+            return true;
+        }
+        res.in_range = true;
+
         float diff = (ros::Time::now() - before_search).toSec();
         delta_time - diff;
         ROS_INFO("Search took %f", diff);
