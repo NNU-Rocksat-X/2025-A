@@ -1,6 +1,7 @@
 import numpy as np
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Pose
+import math
 
 # Note: quaternions in this module all use JPL convention
 
@@ -55,18 +56,32 @@ def quaternion_multiply(q0, q1):
     if q_type == 'a':
         return np.array([Q0Q1_x, Q0Q1_y, Q0Q1_z, Q0Q1_w])
         
-def normalize_quat(q):
-    if isinstance(q0, np.ndarray) and isinstance(q1, np.ndarray):
-        sum = tf.sum(q)
-    else:
-        print(type(q0), type(q1))
-        raise
+def normalize_quat(q: Quaternion):
+    n_q = Quaternion()
+    magnitude = math.sqrt(q.x**2 + q.y**2 + q.z**2 + q.w**2)
+    if magnitude == 0:
+        n_q.w = 1
+        return n_q
+    n_q.x = q.x / magnitude
+    n_q.y = q.y / magnitude
+    n_q.z = q.z / magnitude
+    n_q.w = q.w / magnitude
+    return n_q
 
 def quat_conjugate(q):
     q_conj = np.array([-q[0], -q[1], -q[2], q[3]])
     return q_conj
 
-def rotate(v, q):
+def rotate(v: list, q: list or Quaternion):
+    """
+    Rotates vector by quaternion
+
+    Input
+    :param v: list with (x, y, z) for vector
+    :param q: list with (x, y, z, w) or geometry_msgs quaternion
+    """
+    if isinstance(q, Quaternion):
+        q = [q.x, q.y, q.z, q.w]
     v = np.array(v)
     q = np.array(q)
 
@@ -108,7 +123,21 @@ def euler_to_quat(roll, pitch, yaw):
     q = Quaternion(qx, qy, qz, qw)
     return q
 
+def quat_to_euler(q: Quaternion):
+    t0 = 2 * (q.w * q.x + q.y * q.z)
+    t1 = 1 - 2 * (q.x * q.x + q.y * q.y)
+    roll_x = math.atan2(t0, t1)
 
+    t2 = 2 * (q.w * q.y - q.z * q.x)
+    t2 = 1 if t2 > 1 else t2 
+    t2 = -1 if t2 < -1 else t2 
+    pitch_y = math.asin(t2)
+
+    t3 = 2.0 * (q.w * q.z + q.x * q.y)
+    t4 = 1 - 2 * (q.y * q.y + q.z * q.z)
+    yaw_z = math.atan2(t3, t4)
+
+    return [roll_x, pitch_y, yaw_z]
 
 def translate_vect(v1, v2):
     v1 = np.array(v1)

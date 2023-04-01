@@ -4,7 +4,7 @@
     <quality shadowsize="8192"/>
   </visual>
   <compiler angle="radian" meshdir="../../meshes/" autolimits="true"/>
-  <option integrator="RK4" timestep="0.0001">
+  <option integrator="RK4" timestep="0.00025">
     <flag gravity="disable"/>
   </option>
   <size njmax="500" nconmax="100"/>
@@ -19,11 +19,28 @@
     <mesh file="../../object_description/meshes/wrench.stl" scale=".0011 .0011 .0011"/>
   </asset>
   <worldbody>
-
-    <body name="wrench" pos="-0.5 -0.2 0.3">
+    <light pos="0.1 1 1" dir="-0.1 -1 -1" diffuse="1 1 1"/>
+    <body name="wrench" pos="0 0 0">
         <joint type="free"/>
         <geom type="box" size="0.015 0.015 0.015" rgba="1 0 0 1"/>
         <!--<geom type="mesh" mesh="wrench" euler="0 0 0" rgba="1 0 0 1"/>-->
+    </body>
+
+    <body name="base" pos="0 0 0">
+      
+      <geom type="box" size="0.005 0.005 0.005" rgba="1 1 1 1"/>
+    </body>
+    <body name="before_traj" pos="0 0 0.1">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="0 1 0 1"/>
+    </body>
+    <body name="closest_traj" pos="0 0 0.2">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="1 0 0 1"/>
+    </body>
+    <body name="after_traj" pos="0 0 0.3">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="0 0 1 1"/>
     </body>
 
 
@@ -62,6 +79,17 @@
     <exclude name="gj2_contact" body1="gripper" body2="finger_2"/>
     <exclude name="gj3_contact" body1="gripper" body2="finger_3"/>
     <exclude name="gj4_contact" body1="gripper" body2="finger_4"/>
+    
+    <exclude name="before_gripper_contact" body1="before_traj" body2="gripper"/>
+    <exclude name="before_wrench_contact" body1="before_traj" body2="wrench"/>
+    <exclude name="closest_gripper_contact" body1="closest_traj" body2="gripper"/>
+    <exclude name="closest_wrench_contact" body1="closest_traj" body2="wrench"/>
+    <exclude name="after_gripper_contact" body1="after_traj" body2="gripper"/>
+    <exclude name="after_wrench_contact" body1="after_traj" body2="wrench"/>
+    <exclude name="before_closest_contact" body1="before_traj" body2="closest_traj"/>
+    <exclude name="before_after_contact" body1="before_traj" body2="after_traj"/>
+    <exclude name="after_closest_contact" body1="after_traj" body2="closest_traj"/>
+    <exclude name="base_wrench_contact" body1="base" body2="wrench"/>
   </contact>
 
   <actuator>

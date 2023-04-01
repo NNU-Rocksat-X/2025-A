@@ -1,18 +1,26 @@
 #!/usr/bin/env python3.7
 import tensorflow as tf
+import rospy
 import numpy as np
 import matplotlib.pyplot as plt
 from mog_ai.quaternion import *
 import sys
+import os
 
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+gpus = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpus[0], True)
+# Prevent issue where other AI models use same memory
+tf.config.set_logical_device_configuration(
+    gpus[0],
+    [tf.config.LogicalDeviceConfiguration(memory_limit=256)])
+
+
 
 print("tf version: ", tf.__version__)
 print("python version: ", sys.version)
 
-MODEL_DIR = "/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/grasp_vae_models/"
-MODEL_NUM = 4
+MODEL_DIR = os.getenv("TRAINING_DIR") + "grasp_vae_models/"
+LOG_DIR = os.getenv("TRAINING_DIR") + "grasp_vae_logs/"
 
 GRIPPER_POINTS = [
     [0.005959, -0.022452, 0.054853],
@@ -20,21 +28,47 @@ GRIPPER_POINTS = [
     [-0.007093, 0.024302, 0.053188],
     [0.022822, 0.00746, 0.054188]]
 
-KL_DIVERGENCE_WEIGHT = 0.005 # 6-DOF grasp paper used 0.01
 optimizer = tf.keras.optimizers.Adam(1e-4)
+
+
+def setup_model_dir(model_dir, model_name):
+    
+    if not os.path.exists(model_dir):
+        raise Exception("Model Path does not exist!")
+
+    highest_num = 0
+    for f in os.listdir(model_dir):
+        split_text = f.split(model_name+ '_')
+        try:
+            num = int(split_text[1][0])
+            if num > highest_num:
+                highest_num = num
+        except IndexError:
+            pass
+
+    if highest_num == 0:
+        latest_model = False
+    else:
+        latest_model = model_name + '_' + str(highest_num)
+    next_model = model_name + '_' + str(highest_num+1)
+    return (latest_model, next_model)
+
 
 class GraspVae(tf.keras.Model):
     """ Variational Autoencoder that produces grasps from the latent space and 
         the ID of the object to grasp """
 
-    def __init__(self, latent_dim, model_name=None):
+    def __init__(self, latent_dim, batch_size=None, model_name=None):
         super(GraspVae, self).__init__()
         self.latent_dim = latent_dim
+        self.kl_divergence_weight = 1
+        self.batch_size = batch_size
 
         self.encoder = tf.keras.Sequential(
             [
                 # Input is pos_x, pos_y, pos_z, q_x, q_y, q_z, q_w
                 tf.keras.layers.InputLayer(input_shape=(7,)),
+                tf.keras.layers.Dense(32, activation='relu'),
                 tf.keras.layers.Dense(32, activation='relu'),
                 # For each latent dimension two values are output:
                 # mu (distribution mean) and sigma (standard deviation)
@@ -47,13 +81,22 @@ class GraspVae(tf.keras.Model):
                 # Input is (Object_ID, latent_space)
                 tf.keras.layers.InputLayer(input_shape=(latent_dim+1,)),
                 tf.keras.layers.Dense(32, activation='relu'),
+                tf.keras.layers.Dense(32, activation='relu'),
                 tf.keras.layers.Dense(7)
             ]
         )
+        rospy.loginfo("model name: " + str(model_name))
 
-        if model_name != None:
+        if batch_size != None:
+            prev_model, self.model_shaw = setup_model_dir(MODEL_DIR, model_name)
+            self.summary_writer = tf.summary.create_file_writer(LOG_DIR + self.model_shaw)
+
+            if model_name != None and prev_model:
+                print("loading model: " + MODEL_DIR + prev_model)
+                self.load_weights(MODEL_DIR + prev_model)
+        else:
             print("loading model: " + MODEL_DIR + model_name)
-            self.load_weights(MODEL_DIR + "model_" + str(3))
+            self.load_weights(MODEL_DIR + model_name)
     # Get a grasp from the VAE
     # Either input the latent space
     # Or generate a random grasp from the latent distribution
@@ -76,6 +119,8 @@ class GraspVae(tf.keras.Model):
             latent = np.reshape(latent, newshape=(1, self.latent_dim))
 
         grasp_out, latent = self.sample(object_id, latent)
+        grasp_out = normalize_output(grasp_out)
+
         grasp_out = grasp_out.numpy()[0]
         grasp = Pose()
         grasp.position.x = grasp_out[0]
@@ -197,7 +242,7 @@ def compute_loss(model, x):
     rl = tf.cast(rl, tf.float32)
 
     t = 1 + std_dev - tf.math.square(mean) - tf.math.exp(std_dev)
-    kl_loss = KL_DIVERGENCE_WEIGHT * tf.math.reduce_mean(1 + std_dev - tf.math.square(mean) - tf.math.exp(std_dev), axis=0)
+    kl_loss = model.kl_divergence_weight * tf.math.reduce_mean(1 + std_dev - tf.math.square(mean) - tf.math.exp(std_dev), axis=0)
     #tf.print("rl loss: ", rl, " kl loss: ", kl_loss)
 
     return tf.reduce_mean(rl - kl_loss)
@@ -208,7 +253,7 @@ def visualize_latent_space(model, x):
     ax = fig.add_subplot(projection='3d')
     # Adjust c=x[:, GraspVal] to see map with different grasp attributes
     sc = ax.scatter(mean[:,0], mean[:,1], mean[:,2], c=x[:,6], cmap='brg')
-    ax.set_title('Position Y Map')
+    ax.set_title('Orientation W Map')
     ax.set_xlabel('dim 1')
     ax.set_ylabel('dim 2')
     ax.set_zlabel('dim 3')
@@ -228,6 +273,19 @@ def train_step(model, x):
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return loss # for logging
 
+
+# Set kl divergence according to Cyclical KLAnnealing schedule
+# Uses linear schedule
+# https://medium.com/mlearning-ai/a-must-have-training-trick-for-vae-variational-autoencoder-d28ff53b0023
+def get_kl_divergence(epoch):
+    anneal_rate = 5000
+    if int(epoch / anneal_rate) % 2 == 0:
+        kl_divergence_weight = epoch/anneal_rate - int(epoch/anneal_rate)
+    else:
+        kl_divergence_weight = 0.001
+
+    return kl_divergence_weight
+
 def train(model, dataset, epochs, validate_ratio):
     print("dataset: ", dataset.shape)
     num_validate = int(dataset.shape[0] * validate_ratio)
@@ -240,8 +298,17 @@ def train(model, dataset, epochs, validate_ratio):
     losses = []
     valid_loss = []
     for epoch in range(0, epochs):
-        loss = train_step(model, dataset)
+        batch_elements = np.random.choice(dataset.shape[0], model.batch_size)
+        batch = np.array([dataset[x,:] for x in batch_elements])
+
+        loss = train_step(model, batch)
         validation_loss = compute_loss(model, validation_set)
+        
+        model.kl_divergence_weight = get_kl_divergence(epoch)
+        with model.summary_writer.as_default():
+            tf.summary.scalar('loss', loss, step=epoch)
+            tf.summary.scalar('validation_loss', validation_loss, step=epoch)
+            tf.summary.scalar('kl_divergence_weight', model.kl_divergence_weight, step=epoch)
 
         losses.append(loss.numpy())
         valid_loss.append(validation_loss.numpy())
@@ -255,12 +322,14 @@ def train(model, dataset, epochs, validate_ratio):
             losses = []
             valid_loss = []
 
-    model.save_weights(MODEL_DIR + "model_" + str(MODEL_NUM))
+    model.save_weights(MODEL_DIR + model.model_shaw)
 
 if __name__ == "__main__":
     dataset = np.load("/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy")
-    model = GraspVae(latent_dim=3, model_name="model_4")
+    model = GraspVae(latent_dim=4,
+                    batch_size=32, 
+                    model_name="vae_4latent_4_layers_5kanneal_minibatch")
 
-    compute_loss(model, dataset[1:3,:])
-    #train(model, dataset, 10000, 0.1)
+    #compute_loss(model, dataset[1:3,:])
+    #train(model, dataset, 500000, 0.1)
     visualize_latent_space(model, dataset)

@@ -27,6 +27,7 @@ add_service_files(
     PlanGrasp.srv
     PredictPosition.srv
     ObjectObservation.srv
+    TrajectoryPoints.srv 
 )
 
 

@@ -1,0 +1,13 @@
+#!/usr/bin/env python3.7
+
+import numpy as np
+from mog_ai.grasp_vae import GraspVae, train
+
+
+if __name__ == "__main__":
+    dataset = np.load("/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy")
+    model1 = GraspVae(latent_dim=4, 
+                    batch_size=32, 
+                    model_name="vae_4latent_4_layers_5kanneal_minibatch")
+
+    train(model1, dataset, 500000, 0.1)

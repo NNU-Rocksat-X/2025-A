@@ -2,15 +2,17 @@
 
 import os
 import gym
+import numpy as np
 from stable_baselines3 import TD3
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.noise import NormalActionNoise
 
 from mog_ai.gym_env import ApogeeGym
 from mog_ai.catch_interface import CatchInterface
 from mog_ai.callbacks import TensorboardCallback
 
 def train():
-    MODEL_DIR = os.getenv("TRAINING_DIR") + "TD3_models"
+    MODEL_DIR = os.getenv("TRAINING_DIR") + "TD3_models/"
     LOG_DIR = os.getenv("TRAINING_DIR") + "TD3_logs"
     interface = CatchInterface()
     env = ApogeeGym(interface)
@@ -23,8 +25,11 @@ def train():
                                  eval_freq=10, n_eval_episodes=1)
     callback_list.append(eval_callback)
 
-    model = TD3("MlpPolicy", env, verbose=1, tensorboard_log=LOG_DIR, learning_starts=500)
+    n_actions = env.action_space.shape[-1]
+    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1*np.ones(n_actions))
 
+    #model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, tensorboard_log=LOG_DIR, learning_starts=500)
+    model = TD3.load(MODEL_DIR + 'best_model', env=env, tensorboard_log=LOG_DIR)
     model.learn(total_timesteps=1000, callback=callback_list)
     model.save(MODEL_DIR + "TD3_Catch")
 

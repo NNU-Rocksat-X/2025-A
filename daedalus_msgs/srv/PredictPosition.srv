@@ -2,4 +2,4 @@ float32 trajectory_slice
 ---
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
-float32 delta_time
+std_msgs/Time prediction_time

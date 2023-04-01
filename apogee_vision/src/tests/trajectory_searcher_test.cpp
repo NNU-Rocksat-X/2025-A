@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
     Searcher searcher(pos, vel, acc);
 
-
+    
     float norm_time;
     Vector3f predicted_position = searcher.solve(0.5, norm_time);
     ROS_INFO("Delta closest pass: %f", norm_time);

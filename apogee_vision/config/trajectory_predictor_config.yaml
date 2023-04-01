@@ -5,14 +5,14 @@ TrajectoryPredictorConfig:
     initial_uncertainty_guess: 10
 
     # Trajectory search
-    arm_length: 1
+    arm_length: 0.5
     robot_base:
       - 0
       - 0
       - 0
-    sufficient_convergence: 0.001
+    sufficient_convergence: 0.05
     search_delta: 0.01
 
-    min_time_delta: 0.05
-    max_time_delta: 5
+    min_time_delta: 1
+    max_time_delta: 10
     

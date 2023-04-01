@@ -93,6 +93,20 @@ def push_gripper(force_vector):
     wrench.force.z = force_vector[2] * force
     apply_force(3, wrench, 0.1)
 
+def generate_successful_grasp():
+    grasp = Pose()
+    grasp_id = int(np.random.uniform(low=0, high=len(successful_grasps)))
+    chosen_grasp = successful_grasps[grasp_id]
+    grasp.position.x = chosen_grasp[1]
+    grasp.position.y = chosen_grasp[2]
+    grasp.position.z = chosen_grasp[3]
+    grasp.orientation.x = chosen_grasp[4]
+    grasp.orientation.y = chosen_grasp[5]
+    grasp.orientation.z = chosen_grasp[6]
+    grasp.orientation.w = chosen_grasp[7]
+    return (grasp, [0, 0, 0])
+    
+
 def generate_random_grasp():
     grasp = Pose()
     point_id = int(np.random.uniform(low=0, high=len(object_points))) #318
@@ -128,7 +142,7 @@ def main():
         open_gripper()
         reset()
         rospy.sleep(0.2)
-        grasp, force_vector = generate_random_grasp()
+        grasp, force_vector = generate_successful_grasp()
         set_body('gripper', grasp)
         rospy.sleep(0.1)
         push_gripper(force_vector)

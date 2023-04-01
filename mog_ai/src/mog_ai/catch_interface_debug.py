@@ -141,7 +141,13 @@ class CatchInterface(RosInterface):
         self.plan_grasp = rospy.ServiceProxy("/ARM1/plan_grasp", PlanGrasp)
         """
 
-        rospy.wait_for_service("/ARM1/is_grasped")
+        rospy.loginfo("Gripper only srvs")
+        # Allows for testing with just gripper without the rest of arm
+        self.grasp_pub = rospy.Publisher("/ARM1/grip_position_cmd", Float32, queue_size=1)
+        rospy.wait_for_service("/mujoco/set_body")
+        self.set_body = rospy.ServiceProxy("/mujoco/set_body", SetBody)
+
+        #rospy.wait_for_service("/ARM1/is_grasped")
         self.is_grasped = rospy.ServiceProxy("/ARM1/is_grasped", GraspDetect)
 
         rospy.wait_for_service("/mog_ai/generate_grasp")

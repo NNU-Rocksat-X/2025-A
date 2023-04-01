@@ -1,0 +1,17 @@
+<launch>
+    <arg name="env" default="cube"/>
+    <arg name="launch_sim" default="true"/>
+    <arg name="ref_pcd" default="/home/cyborg/catkin_ws/src/daedalus/arm2d2_v2_description/meshes/wrench.pcd"/>
+
+    <rosparam file="$(find daedalus_core)/config/schedule_rates.yaml" command="load"/>
+    <rosparam file="$(find apogee_vision)/config/trajectory_predictor_config.yaml" command="load"/>
+    
+    <include if="$(arg launch_sim)" file="$(find mujoco_ros)/launch/sim.launch">
+        <arg name="env" value="$(arg env)"/>
+        <arg name="fixed_cam" value="false"/>
+    </include>
+    
+    <node name="reset_server" pkg="mog_ai" type="reset_server"/>
+    <node name="trajectory_predictor" pkg="apogee_vision" type="trajectory_predictor" output="screen"/>
+
+</launch>

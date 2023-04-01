@@ -80,14 +80,35 @@ Eigen::Quaternionf v3_to_quat(Eigen::Vector3f v)
     }
 }
 
-
+/*
 Eigen::Vector3f quat_to_euler(Eigen::Quaternionf q)
 {
     return q.toRotationMatrix().eulerAngles(0,1,2);
 }
+*/
 
 Eigen::Vector3f quat_to_euler(Eigen::Vector4f vq)
 {
     Eigen::Quaternionf q = v4_to_quat(vq);
     return quat_to_euler(q);
+}
+
+Eigen::Vector3f quat_to_euler(Eigen::Quaternionf q)
+{
+    Eigen::Vector3f euler;
+    // roll
+    double sinr_cosp = 2 * (q.w() * q.vec()[0] + q.vec()[1] * q.vec()[2]);
+    double cosr_cosp = 1 - 2 * (q.vec()[0] * q.vec()[0] + q.vec()[1] * q.vec()[1]);
+    euler[0] = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch
+    double sinp = std::sqrt(1 + 2 * (q.w() * q.vec()[1] - q.vec()[0] * q.vec()[2]));
+    double cosp = std::sqrt(1 - 2 * (q.w() * q.vec()[1] - q.vec()[0] * q.vec()[2]));
+    euler[1] = 2 * std::atan2(sinp, cosp) - M_PI / 2;
+
+    // yaw
+    double siny_cosp = 2 * (q.w() * q.vec()[2] + q.vec()[0] * q.vec()[1]);
+    double cosy_cosp = 1 - 2 * (q.vec()[1] * q.vec()[1] + q.vec()[2] * q.vec()[2]);
+    euler[2] = std::atan2(siny_cosp, cosy_cosp);
+    return euler;
 }

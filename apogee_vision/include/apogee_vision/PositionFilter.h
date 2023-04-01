@@ -64,6 +64,8 @@ class PositionFilter {
         void get_state(Position::StateVector &state);
 
         void print_state(Position::StateVector &state);
+
+        float get_convergence(void);
 };
 
 #endif /*_POSITION_FILTER_H_*/

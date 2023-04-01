@@ -17,7 +17,12 @@ class TensorboardCallback(BaseCallback):
         #print("Object position:", self.locals["new_obs"])
 
         self.logger.record('Reward', reward)
+        self.logger.record('motion_punishment', self.locals['infos'][0]['motion_punishment'])
         self.logger.record('Catches', self.num_catches)
+        self.logger.record('out_of_reach', self.locals['infos'][0]['out_of_reach'])
+        self.logger.record('pre_grasp_plan', self.locals['infos'][0]['pre_grasp_plan'])
+        self.logger.record('grasp_plan', self.locals['infos'][0]['grasp_plan'])
+        self.logger.record("pointing_reward", self.locals['infos'][0]["pointing_reward"])
 
         #self.logger.record('Time: ' + info['timing']['func_name'], info['timing']['elapsed_time'])
         #self.logger.record('ADR Difficulty', info['difficulty'])

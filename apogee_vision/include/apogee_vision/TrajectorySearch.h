@@ -61,6 +61,7 @@ class Searcher {
             return dist;
         }
 
+        // Returns time from now that is closest to the base of the arm
         float binarySearch(float before, float after) {
 
             float mid = before + (after - before) / 2;
@@ -131,17 +132,16 @@ class Searcher {
 
             if (ros::param::has("TrajectoryPredictorConfig"))
             {
-                ROS_INFO("Getting params");
-                ros::param::get("arm_length", robot_length);
+                ros::param::get("TrajectoryPredictorConfig/arm_length", robot_length);
                 std::vector<float> base = {0, 0, 0};
-                ros::param::get("robot_base", base);
+                ros::param::get("TrajectoryPredictorConfig/robot_base", base);
                 robot_base[0] = base[0];
                 robot_base[1] = base[1];
                 robot_base[2] = base[2];
-                ros::param::get("sufficient_convergence", epsilon);
-                ros::param::get("search_delta", search_delta);
-                ros::param::get("min_time_delta", min_time_delta);
-                ros::param::get("max_time_delta", max_time_delta);
+                ros::param::get("TrajectoryPredictorConfig/sufficient_convergence", epsilon);
+                ros::param::get("TrajectoryPredictorConfig/search_delta", search_delta);
+                ros::param::get("TrajectoryPredictorConfig/min_time_delta", min_time_delta);
+                ros::param::get("TrajectoryPredictorConfig/max_time_delta", max_time_delta);
             } else {
                 ROS_ERROR("Trajectory Predictor params not loaded.");
             }
@@ -155,26 +155,54 @@ class Searcher {
         // Returns a vector with the position of the object at the chosen trajectory slice
         // Updates norm_time with the duration until the selected point in the trajectory
         // A norm time of -1 indicates the object is out of reach
-        Vector3f solve(float trajectory_slice, float &norm_time) {
+        Vector3f solve(float trajectory_slice, float &norm_time, Vector3f* traj_points) {
             float closest_point;
             if (is_linear) {
+                ROS_WARN("Using linear solver!");
                 closest_point = linear();
             } else {
                 closest_point = binarySearch(0, t_0);
             }
-            if (closest_point > robot_length)
+            if (closest_point < min_time_delta)
+                closest_point = min_time_delta;
+            if (closest_point > max_time_delta)
+                closest_point = max_time_delta;
+            if (distance(closest_point) > robot_length)
             {
+                ROS_INFO("Out of reach. Closest point: %f - Length: %f", distance(closest_point), robot_length);
                 norm_time = -1;
                 return Vector3f(0, 0, 0);
             }
-            ROS_INFO("Closest point: %f", closest_point);
+            ROS_INFO("Closest point: %f - dist: %f", closest_point, distance(closest_point));
+
             float furthest_before = search_before(closest_point);
-            ROS_INFO("Furthest before: %f", furthest_before);
+            ROS_INFO("Furthest before: %f - dist: %f", furthest_before, distance(furthest_before));
+            if (furthest_before < min_time_delta - 0.1)
+                ROS_WARN("Less than min time delta!");
+
             float furthest_after = search_after(closest_point);
-            ROS_INFO("Furthest after: %f", furthest_after);
+            ROS_INFO("Furthest after: %f - dist: %f", furthest_after, distance(furthest_after));
+            if (furthest_after > max_time_delta + 0.1)
+                ROS_WARN("Greater than max time delta!");
+
 
             norm_time = map(trajectory_slice, 0, 1, furthest_before, furthest_after);
 
+            // ======= Debug =====
+            traj_points[0] = find_position(furthest_before);
+            traj_points[1] = find_position(closest_point);
+            traj_points[2] = find_position(furthest_after);
+            // ==================
             return find_position(norm_time);
         }
+
+
+        // Without traj points
+        Vector3f solve(float trajectory_slice, float &norm_time)
+        {
+            Vector3f points[3];
+            return solve(trajectory_slice, norm_time, points);
+            
+        }
+
 };

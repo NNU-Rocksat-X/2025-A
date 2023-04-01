@@ -49,8 +49,10 @@ void KalmanFilter<StateDim, MeasureDim>::measurement_update(const MeasureVector 
 
     // State update equation
     // X = X + K(z - HX)
-    state_estimate = state_estimate + kalman_gain *
-            (measurement - observation_matrix*state_estimate); 
+
+    // (z - HX) part
+    innovation = measurement - observation_matrix * state_estimate;
+    state_estimate = state_estimate + kalman_gain * innovation; 
 
     // Covariance update equation
     // P = (I - KH) * P * (I - KH)^T + KRK^T
@@ -102,7 +104,13 @@ void KalmanFilter<StateDim, MeasureDim>::get_state(StateVector &state)
     // Testing reveals that the velocity is off exactly by a factor of 2
     // for each axis. Internally the position and acceleration is correct so heres 
     // a quick patch
-    state[1] *= 2;
-    state[4] *= 2;
-    state[7] *= 2;
+    //state[1] *= 2;
+    //state[4] *= 2;
+    //state[7] *= 2;
+}
+
+template <uint8_t StateDim, uint8_t MeasureDim>
+float KalmanFilter<StateDim, MeasureDim>::get_convergence(void)
+{
+    return abs(innovation.sum());
 }

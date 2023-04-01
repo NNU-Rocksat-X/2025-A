@@ -29,7 +29,7 @@ def open_gripper():
     grasp_pub.publish(0.8)
 
 def main():
-    vae = GraspVae(latent_dim=4)
+    vae = GraspVae(latent_dim=4, model_name="vae_4latent_4_layers_5kanneal_minibatch_1")
     
 
 
@@ -38,15 +38,15 @@ def main():
         reset()
         rospy.sleep(0.2)
         grasp = vae.generate_grasp(object_id=1)
-        print("grasp: ", grasp)
-        #set_body('gripper', grasp)
+        rospy.loginfo("grasp: " + str(grasp))
+        set_body('gripper', grasp)
         rospy.sleep(0.5)
-        #attempt_grasp()
+        attempt_grasp()
         rospy.sleep(2)
         status = is_grasped()
         rospy.loginfo("Status: " + str(status.is_grasped))
         if (status.is_grasped):
-            add_successful_grasp(grasp)
+            rospy.loginfo("Grasp Successfully!")
 
 if __name__ == "__main__":
     main()

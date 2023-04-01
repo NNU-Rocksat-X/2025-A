@@ -19,15 +19,15 @@ PositionFilter::PositionFilter(const StateVector &state_guess, float initial_unc
     // Initialize process noise matrix
     StateMatrix process_noise_matrix;
     
-    process_noise_matrix << dt4/4, dt3/2, dt2/2, 0,     0,     0,     0,     0,     0,
-                            dt3/2, dt2,   dt,    0,     0,     0,     0,     0,     0,
-                            dt2/2, dt,    1,     0,     0,     0,     0,     0,     0,
-                            0,     0,     0,     dt4/4, dt3/2, dt2/2, 0,     0,     0,
-                            0,     0,     0,     dt3/2, dt2,   dt,    0,     0,     0,
-                            0,     0,     0,     dt2/2, dt,    1,     0,     0,     0,
-                            0,     0,     0,     0,     0,     0,     dt4/4, dt3/2, dt2/2,
-                            0,     0,     0,     0,     0,     0,     dt3/2, dt2,   dt,   
-                            0,     0,     0,     0,     0,     0,     dt2/2, dt,    1;
+    process_noise_matrix << dt4/4, dt3/2, 0, 0,     0,     0,     0,     0,     0,
+                            dt3/2, dt2,   0,    0,     0,     0,     0,     0,     0,
+                            dt2/2, dt,    0,     0,     0,     0,     0,     0,     0,
+                            0,     0,     0,     dt4/4, dt3/2, 0, 0,     0,     0,
+                            0,     0,     0,     dt3/2, dt2,   0,    0,     0,     0,
+                            0,     0,     0,     dt2/2, dt,    0,     0,     0,     0,
+                            0,     0,     0,     0,     0,     0,     dt4/4, dt3/2, 0,
+                            0,     0,     0,     0,     0,     0,     dt3/2, dt2,   0,   
+                            0,     0,     0,     0,     0,     0,     dt2/2, dt,    0;
     
     process_noise_matrix = process_noise_matrix * acceleration_variance;
                      
@@ -72,15 +72,17 @@ void PositionFilter::set_transition_matrix(float dt, StateMatrix &transition_mat
     float dt2 = pow(dt, 2);
 
     // Initialize state transition matrix
-    transition_matrix << 1, dt, dt2/2, 0, 0,  0,     0, 0,  0,
-                         0, 1,  dt,    0, 0,  0,     0, 0,  0,
-                         0, 0,  1,     0, 0,  0,     0, 0,  0,
-                         0, 0,  0,     1, dt, dt2/2, 0, 0,  0,
-                         0, 0,  0,     0, 1,  dt,    0, 0,  0,
-                         0, 0,  0,     0, 0,  1,     0, 0,  0,
-                         0, 0,  0,     0, 0,  0,     1, dt, dt2/2,
-                         0, 0,  0,     0, 0,  0,     0, 1,  dt,   
-                         0, 0,  0,     0, 0,  0,     0, 0,  1;  
+    
+    transition_matrix << 1, dt, 0, 0, 0,  0,     0, 0,  0,
+                         0, 1,  0,    0, 0,  0,     0, 0,  0,
+                         0, 0,  0,     0, 0,  0,     0, 0,  0,
+                         0, 0,  0,     1, dt, 0, 0, 0,  0,
+                         0, 0,  0,     0, 1,  0,    0, 0,  0,
+                         0, 0,  0,     0, 0,  0,     0, 0,  0,
+                         0, 0,  0,     0, 0,  0,     1, dt, 0,
+                         0, 0,  0,     0, 0,  0,     0, 1,  0,   
+                         0, 0,  0,     0, 0,  0,     0, 0,  0;  
+
 }
 
 State PositionFilter::vector_to_state(StateVector vector)
@@ -133,4 +135,9 @@ void PositionFilter::get_state(StateVector &state)
 void PositionFilter::print_state(StateVector &state)
 {
     ROS_DEBUG("x: %f, dx: %f, ddx: %f, y: %f, dy: %f, ddy: %f, z: %f, dz: %f, ddz: %f", state(0), state(1), state(2), state(3), state(4), state(5), state(6), state(7), state(8));
+}
+
+float PositionFilter::get_convergence(void)
+{
+    return kalman_filter->get_convergence();
 }

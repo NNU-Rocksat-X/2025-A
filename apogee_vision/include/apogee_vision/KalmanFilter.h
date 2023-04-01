@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <ros/ros.h>
+#include <apogee_vision/EigenUtil.h>
 
 #ifndef _KALMANFILTER_H_
 #define _KALMANFILTER_H_
@@ -28,6 +29,10 @@ class KalmanFilter {
 
         Eigen::Matrix<float, StateDim, MeasureDim> kalman_gain; // K in notation
 
+        // (z - HX) in state update equation
+        // Used for determining convergence
+        MeasureVector innovation;
+
         void set_transition_matrix(float dt, StateMatrix &transition_matrix);
         void measurement_update(const MeasureVector &measurement);
         void predict(void);
@@ -51,6 +56,8 @@ class KalmanFilter {
         void predict_state(StateMatrix prediction_transition, StateVector &predicted_state);
 
         void get_state(StateVector &state);
+
+        float get_convergence(void);
 };
 
 // Fix linker issue for template class

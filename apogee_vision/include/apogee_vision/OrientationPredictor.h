@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <math.h>
 #include "ceres/ceres.h"
 #include "apogee_vision/EigenUtil.h"
 
@@ -12,6 +13,7 @@ class OrientationPredictor
 {
     private:
         Eigen::Quaternionf prev_q;
+        ros::Time prev_time;
         Eigen::Quaternionf curr_q;
         std::vector<Eigen::Vector3f> w_list;
 
@@ -40,7 +42,7 @@ class OrientationPredictor
         *
         * Returns N/A
         */
-        void step(Eigen::Vector4f q_vec);
+        void step(Eigen::Vector4f q_vec, ros::Time measurement_time);
 
 
         // @Brief - Places current orientation and angular velocity in reference parameters.
