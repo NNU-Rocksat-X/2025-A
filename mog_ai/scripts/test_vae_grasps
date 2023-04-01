@@ -1,0 +1,52 @@
+#!/usr/bin/env python3.7
+
+import rospy
+import numpy as np
+from mog_ai.grasp_vae import GraspVae
+
+# Srvs and Msgs
+from mujoco_ros.srv import SetBody
+from std_srvs.srv import Trigger
+from daedalus_msgs.srv import GraspDetect
+from std_msgs.msg import Float32
+
+
+rospy.init_node("vae_grasp_tester")
+
+rospy.wait_for_service("/mujoco/reset")
+reset = rospy.ServiceProxy("/mujoco/reset", Trigger)
+rospy.wait_for_service("/ARM1/is_grasped")
+is_grasped = rospy.ServiceProxy("/ARM1/is_grasped", GraspDetect)
+rospy.wait_for_service("/mujoco/set_body")
+set_body = rospy.ServiceProxy("/mujoco/set_body", SetBody)
+
+grasp_pub = rospy.Publisher("/ARM1/grip_position_cmd", Float32, queue_size=1)
+
+def attempt_grasp():
+    grasp_pub.publish(-0.9)
+
+def open_gripper():
+    grasp_pub.publish(0.8)
+
+def main():
+    vae = GraspVae(latent_dim=4, model_name="vae_4latent_4_layers_5kanneal_minibatch_1")
+    
+
+
+    while not rospy.is_shutdown():
+        open_gripper()
+        reset()
+        rospy.sleep(0.2)
+        grasp = vae.generate_grasp(object_id=1)
+        rospy.loginfo("grasp: " + str(grasp))
+        set_body('gripper', grasp)
+        rospy.sleep(0.5)
+        attempt_grasp()
+        rospy.sleep(2)
+        status = is_grasped()
+        rospy.loginfo("Status: " + str(status.is_grasped))
+        if (status.is_grasped):
+            rospy.loginfo("Grasp Successfully!")
+
+if __name__ == "__main__":
+    main()

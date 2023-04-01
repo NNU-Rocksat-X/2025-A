@@ -1,0 +1,4 @@
+model_config:
+  vae_path: vae_4latent_4_layers_5kanneal_minibatch_1
+  latent_dim: 4
+  TD3_path: 0

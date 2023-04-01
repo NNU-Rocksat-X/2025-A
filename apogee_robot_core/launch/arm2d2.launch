@@ -1,6 +1,7 @@
 <launch>
-    <arg name="version" default="arm2d2_v2"/>
+    <arg name="version" default="arm2v4"/>
     <arg name="dual" default="false"/>
+    <arg name="launch_rviz" default="false"/>
 
     <group ns="ARM1">
         <include if="$(eval arg('version') == 'arm2d2_v3')" file="$(find arm2d2_v3_description)/launch/config.launch"/>
@@ -9,8 +10,13 @@
             <arg name="ns" value="ARM1"/>
             <arg name="dual" value="dual"/>
         </include>
+        <include if="$(eval arg('version') == 'arm2v4_wrench')" file="$(find arm2v4_description)/launch/config.launch">
+            <arg name="ns" value="ARM1"/>
+            <arg name="dual" value="dual"/>
+        </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
+            <arg name="launch_rviz" value="$(arg launch_rviz)"/>
             <arg name="ns" value="ARM1"/>
         </include>
     </group>
@@ -23,6 +29,7 @@
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
+            <arg name="launch_rviz" value="$(arg launch_rviz)"/>
             <arg name="ns" value="ARM2"/>
         </include>
     </group>

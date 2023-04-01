@@ -1,0 +1,26 @@
+<mujoco>
+  <worldbody>
+    <body name="before_traj" pos="0 0 0">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="0 1 0 1"/>
+    </body>
+    <body name="closest_traj" pos="0 0 0.2">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="1 0 0 1"/>
+    </body>
+    <body name="after_traj" pos="0 0 0.3">
+      <joint type="free"/>
+      <geom type="box" size="0.005 0.005 0.005" rgba="0 0 1 1"/>
+    </body>
+  </worldbody>
+
+
+  <contact>
+    <exclude name="before_closest_contact" body1="before_traj" body2="closest_traj"/>
+    <exclude name="before_after_contact" body1="before_traj" body2="after_traj"/>
+    <exclude name="after_closest_contact" body1="after_traj" body2="closest_traj"/>
+    <exclude name="before_object_contact" body1="before_traj" body2="object"/>
+    <exclude name="closest_object_contact" body1="closest_traj" body2="object"/>
+    <exclude name="after_object_contact" body1="after_traj" body2="object"/>
+  </contact>
+</mujoco>

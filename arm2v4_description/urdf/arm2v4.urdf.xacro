@@ -9,6 +9,7 @@
 
 
 <link name="base_link">
+  <!--
   <inertial>
     <origin xyz="-0.01036605995280163 0.008118725780222396 -0.010698521307181049" rpy="0 0 0"/>
     <mass value="0.6714813076324946"/>
@@ -21,12 +22,14 @@
     </geometry>
     <material name="silver"/>
   </visual>
+  
   <collision>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
     </geometry>
   </collision>
+  -->
 </link>
 
 <joint name="world_joint" type="fixed">
@@ -35,13 +38,14 @@
   <origin xyz="0 0 0" rpy="1.57 0 0"/>
 </joint>
 
+  <!--
   <link name="top_plate">
     <inertial>
         <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
         <mass value="1.5479093566761954"/>
         <inertia ixx="0.010238" iyy="0.01139" izz="0.021617" ixy="-0.0" iyz="0.0" ixz="0.0"/>
     </inertial>
-    <!--
+    
     <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -49,7 +53,7 @@
         </geometry>
         <material name="silver"/>
     </visual>
-    -->
+    
     <collision>
         <origin xyz="0 0 0.279654" rpy="0 0 0"/>
         <geometry>
@@ -57,13 +61,14 @@
         </geometry>
     </collision>
   </link>
-
+  -->
+  <!--
   <joint name="top_connector" type="fixed">
     <parent link="world"/>
     <child link="top_plate"/>
     <origin xyz="0 0 0.279654" rpy="0 0 0"/>
   </joint>
-
+  -->
 <link name="link_1">
   <inertial>
     <origin xyz="0.000994555873334066 0.032192633992419506 0.034631373816010426" rpy="0 0 0"/>
@@ -318,12 +323,12 @@
   </collision>
 </link>
 
-<joint name="joint_1" type="revolute">
-  <origin xyz="-0.1101 0.00635 -0.0551" rpy="0 0 0"/>
+<joint name="joint_1" type="continuous">
+  <origin xyz="-0.1101 0.02 -0.0551" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="link_1"/>
   <axis xyz="-0.0 -1.0 0.0"/>
-  <limit upper="3.141593" lower="-1.047198" effort="100" velocity="100"/>
+  <!--<limit upper="3.141593" lower="-3.141593" effort="100" velocity="100"/>-->
 </joint>
 
 <joint name="joint_2" type="revolute">
@@ -334,12 +339,12 @@
   <limit upper="1.570796" lower="-1.570796" effort="100" velocity="100"/>
 </joint>
 
-<joint name="joint_3" type="revolute">
+<joint name="joint_3" type="continuous">
   <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>
   <parent link="link_2"/>
   <child link="link_3"/>
   <axis xyz="-0.0 1.0 -0.0"/>
-  <limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>
+  <!--<limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>-->
 </joint>
 
 <joint name="joint_4" type="revolute">
@@ -350,12 +355,12 @@
   <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
 </joint>
 
-<joint name="joint_5" type="revolute">
+<joint name="joint_5" type="continuous">
   <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>
   <parent link="link_4"/>
   <child link="link_5"/>
   <axis xyz="-0.0 1.0 -0.0"/>
-  <limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>
+  <!--<limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>-->
 </joint>
 
 <joint name="joint_6" type="revolute">
@@ -366,13 +371,13 @@
   <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
 </joint>
 
-<joint name="joint_7" type="revolute">
+<joint name="joint_7" type="continuous">
  <!-- <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>-->
   <origin xyz="0.0 0.09 0.0" rpy="-1.53 0 0"/>
   <parent link="link_6"/>
   <child link="gripper"/>
   <axis xyz="-0.0 0.0 1.0"/>
-  <limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>
+  <!--<limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>-->
 </joint>
 
 

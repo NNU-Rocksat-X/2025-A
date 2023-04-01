@@ -9,6 +9,7 @@ from std_srvs.srv import Trigger
 from mujoco_ros.srv import ApplyForce, ApplyForceRequest
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Twist
+import matplotlib.pyplot as plt
 
 def q_to_rpy(q):
     sinr_cosp = 2 * (q.w * q.x * + q.y * q.z)
@@ -34,11 +35,18 @@ class Tester():
         self.predict = rospy.ServiceProxy('/trajectory_predictor/predict', PredictPosition)
         self.trajectory_ready = rospy.ServiceProxy('/trajectory_predictor/ready', Trigger)
         self.apply_force = rospy.ServiceProxy('/mujoco/apply_force', ApplyForce)
+        rospy.wait_for_service("/random_reset")
+        self.reset = rospy.ServiceProxy("/random_reset", Trigger)
         rospy.Subscriber("/mujoco/object_pose", Pose, self.pose_cb)
         rospy.Subscriber("/mujoco/object_twist", Twist, self.twist_cb)
 
         self.measured_pose = None
         self.measured_twist = None
+
+        self.position_errs = []
+        self.orientation_errs = []
+        self.vel_errs = []
+        self.ang_vel_errs = []
 
     def pose_cb(self, msg):
         self.measured_pose = msg
@@ -48,12 +56,26 @@ class Tester():
 
 
     def check_error(self, observation):
+        """
+        error_sum = 0
+        error_sum += (prediction.position.x - self.measured_pose.position.x)**2
+        error_sum += (prediction.position.y - self.measured_pose.position.y)**2
+        error_sum += (prediction.position.z - self.measured_pose.position.z)**2
+        self.position_errs.append(math.sqrt(error_sum))
+
+        error_sum = 0
+        observe_orientation = q_to_rpy(prediction.orientation)
+        measure_orientation = q_to_rpy(self.measured_pose.orientation)
+        error_sum += (observe_orientation[0] - measure_orientation[0])**2
+        error_sum += (observe_orientation[1] - measure_orientation[1])**2
+        error_sum += (observe_orientation[2] - measure_orientation[2])**2
+        self.orientation_errs.append(math.sqrt(error_sum))
+        """
         error_sum = 0
         error_sum += (observation.pose.position.x - self.measured_pose.position.x)**2
         error_sum += (observation.pose.position.y - self.measured_pose.position.y)**2
         error_sum += (observation.pose.position.z - self.measured_pose.position.z)**2
-        position_error = math.sqrt(error_sum)
-        rospy.loginfo("Position error: " + str(position_error))
+        self.position_errs.append(math.sqrt(error_sum))
 
         error_sum = 0
         observe_orientation = q_to_rpy(observation.pose.orientation)
@@ -61,52 +83,63 @@ class Tester():
         error_sum += (observe_orientation[0] - measure_orientation[0])**2
         error_sum += (observe_orientation[1] - measure_orientation[1])**2
         error_sum += (observe_orientation[2] - measure_orientation[2])**2
-        orientation_error = math.sqrt(error_sum)
-        rospy.loginfo("Orientation error: " + str(orientation_error))
+        self.orientation_errs.append(math.sqrt(error_sum))
 
+        
         error_sum = 0
         error_sum += (observation.velocity.linear.x - self.measured_twist.linear.x)**2
         error_sum += (observation.velocity.linear.y - self.measured_twist.linear.y)**2
         error_sum += (observation.velocity.linear.z - self.measured_twist.linear.z)**2
-        vel_err = math.sqrt(error_sum)
-        rospy.loginfo("Velocity error: " + str(vel_err))
+        self.vel_errs.append(math.sqrt(error_sum))
 
         error_sum = 0
         error_sum += (observation.velocity.angular.x - self.measured_twist.angular.x)**2
         error_sum += (observation.velocity.angular.y - self.measured_twist.angular.y)**2
         error_sum += (observation.velocity.angular.z - self.measured_twist.angular.z)**2
-        ang_vel_err = math.sqrt(error_sum)
-        rospy.loginfo("Angular Velocity error: " + str(ang_vel_err))
-
+        self.ang_vel_errs.append(math.sqrt(error_sum))
+        
 
 
     def run(self):
+        for i in range(0, 10):
+            rospy.loginfo("============" + str(i) + "=================")
+            rospy.loginfo("Waiting for trajectory to converge")
 
-        print("waiting for convergence")
-        rospy.loginfo("Waiting for trajectory to converge")
+            while self.measured_pose is None:
+                rospy.sleep(0.1)
 
-        while self.measured_pose is None:
-            rospy.sleep(0.1)
+            self.reset()
 
-        while not self.trajectory_ready().success:
-            rospy.sleep(0.1)
-            print(ready)
+            while not self.trajectory_ready().success:
+                rospy.sleep(0.1)
 
-        rospy.loginfo("Trajectory converged")
+            rospy.loginfo("Trajectory converged")
 
-        # No motion test
-        observation = self.observe()
-        self.check_error(observation)
+            rospy.sleep(5)
+            #prediction = self.predict(0.5)
+            observation = self.observe()
+            """
+            if prediction.delta_time < 0:
+                rospy.logwarn("Out of reach!")
+            else:
+            """
+            rospy.loginfo("Observation: " + str(observation))
+            rospy.loginfo("Measured Pose: " + str(self.measured_pose))
+            rospy.loginfo("Measured Twist: " + str(self.measured_twist))
+            self.check_error(observation)
 
-        # With motion test
-        force = ApplyForceRequest()
-        force.body_id = 1
-        force.wrench.force.x = 1
-        self.apply_force(force)
-        rospy.sleep(1)
 
-        observation = self.observe()
-        self.check_error(observation)
+        avg_ang_vel_err = sum(self.ang_vel_errs) / len(self.ang_vel_errs)
+        rospy.loginfo("Avg ang vel error" + str(avg_ang_vel_err))
+        fig, ax = plt.subplots()
+        ax.plot(self.position_errs, label='position error')
+        ax.plot(self.orientation_errs, label='orientation error')
+        ax.plot(self.vel_errs, label="velocity error")
+        ax.plot(self.ang_vel_errs, label='angular velocity error')
+
+        ax.legend()
+
+        plt.show()
 
 
 

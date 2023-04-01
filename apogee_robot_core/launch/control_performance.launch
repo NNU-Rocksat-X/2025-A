@@ -1,0 +1,23 @@
+<launch>
+    <node name="j1_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_1" output="screen"/>
+
+    <node name="j2_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_2" output="screen"/>
+
+    <node name="j3_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_3" output="screen"/>
+
+    <node name="j4_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_4" output="screen"/>
+
+    <node name="j5_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_5" output="screen"/>
+
+    <node name="j6_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_6" output="screen"/>
+
+    <node name="j7_performance" pkg="apogee_robot_core" type="view_control_performance"
+        args="joint_7" output="screen"/>
+
+</launch>

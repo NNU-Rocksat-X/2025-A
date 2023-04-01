@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+import rospy
+from daedalus_msgs.srv import PlanGrasp, PlanGraspRequest
+from std_msgs.msg import Float32
+
+rospy.init_node("catch_plan_tester")
+
+rospy.wait_for_service("/ARM1/plan_grasp")
+plan_grasp = rospy.ServiceProxy("/ARM1/plan_grasp", PlanGrasp)
+
+
+def main():
+    plan = PlanGraspRequest()
+    plan.Grasp.position.x = -0.29
+    plan.Grasp.position.y = 0.063066
+    plan.Grasp.position.z = 0.26048
+    plan.Grasp.orientation.x = 0.0144
+    plan.Grasp.orientation.y = -0.708
+    plan.Grasp.orientation.z = -0.01209
+    plan.Grasp.orientation.w = 0.7066
+    plan.time_to_maneuver.data = rospy.Time.from_sec(rospy.get_time() + 3)
+    plan.grasp_time = 2.0
+
+    print("plan:", plan)
+
+    status = plan_grasp(plan)
+    print(status)
+    
+if __name__ == "__main__":
+    main()

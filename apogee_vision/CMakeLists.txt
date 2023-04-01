@@ -54,6 +54,7 @@ catkin_install_python(
         scripts/tests/orientation_axis
         scripts/tests/graph_angular_velocity
         scripts/tests/trajectory_prediction_accuracy
+        scripts/tests/velocity_estimation_accuracy
         nodes/remap_object_pose
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -104,3 +105,10 @@ add_executable(trajectory_predictor ${TRAJECTORY_SRC})
 target_link_libraries(trajectory_predictor eigen_util ${CERES_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(trajectory_predictor eigen_util  ${catkin_EXPORTED_TARGETS})
 
+##################################################
+#                      TESTS
+##################################################
+
+add_executable(trajectory_search_test src/tests/trajectory_searcher_test.cpp)
+target_link_libraries(trajectory_search_test ${catkin_LIBRARIES})
+add_dependencies(trajectory_search_test ${catkin_EXPORTED_TARGETS})

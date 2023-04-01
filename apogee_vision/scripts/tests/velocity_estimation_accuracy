@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import rospy 
+
+from daedalus_msgs.srv import ObjectObservation
+from geometry_msgs.msg import Twist 
+import math
+
+
+
+class Tester:
+    def __init__(self):
+        self.measured_twist = Twist()
+
+        rospy.init_node("velocity_accuracy_tester")
+
+        rospy.Subscriber("/mujoco/object_twist", Twist, self.pose_cb)
+        self.observe = rospy.ServiceProxy("/trajectory_predictor/observe", ObjectObservation)
+
+
+    def pose_cb(self, msg):
+        self.measured_twist = msg
+
+
+    def run(self):
+        rate = rospy.Rate(10)
+
+        while not rospy.is_shutdown():
+            observation = self.observe()
+            error_sum = 0
+            error_sum += (observation.velocity.linear.x - self.measured_twist.linear.x)**2
+            error_sum += (observation.velocity.linear.y - self.measured_twist.linear.y)**2
+            error_sum += (observation.velocity.linear.z - self.measured_twist.linear.z)**2
+            dist = math.sqrt(error_sum)
+            rospy.loginfo("\n" + str(observation.velocity.linear) + "\nD: " + str(dist))
+            rate.sleep()
+
+
+
+if __name__ == "__main__":
+    tester = Tester()
+    tester.run()

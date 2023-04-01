@@ -1,0 +1,16 @@
+<launch>
+    <rosparam file="$(find mog_ai)/config/model_config.yaml" command="load"/>
+    <env name="TRAINING_DIR" value="$(find mog_ai)/models/"/>
+
+    <group ns="ARM1">
+        <include file="$(find arm2v4_description)/launch/gripper_config.launch"/>
+    </group>
+    
+    
+    <include file="$(find mujoco_ros)/launch/sim.launch" >
+        <arg name="env" value="gripper"/>
+    </include>
+
+    <node name="vae_tester" pkg="mog_ai" type="test_vae_grasps" output="screen"/>
+
+</launch>

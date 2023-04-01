@@ -3,6 +3,7 @@
 
 #include "apogee_vision/PositionFilter.h"
 #include "apogee_vision/OrientationPredictor.h"
+#include "apogee_vision/TrajectorySearch.h"
 
 // MSG & SRVs
 #include <geometry_msgs/Pose.h>
@@ -13,6 +14,7 @@
 
 #include <daedalus_msgs/PredictPosition.h> 
 #include <daedalus_msgs/ObjectObservation.h>
+#include <daedalus_msgs/TrajectoryPoints.h>
 
 
 Eigen::Vector3f point_to_v3f(const geometry_msgs::Point msg)
@@ -25,6 +27,15 @@ Eigen::Vector4f quat_to_v4f(const geometry_msgs::Quaternion msg)
 {
     Eigen::Vector4f vector(msg.x, msg.y, msg.z, msg.w);
     return vector;
+}
+
+geometry_msgs::Point eigen_to_msg(const Eigen::Vector3f v)
+{
+    geometry_msgs::Point point;
+    point.x = v[0];
+    point.y = v[1];
+    point.z = v[2];
+    return point;
 }
 
 geometry_msgs::Quaternion quat_to_msg(const Eigen::Quaternionf q)
@@ -49,18 +60,34 @@ class Predictor {
 
     Eigen::Vector3f measured_position;
     Eigen::Vector4f measured_orientation;
+    ros::Time measurement_time;
     ros::Time init_time;
 
-    bool position_recvd = false;
     bool has_converged = false;
+    bool position_recvd = false;
+    // Ensures this node only runs when new data is available
+    // This prevents the case where it seems like the object has 0 velocity
+    // because this loop has ran twice before the object tracker publishes new data
+    bool new_data = false;
 
     // Ros comm
     ros::NodeHandle* nh;
     ros::Subscriber sub;
     ros::Publisher or_pub;
+    ros::ServiceClient traj_points_client;
     ros::ServiceServer convergenceService;
     ros::ServiceServer predictService;
     ros::ServiceServer observeService;
+    ros::ServiceServer resetService;
+
+
+    // Parameters
+    int rate_freq;
+    float acceleration_variance;
+    float measurement_variance;
+    float initial_uncertainty_guess;
+    float sufficient_convergence;
+    float rate_period;
 
 
     public:
@@ -70,9 +97,11 @@ class Predictor {
 
         sub = nh->subscribe("mujoco/object_pose", 1, &Predictor::pose_cb, this);
         or_pub = nh->advertise<daedalus_msgs::OrientationState>("/orientation_state", 10);
+        traj_points_client = nh->serviceClient<daedalus_msgs::TrajectoryPoints>("/trajectory_predictor/traj_points");
         convergenceService = nh->advertiseService("trajectory_predictor/ready", &Predictor::prediction_ready, this);
         predictService = nh->advertiseService("trajectory_predictor/predict", &Predictor::predict, this);
         observeService = nh->advertiseService("trajectory_predictor/observe", &Predictor::observe, this);
+        resetService = nh->advertiseService("trajectory_predictor/reset", &Predictor::reset_cb, this);
 
     }
 
@@ -80,14 +109,19 @@ class Predictor {
     {
         measured_position = point_to_v3f(msg->position);
         measured_orientation = quat_to_v4f(msg->orientation);
+        measurement_time = ros::Time::now();
+
 
         if (!position_recvd)
         {
-            position_recvd = true;
             init_time = ros::Time::now();
+            position_recvd = true;
         }
+        new_data = true;
 
     }
+
+    
 
     // Currently only works for position
     bool observe(daedalus_msgs::ObjectObservation::Request &req,
@@ -129,8 +163,19 @@ class Predictor {
     }
 
 
+    bool reset_cb(std_srvs::Trigger::Request &req,
+               std_srvs::Trigger::Response & res)
+    {
+        Position::StateVector state_guess = Position::StateVector::Zero();
+        state_guess(0) = measured_position[0];
+        state_guess(1) = 0.1;
+        state_guess(3) = measured_position[1];
+        state_guess(6) = measured_position[2];
+        pos_filter = new PositionFilter(state_guess, initial_uncertainty_guess, rate_period, acceleration_variance, measurement_variance);
+        //ori_predictor = new OrientationPredictor(rate_period);
+        return true;
+    }
 
-    
     bool prediction_ready(std_srvs::Trigger::Request &req,
                         std_srvs::Trigger::Response &res)
     {
@@ -138,29 +183,59 @@ class Predictor {
         return true;
     }
 
-    /* Predict uses time until prediction, norm dist is calculated else where
-        Searcher searcher(state.position, state.velocity, state.acceleration);
+    void publish_traj_points(const Vector3f* points)
+    {
+        daedalus_msgs::TrajectoryPoints traj_points;
+        traj_points.request.before = eigen_to_msg(points[0]);
+        traj_points.request.closest = eigen_to_msg(points[1]);
+        traj_points.request.after = eigen_to_msg(points[2]);
 
-        Find time until object is at closest point to base of arm
-        float delta_time = searcher.solve();
-    */
+        traj_points_client.call(traj_points);
+    }
+
     bool predict(daedalus_msgs::PredictPosition::Request &req,
                     daedalus_msgs::PredictPosition::Response &res)
     {
-        // Orientation prediction
-        float t = (float)req.time_until_prediction;
-        Eigen::Quaternionf orientation = ori_predictor->predict(t);
-        res.orientation = quat_to_msg(orientation);
-        
-        // Position prediction
-        Position::State state_prediction;
-        pos_filter->predict_state(t, state_prediction);
+        ROS_INFO("======== prediction ===========");
+        // Get current state
+        Position::State curr_state;
+        pos_filter->get_state(curr_state);
 
+        // Setup to convert trajectory slice to position and delta time
+        ros::Time before_search = ros::Time::now();
+        Searcher searcher(curr_state.position, curr_state.velocity, curr_state.acceleration);
+
+        // Convert trajectory slice
+        float delta_time;
+        Vector3f traj_points[3];
+        bool in_range;
+        Vector3f predicted_position = searcher.solve(req.trajectory_slice, delta_time, in_range, traj_points);
+
+        if (!in_range)
+        {
+            res.in_range = false;
+            return true;
+        }
+        res.in_range = true;
+
+        float diff = (ros::Time::now() - before_search).toSec();
+        delta_time - diff;
+        ROS_INFO("Search took %f", diff);
+        publish_traj_points(traj_points);
+        //delta_time = delta_time/2;
+
+
+        // Orientation prediction
+        Eigen::Quaternionf orientation = ori_predictor->predict(delta_time);
+
+        // Fill in response msg
         geometry_msgs::Point position_msg;
-        position_msg.x = state_prediction.position(0);
-        position_msg.y = state_prediction.position(1);
-        position_msg.z = state_prediction.position(2);
+        position_msg.x = predicted_position(0);
+        position_msg.y = predicted_position(1);
+        position_msg.z = predicted_position(2);
         res.position = position_msg;  
+        res.orientation = quat_to_msg(orientation);
+        res.prediction_time.data = ros::Time::now() + ros::Duration(delta_time);
 
         return true;
     }
@@ -175,10 +250,7 @@ class Predictor {
         state_guess(6) = 0.05;
 
         // -------------------- Velocity Estimator -----------------------
-        int rate_freq;
-        float acceleration_variance;
-        float measurement_variance;
-        float initial_uncertainty_guess;
+
 
         if (nh->hasParam("/rates/trajectory_predictor")) 
         {
@@ -191,11 +263,12 @@ class Predictor {
             nh->getParam("TrajectoryPredictorConfig/acceleration_variance", acceleration_variance);
             nh->getParam("TrajectoryPredictorConfig/measurement_variance", measurement_variance);
             nh->getParam("TrajectoryPredictorConfig/initial_uncertainty_guess", initial_uncertainty_guess);
+            nh->getParam("TrajectoryPredictorConfig/sufficient_convergence", sufficient_convergence);
         } else {
             ROS_ERROR("TrajectoryPredictorConfig parameters not loaded.");
         }
         
-        float rate_period = 1.0 / (float)rate_freq;
+        rate_period = 1.0 / (float)rate_freq;
         ROS_INFO("rate period: %f", rate_period);
 
         pos_filter = new PositionFilter(state_guess, initial_uncertainty_guess, rate_period, acceleration_variance, measurement_variance);
@@ -213,12 +286,21 @@ class Predictor {
 
         while(ros::ok())
         {
+            static ros::Time prev_time = ros::Time::now();
+            ros::Time now = ros::Time::now();
+            float dt = (now - prev_time).toSec();
+            float ratio = dt/rate_period;
+            if (ratio > 1.3 || ratio < 0.96)
+            {
+                //ROS_WARN("Bad rate: %f", dt/rate_period);
+            }
+            prev_time = now;
 
             if (!has_converged)
             {
-                if (position_recvd)
+                if (new_data)
                 {
-                    ori_predictor->step(measured_orientation);
+                    ori_predictor->step(measured_orientation, measurement_time);
             
                     // Step prediction
                     Position::StateVector state_estimate;
@@ -226,20 +308,21 @@ class Predictor {
                     pos_filter->get_state(state_estimate);
 
                     // Test for convergence
-                    if (abs(state_estimate(2)) < 0.005)
+                    if (pos_filter->get_convergence() < sufficient_convergence)
                     {
                         float converge_duration = (ros::Time::now() - init_time).toSec();
                         ROS_INFO("Converge_time: %f", converge_duration);
                         has_converged = true;
                     }
+                    new_data = false;
                     
                 } else {
-                    ROS_INFO("Waiting for position");
+                    //ROS_INFO("Waiting for position");
                 }
             }
             else {
                 
-                ori_predictor->step(measured_orientation);
+                ori_predictor->step(measured_orientation, measurement_time);
 
                 // Step position
                 Position::StateVector state_estimate;
@@ -248,7 +331,7 @@ class Predictor {
                 pos_filter->get_state(state_estimate);
 
                 // Test for convergence
-                if(abs(state_estimate(2)) > 1)
+                if(pos_filter->get_convergence() > 2*sufficient_convergence)
                 {
                     has_converged = false;
                     init_time = ros::Time::now();

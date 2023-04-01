@@ -1,0 +1,48 @@
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
+class Trajectory:
+    def __init__(self, x0, y0, z0, vx0, vy0, vz0, ax, ay, az):
+        self.x0 = x0
+        self.y0 = y0
+        self.z0 = z0
+        self.vx0 = vx0
+        self.vy0 = vy0
+        self.vz0 = vz0
+        self.ax = ax
+        self.ay = ay
+        self.az = az
+    
+    def position(self, t):
+        x = self.x0 + self.vx0*t + 0.5*self.ax*t**2
+        y = self.y0 + self.vy0*t + 0.5*self.ay*t**2
+        z = self.z0 + self.vz0*t + 0.5*self.az*t**2
+        return x, y, z
+    
+    def plot_trajectory(self, t):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        x, y, z = self.position(np.arange(0, t, 0.01))
+        ax.plot(x, y, z)
+        ax.set_xlabel('X (m)')
+        ax.set_ylabel('Y (m)')
+        ax.set_zlabel('Z (m)')
+        ax.set_title('Trajectory')
+        return fig, ax
+    
+    def place_dot(self, x, y, z, closest, before, after):
+        fig, ax = self.plot_trajectory(4)
+        ax.scatter(x, y, z, s=100, c='orange')
+        ax.plot([closest[0], x], [closest[1], y], [closest[2], z], '--', color='gray')
+        ax.plot([before[0], x], [before[1], y], [before[2], z], '--', color='gray')
+        ax.plot([after[0], x], [after[1], y], [after[2], z], '--', color='gray')
+        ax.set_xlabel('X (m)')
+        ax.set_ylabel('Y (m)')
+        ax.set_zlabel('Z (m)')
+        ax.set_title('Trajectory')
+        return fig, ax
+
+t = Trajectory(0, 0, 0, 10, 5, 20, 0, 0, -9.81)  # initial position: (0, 0, 0), initial velocity: (10, 0, 0), acceleration: (0, -9.81, 0)
+fig, ax = t.place_dot(30, 5, 5, t.position(3.124809), t.position(2.934809), t.position(3.654809))  # place a dot at (x=1.5, y=0, z=position at t=1.5)
+plt.show()  # display the final plot

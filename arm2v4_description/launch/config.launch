@@ -4,6 +4,7 @@
 
     <rosparam file="$(find arm2v4_description)/config/joint_config.yaml" command="load"/>
     <rosparam file="$(find arm2v4_description)/config/controllers.yaml" command="load"/>
+    <rosparam file="$(find arm2v4_description)/config/poses.yaml" command="load"/>
     <param name="robot_description" command="$(find xacro)/xacro $(find arm2v4_description)/urdf/arm2v4.urdf.xacro"/> 
     <param name="robot_description_semantic" textfile="$(find arm2v4_description)/config/arm2d2.srdf"/>
 

@@ -1,0 +1,52 @@
+#!/usr/bin/env python3.7
+
+import rospy
+import numpy as np
+from mog_ai.grasp_vae import GraspVae
+from mog_ai.srv import GenerateGrasp, GenerateGraspResponse
+from geometry_msgs.msg import Pose
+
+GRASPS_FILE = "/home/cyborg/catkin_ws/src/daedalus/mog_ai/training/successful_grasps.npy"
+successful_grasps = np.load(GRASPS_FILE).tolist()
+
+rospy.init_node("grasp_vae_server")
+model_params = rospy.get_param("/model_config")
+vae = GraspVae(latent_dim=model_params['latent_dim'], model_name=model_params['vae_path'])
+
+def generate_successful_grasp():
+    grasp = Pose()
+    grasp_id = int(np.random.uniform(low=0, high=len(successful_grasps)))
+    chosen_grasp = successful_grasps[grasp_id]
+    grasp.position.x = chosen_grasp[1]
+    grasp.position.y = chosen_grasp[2]
+    grasp.position.z = chosen_grasp[3]
+    grasp.orientation.x = chosen_grasp[4]
+    grasp.orientation.y = chosen_grasp[5]
+    grasp.orientation.z = chosen_grasp[6]
+    grasp.orientation.w = chosen_grasp[7]
+    return grasp
+
+def generate_basic_grasp():
+    grasp = Pose()
+    grasp.position.z = 0
+    grasp.orientation.x = 0
+    grasp.orientation.y = 0
+    grasp.orientation.z = 0
+    grasp.orientation.w = 1
+    return grasp
+
+def generate_vae_grasp(req):
+    grasp = vae.generate_grasp(object_id=req.object_id, latent=list(req.latent_space))
+    return grasp
+
+def generate_cb(req):
+    grasp = generate_vae_grasp(req)
+    return GenerateGraspResponse(grasp)
+
+def main():
+    rospy.Service("/mog_ai/generate_grasp", GenerateGrasp, generate_cb)
+    rospy.spin()
+
+if __name__ == "__main__":
+    main()
+

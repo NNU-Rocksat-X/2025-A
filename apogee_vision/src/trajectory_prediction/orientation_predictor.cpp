@@ -81,20 +81,34 @@ Eigen::Quaternionf OrientationPredictor::predict(float t)
 ///////////////////////////////////////////////////////////////////////////////////////
 //                         CALCULATE ANGULAR VELOCITY
 ///////////////////////////////////////////////////////////////////////////////////////
-void OrientationPredictor::step(Eigen::Vector4f q_vec)
+void OrientationPredictor::step(Eigen::Vector4f q_vec, ros::Time measurement_time)
 {
     // q = current orientation
     curr_q = v4_to_quat(q_vec);
+    curr_q.normalize();
+
+    float delta_time = (measurement_time - prev_time).toSec();
+
+    if (delta_time == 0.0)
+    {
+        return;
+    }
+
     
     // Change in orientation
     Eigen::Quaternionf q_diff = curr_q * prev_q.inverse();
 
-    Eigen::Vector3f vector_diff = q_diff.toRotationMatrix().eulerAngles(0,1,2);
+    //Eigen::Vector3f vector_diff = q_diff.toRotationMatrix().eulerAngles(0,1,2);
+    Eigen::Vector3f vector_diff = quat_to_euler(q_diff);
+
+    // Multiply step period by 2 because diff is calculated with every other step
     Eigen::Vector3f angular_velocity = 2 *vector_diff / step_period;
 
 
-    prev_q = curr_q;
     w_list.push_back(angular_velocity);
+
+    prev_q = curr_q;
+    prev_time = measurement_time;
 
     // Only keep the most recent otherwise it takes to long to predict
     if (w_list.size() > 75)
@@ -111,5 +125,18 @@ void OrientationPredictor::step(Eigen::Vector4f q_vec)
 void OrientationPredictor::get_state(Eigen::Quaternionf &orientation, Eigen::Vector3f &velocity)
 {
     orientation = curr_q;
-    velocity = w_list.back();
+    Eigen::Vector3f w_sum;
+    int num_avg = 5;
+    for (int i = 0; i < num_avg; i++)
+    {
+        w_sum += w_list[w_list.size() - 1 - i];
+    }
+
+    
+    for (int i = 0; i < 3; i++)
+    {
+        velocity[i] = w_sum[i] / num_avg;
+
+    }
+
 }

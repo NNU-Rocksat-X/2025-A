@@ -21,3 +21,11 @@ stepper_config:
     - 0.1 #0.3     # 90 / 300
     - 0.1 #0.3     # 90 / 300
   gripper_gain: 50
+  gains:
+    joint_1: {p: 50,  d: 0, i: 0.01, i_clamp: 1}
+    joint_2: {p: 55,  d: 0, i: 0.01, i_clamp: 1}
+    joint_3: {p: 30,  d: 0, i: 0.01, i_clamp: 1} # Good!
+    joint_4: {p: 55,  d: 0, i: 0.01, i_clamp: 1}
+    joint_5: {p: 30,  d: 0, i: 0.001, i_clamp: 1} # Good!
+    joint_6: {p: 50, d: 0.1, i: 0.01, i_clamp: 1}
+    joint_7: {p: 35, d: 0.1, i: 0.01, i_clamp: 1}
