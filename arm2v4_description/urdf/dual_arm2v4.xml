@@ -4,7 +4,7 @@
     <quality shadowsize="8192"/>
   </visual>
   <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
-  <option integrator="RK4" timestep="0.0002" > <!-- cone="elliptic" impratio="50" -->
+  <option integrator="RK4" timestep="0.00015" > <!-- cone="elliptic" impratio="50" -->
     <flag gravity="disable"/>
   </option>
   <size njmax="500" nconmax="100"/>

@@ -215,12 +215,12 @@ bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
                 joints_complete += 1;
         }
 
-        if (cnt > MAX_WAIT)
+        if (cnt > MAX_WAIT*10)
         {
             return false;
         }
         cnt++;
-        ros::Duration(0.5).sleep();
+        ros::Duration(0.1).sleep();
     }
     return true;
 }

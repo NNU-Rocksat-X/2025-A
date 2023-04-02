@@ -27,6 +27,39 @@ joints:
     - 1.38
     - 0.014
 
+  # Must be labeled step_x.
+  # These are looped through autonomously to fold and unfold
+  # Any number of steps can be used
+  # Must start at step_0
+  folding:
+    step_0:
+      - 1.0
+      - 0.85
+      - 0.677
+      - 1.23
+      - 0.86
+      - 1.82
+      - -0.46
+
+    step_1:
+      - 0.169
+      - 0.806
+      - 0.905
+      - 1.51
+      - 1.268
+      - 0.807
+      - -0.624
+
+    step_2:
+      - -0.135
+      - 1.104
+      - 0.76
+      - 0.75
+      - 0.81
+      - 1.54
+      - -0.176
+
+
 grip_pose:
   open: 1
   close: -1

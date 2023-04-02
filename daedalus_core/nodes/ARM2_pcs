@@ -19,6 +19,10 @@ class Mission_SM:
     
     def mission_sm(self):
         with self.sm:
+            smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
+                transitions={'Ready': 'Pickup_Wrench',
+                             'Timeout': 'Mission_Fail'})
+
             smach.StateMachine.add('Pickup_Wrench', Pickup_Wrench_SM,
                     transitions={'Success': 'Mission_Success',
                                  'Fail': 'Mission_Fail'})

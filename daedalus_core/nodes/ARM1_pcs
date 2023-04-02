@@ -19,11 +19,28 @@ class Mission_SM:
     
     def mission_sm(self):
         with self.sm:
+            
+            smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
+                transitions={'Ready': 'Pickup_Cube',
+                             'Timeout': 'Mission_Fail'})
+            
+
             smach.StateMachine.add('Pickup_Cube', Pickup_Cube_SM,
-                    transitions={'Success': 'Mission_Success',
+                    transitions={'Success': 'Unfold',
                                  'Fail': 'Mission_Fail'})
 
+            smach.StateMachine.add('Unfold', Unfold_SM,
+                    transitions={'Success': 'Mission_Success',
+                                 'Fail': 'Mission_Fail'})
+            """
+            smach.StateMachine.add('Fold', Fold_SM,
+                    transitions={'Success': 'Mission_Success',
+                                 'Fail': 'Mission_Fail'})
+            """
+
     def run(self):
+        folding = rospy.get_param('joints/folding')
+        print(len(folding))
         outcome = self.sm.execute()
 
 
