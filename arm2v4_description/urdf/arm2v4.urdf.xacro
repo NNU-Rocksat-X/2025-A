@@ -1,6 +1,12 @@
 <?xml version="1.0" ?>
 <robot name="arm2v4" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+<xacro:arg name="include_base_plate" default="false"/>
+<xacro:arg name="arm" default="ARM1"/>
+
+<!-- Convert arg to property -->
+<xacro:property name="arm" value="$(arg arm)"/>
+
 <material name="silver">
   <color rgba="0.700 0.700 0.700 1.000" />
 </material>
@@ -9,27 +15,27 @@
 
 
 <link name="base_link">
-  <!--
-  <inertial>
-    <origin xyz="-0.01036605995280163 0.008118725780222396 -0.010698521307181049" rpy="0 0 0"/>
-    <mass value="0.6714813076324946"/>
-    <inertia ixx="0.004693" iyy="0.009008" izz="0.004597" ixy="0.000126" iyz="0.000275" ixz="-0.00051"/>
-  </inertial>
-  <visual>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <geometry>
-      <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
-    </geometry>
-    <material name="silver"/>
-  </visual>
-  
-  <collision>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <geometry>
-      <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
-    </geometry>
-  </collision>
-  -->
+  <xacro:if value="$(arg include_base_plate)">
+    <inertial>
+      <origin xyz="-0.01036605995280163 0.008118725780222396 -0.010698521307181049" rpy="0 0 0"/>
+      <mass value="0.6714813076324946"/>
+      <inertia ixx="0.004693" iyy="0.009008" izz="0.004597" ixy="0.000126" iyz="0.000275" ixz="-0.00051"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </xacro:if>
 </link>
 
 <joint name="world_joint" type="fixed">
@@ -324,7 +330,13 @@
 </link>
 
 <joint name="joint_1" type="continuous">
-  <origin xyz="-0.1101 0.02 -0.0551" rpy="0 0 0"/>
+  <xacro:if value="${arm == 'ARM1'}">
+    <origin xyz="-0.1101 0.007 -0.0551" rpy="0 0 0"/>
+  </xacro:if>
+  <xacro:unless value="${arm == 'ARM1'}">
+    <origin xyz="0.0551 0.007 0.1101" rpy="0 -1.57 0"/>
+  </xacro:unless>
+
   <parent link="base_link"/>
   <child link="link_1"/>
   <axis xyz="-0.0 -1.0 0.0"/>

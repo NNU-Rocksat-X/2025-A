@@ -1,0 +1,10 @@
+<mujoco>
+  <asset>
+    <mesh name="finger_3_100" file="finger_3/finger_3_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_200" file="finger_3/finger_3_2.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_300" file="finger_3/finger_3_3.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_400" file="finger_3/finger_3_4.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_500" file="finger_3/finger_3_5.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="finger_3_600" file="finger_3/finger_3_6.stl" scale="0.01 0.01 0.01"/>
+  </asset>
+</mujoco>

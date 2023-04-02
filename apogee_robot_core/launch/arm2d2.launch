@@ -8,11 +8,11 @@
         <include if="$(eval arg('version') == 'arm2d2_v2')" file="$(find arm2d2_v2_description)/launch/config.launch"/>
         <include if="$(eval arg('version') == 'arm2v4')" file="$(find arm2v4_description)/launch/config.launch">
             <arg name="ns" value="ARM1"/>
-            <arg name="dual" value="dual"/>
+            <arg name="dual" value="true"/>
         </include>
         <include if="$(eval arg('version') == 'arm2v4_wrench')" file="$(find arm2v4_description)/launch/config.launch">
             <arg name="ns" value="ARM1"/>
-            <arg name="dual" value="dual"/>
+            <arg name="dual" value="true"/>
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
@@ -26,6 +26,7 @@
         <include if="$(eval arg('version') == 'arm2d2_v2')" file="$(find arm2d2_v2_description)/launch/config.launch"/>
         <include if="$(eval arg('version') == 'arm2v4')" file="$(find arm2v4_description)/launch/config.launch">
             <arg name="ns" value="ARM2"/>
+            <arg name="dual" value="true"/>
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">

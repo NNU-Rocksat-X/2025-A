@@ -1,0 +1,34 @@
+pose:
+  0
+joints:
+  home:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+
+  pre_pickup_cube:
+    - 0.0
+    - 0.25
+    - 0.0
+    - 0.99
+    - 0
+    - 1.85
+    - 0
+
+  pickup_cube:
+    - -0.02
+    - 0.156
+    - 0
+    - 1.6
+    - 0
+    - 1.38
+    - 0.014
+
+grip_pose:
+  open: 1
+  close: -1
+  half_close: -0.5
+  grasp_cube: -0.84

@@ -22,8 +22,8 @@ arm2d2/controllers:
       joint_6: {p: 6, d: 0.7, i: 0, i_clamp: 1}
       joint_7: {p: 7, d: 0.9, i: 0, i_clamp: 1}
     constraints:
-      goal_time: 10
-      stopped_velocity_tolerance: 0.5
+      goal_time: 100
+      stopped_velocity_tolerance: 0
 
   position:
     type: "position_controllers/JointTrajectoryController"
@@ -37,7 +37,7 @@ arm2d2/controllers:
       - joint_7
     constraints:
       goal_time: 10
-      stopped_velocity_tolerance: 0.5
+      stopped_velocity_tolerance: 10
 
 
 

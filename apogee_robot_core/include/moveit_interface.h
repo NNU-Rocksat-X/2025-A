@@ -16,6 +16,7 @@
 #include <geometry_msgs/Point.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Empty.h>
+#include <std_srvs/Trigger.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 
 #include <daedalus_msgs/MoveCmd.h>
@@ -59,6 +60,7 @@ class MoveInterface {
         ros::ServiceServer asyncJointPoseService;
         ros::ServiceServer positionService;
         ros::ServiceServer getPosService;
+        ros::ServiceServer getJointService;
         ros::ServiceServer postureService;
         ros::ServiceServer graspService;
         ros::ServiceServer planGraspService;
@@ -78,6 +80,8 @@ class MoveInterface {
 
 
         bool grasp(std::string pose);
+        bool wait_until_complete(std::vector<double> joint_cmds);
+        bool wait_until_grasp_complete(float grasp_position);
 
         GraspPlan grasp_plan;
 
@@ -90,6 +94,9 @@ class MoveInterface {
 
         bool getPose(daedalus_msgs::GetPos::Request &req,
                      daedalus_msgs::GetPos::Response &res);
+
+        bool get_joints(std_srvs::Trigger::Request &req,
+                        std_srvs::Trigger::Response & res);
 
         bool poseCmd(daedalus_msgs::MoveCmd::Request &req,
                      daedalus_msgs::MoveCmd::Response &res);

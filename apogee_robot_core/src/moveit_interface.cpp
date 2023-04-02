@@ -29,6 +29,8 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
 
     getPosService = nh->advertiseService("get_pos", &MoveInterface::getPose, this);
 
+    getJointService = nh->advertiseService("get_joints", &MoveInterface::get_joints, this);
+
     postureService = nh->advertiseService("posture_cmd", &MoveInterface::postureCmd, this);
 
     graspService = nh->advertiseService("grasp_cmd", &MoveInterface::graspCmd, this);
@@ -37,15 +39,14 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
 
     executeGraspService = nh->advertiseService("execute_grasp", &MoveInterface::executeGrasp, this);
 
-    graspPub = nh->advertise<std_msgs::Float32>("/ARM1/grip_position_cmd", 1);
+    graspPub = nh->advertise<std_msgs::Float32>("grip_position_cmd", 1);
     display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
 
     ros::param::get(ros::this_node::getNamespace() + "/stepper_config/num_joints", num_joints);
     ROS_INFO("Running with %i joints", num_joints);
 
     pose_param = ros::this_node::getNamespace() + "/pose/";
-    //joint_param = ros::this_node::getNamespace() + "/joints/"; commented because there currently is no namespace
-    joint_param = "joints/";
+    joint_param = ros::this_node::getNamespace() + "/joints/";
 
     grasp_plan.planned = false;
 }
@@ -191,6 +192,39 @@ bool MoveInterface::asyncPoseCmd(daedalus_msgs::MoveCmd::Request &req,
     return true;            
 }
 
+bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
+{
+    float POSITION_ACCURACY = 0.1;
+    int MAX_WAIT = 100;
+    std::vector<std::string> joint_names;
+    ros::param::get("stepper_config/joint_names", joint_names);
+    ros::param::get("stepper_config/goal_position_accuracy", POSITION_ACCURACY);
+    ros::param::get("stepper_config/max_goal_time", MAX_WAIT);
+
+    int joints_complete = 0;
+    int cnt = 0;
+
+    while (joints_complete < joint_cmds.size())
+    {
+        joints_complete = 0;
+        robot_state::RobotState current_state(*move_group->getCurrentState());
+        for (int i = 0; i < joint_cmds.size(); i++)
+        {
+            const double* joint_pos = current_state.getJointPositions(joint_names[i]);
+            if (abs(*joint_pos - joint_cmds[i]) < POSITION_ACCURACY)
+                joints_complete += 1;
+        }
+
+        if (cnt > MAX_WAIT)
+        {
+            return false;
+        }
+        cnt++;
+        ros::Duration(0.5).sleep();
+    }
+    return true;
+}
+
 
 /// @brief - Takes name as request an moves to pre-programmed radian angles for each joint
 ///          Joint values in yaml file must be in radians
@@ -202,25 +236,34 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
 
     std::vector<double> joint_group_positions;
 
-    ros::param::get(param, joint_group_positions);
+    if (ros::param::get(param, joint_group_positions))
+    {
+        ROS_INFO("Joint angles: %f, %f, %f", joint_group_positions[0], joint_group_positions[1], joint_group_positions[2]);
 
 
-    bool target_success = move_group->setJointValueTarget(joint_group_positions);
-    ROS_WARN("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
-    moveit::planning_interface::MoveGroupInterface::Plan target_plan;
+        bool target_success = move_group->setJointValueTarget(joint_group_positions);
+        ROS_WARN("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
+        moveit::planning_interface::MoveGroupInterface::Plan target_plan;
 
-    bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    ROS_DEBUG("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
+        bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+        ROS_DEBUG("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
 
-    if (plan_success) {
-        move_group->execute(target_plan);
-        res.done = true;
+        if (plan_success) {
+            move_group->execute(target_plan);
+            bool completion_status = wait_until_complete(joint_group_positions);
+            res.done = completion_status;
+            return true;
+        }
+        else {
+            res.done = false;
+            return true;
+        }
+    } else {
+        res.done = false;
+        ROS_WARN("Joint pose does not exist!");
         return true;
     }
-    else {
-        res.done = false;
-        return false;
-    }
+
 
 }
 
@@ -315,9 +358,7 @@ bool MoveInterface::planGrasp(daedalus_msgs::PlanGrasp::Request &req,
 
 
         robot_state::RobotState start_state(*move_group->getCurrentState());
-        const double* j1_start = start_state.getJointPositions("joint_1");
-        ROS_WARN("j1 start = %f", *j1_start);
-        //start_state.setFromIK(joint_model_group, req.Grasp);
+ 
         move_group->setStartState(start_state);
 
         ROS_WARN("Beginning to plan!");
@@ -429,14 +470,45 @@ bool MoveInterface::positionCmd(daedalus_msgs::PositionCmd::Request &req,
 
 }
 
+bool MoveInterface::wait_until_grasp_complete(float grasp_position)
+{
+    float POSITION_ACCURACY = 0.1;
+    int MAX_WAIT = 100;
+    
+    ros::param::get("stepper_config/goal_position_accuracy", POSITION_ACCURACY);
+    ros::param::get("stepper_config/max_goal_time", MAX_WAIT);
+
+    int cnt = 0;
+
+    while (true)
+    {
+        robot_state::RobotState current_state(*move_group->getCurrentState());
+
+        const double* joint_pos = current_state.getJointPositions("gripper_joint_1");
+        if (abs(*joint_pos - grasp_position) < POSITION_ACCURACY)
+            return true;
+
+        if (cnt > MAX_WAIT)
+            return false;
+
+        cnt++;
+        ros::Duration(0.5).sleep();
+    }
+        
+
+
+}
         
 bool MoveInterface::grasp(std::string pose) {
     std::string param = "grip_pose/" + pose;
-    std_msgs::Float32 grip_position;
+    std_msgs::Float32 grasp_position;
+    ROS_INFO("Grasp position: %f", grasp_position.data);
     if(ros::param::has(param))
     {
-        ros::param::get(param, grip_position.data);
-        graspPub.publish(grip_position);
+        ros::param::get(param, grasp_position.data);
+        graspPub.publish(grasp_position);
+
+        wait_until_grasp_complete(grasp_position.data);
 
         return true;
     } else {
@@ -452,6 +524,8 @@ bool MoveInterface::graspCmd(daedalus_msgs::MoveCmd::Request &req,
     std::string param = req.pose_name;
     ROS_INFO("Gripping pose: %s", param.c_str());
     bool success = grasp(param);
+
+    
 
     res.done = success;
     return true;
@@ -471,6 +545,22 @@ bool MoveInterface::getPose(daedalus_msgs::GetPos::Request &req,
     );
 
     res.position = position;
+    return true;
+}
+
+bool MoveInterface::get_joints(std_srvs::Trigger::Request &req,
+                               std_srvs::Trigger::Response & res)
+{
+    std::vector<std::string> joint_names;
+    ros::param::get("stepper_config/joint_names", joint_names);
+
+    robot_state::RobotState current_state(*move_group->getCurrentState());
+    for (int i = 0; i < joint_names.size(); i++)
+    {
+        const double* joint_angle = current_state.getJointPositions(joint_names[i]);
+        ROS_INFO("%s: %f", joint_names[i].c_str(), *joint_angle);
+    }
+
     return true;
 }
 

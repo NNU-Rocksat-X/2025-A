@@ -1,0 +1,7 @@
+<mujoco>
+    <geom solref=".004 1" pos="0.023955 0.005611 -0.053852" type="mesh" mesh="finger_2_100"/>
+    <geom solref=".004 1" pos="0.023955 0.005611 -0.053852" type="mesh" mesh="finger_2_200"/>
+    <geom solref=".004 1" pos="0.023955 0.005611 -0.053852" type="mesh" mesh="finger_2_300"/>
+    <geom solref=".004 1" pos="0.023955 0.005611 -0.053852" type="mesh" mesh="finger_2_400"/>
+    <geom solref=".004 1" pos="0.023955 0.005611 -0.053852" type="mesh" mesh="finger_2_500"/>
+</mujoco>
