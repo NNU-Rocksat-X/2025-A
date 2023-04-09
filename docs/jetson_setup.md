@@ -8,3 +8,5 @@ If that is the case, you must move the filesystem to the sd card, because there 
 
 # Installing pyrealsense
 [Pyrealsense Installation Instructions](https://www.lieuzhenghong.com/how_to_install_librealsense_on_the_jetson_nx/)
+
+The last step includes `export PYTHONPATH` put this line in `~/.bashrc`
