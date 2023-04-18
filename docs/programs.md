@@ -28,7 +28,22 @@ Current <Environments> are `payload` and `wrench`
 --------------------------
  
 TODO
-
+'roslaunch apogee_robot_core arm2d2.launch dual:=true'
+    
+To exacute SM
+'rosrun daedalus_core ARM2_pcs __ns:=ARM2'
+    
+----------------------------
+## Services
+    Joint Pose Cmd
+    'rosservice call joint_pose_cmd [POSE]'
+    
+    Put the pose in place of the POSE.
+    
+    Path to poses file:
+    src/daedalus/arm2v4_description/config/ARM1_poses.yaml
+    
+    
 Simulation with RVIZ control interface
 --------------------------
  
