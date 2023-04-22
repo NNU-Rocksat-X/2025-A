@@ -47,7 +47,7 @@ def crop_frame(frame, crop_center, size):
     return cropped_frame
 
 def main(show_gui=False):
-    show_gui=False
+    show_gui=True
     rospy.init_node('color_filter')
 
     mask_pub = rospy.Publisher('/object_mask', UInt8MultiArray, queue_size=1)

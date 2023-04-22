@@ -1,0 +1,58 @@
+#!/usr/bin/env python3.7
+
+import rospy
+import numpy as np
+from apogee_vision.deepsatnet import DeepsatNet
+from std_msgs.msg import UInt8MultiArray
+from geometry_msgs.msg import Pose # will be just quaternion
+import rospkg
+
+rospack = rospkg.RosPack()
+
+TRAINING_DIR = rospack.get_path('apogee_vision') + "/training"
+MODEL_DIR = TRAINING_DIR + "/models/"
+MODEL_SHAW = "logo_l2_batch_13_sgd_e4_2500_img_dense_32"
+
+def np_to_msg(np_q) -> Pose:
+    np_q = np_q[0] # Remove batch array
+    msg = Pose()
+    msg.orientation.x = np_q[0]
+    msg.orientation.y = np_q[1]
+    msg.orientation.z = np_q[2]
+    msg.orientation.w = np_q[3]
+    return msg
+
+class DeepSatServer:
+    def __init__(self):
+        rospy.init_node("deepsat_server")
+
+        self.model = DeepsatNet()
+        self.model.load_weights(MODEL_DIR + MODEL_SHAW)
+        self.rate = rospy.Rate(10)
+
+        rospy.Subscriber("/cam/object_frame", UInt8MultiArray, self.rgb_cb)
+        self.orientation_pub = rospy.Publisher('object_orientation', Pose, queue_size=5)
+
+
+    def rgb_cb(self, msg):
+        np_frame = np.array(list(msg.data))
+        frame_height = msg.layout.dim[0].size 
+        frame_width = msg.layout.dim[1].size 
+        frame = np.reshape(np_frame, (frame_height, frame_width, 3)).astype(np.uint8)
+
+        frame = np.flip(frame, 0)
+        frame = np.reshape(frame, newshape=(1, frame.shape[0], frame.shape[1], frame.shape[2]))
+        orientation = self.model.inference(frame).numpy()
+        orientation = np_to_msg(orientation)
+        print("orientation:", orientation)
+        self.orientation_pub.publish(orientation)
+
+    def run(self):
+        while not rospy.is_shutdown():
+            self.rate.sleep()
+
+if __name__ == "__main__":
+    server = DeepSatServer()
+    server.run()
+
+

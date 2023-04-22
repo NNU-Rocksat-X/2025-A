@@ -8,20 +8,19 @@ geometry_msgs::Pose object_pose_;
 void wrench_pose_cb(const geometry_msgs::Pose& msg)
 {
     object_pose_ = msg;
-    object_pose_.position.x += 0.5;
-    object_pose_.position.y -= 0.1;
     ROS_INFO("Recieved pose!");
 }
 
+// Args: Mesh file path, visualization topic, pose topic
 int main(int argc, char** argv) {
 
   ros::init(argc, argv, "display_object");
 
   ros::NodeHandle nh;
-  ros::Rate rate(1);
+  ros::Rate rate(50);
 
-  ros::Publisher object_pub  = nh.advertise<visualization_msgs::Marker>("collision_object", 10);
-  ros::Subscriber sub = nh.subscribe("/wrench_pose", 1, wrench_pose_cb);
+  ros::Publisher object_pub  = nh.advertise<visualization_msgs::Marker>(argv[2], 10);
+  ros::Subscriber sub = nh.subscribe(argv[3], 1, wrench_pose_cb);
 
   while (ros::ok())
   {

@@ -111,11 +111,8 @@ def closest_point_error(p1, p2):
 
 
 class DeepsatNet(tf.keras.Model):
-    def __init__(self, icp_weight, quat_divergence_weight):
+    def __init__(self):
         super(DeepsatNet, self).__init__()
-
-        self.quat_divergence_weight = tf.constant(quat_divergence_weight, dtype=tf.float32)
-        self.icp_weight = tf.constant(icp_weight, dtype=tf.float64)
 
         # uses resnet backbone
         self.resnet = ResNet50(include_top=False, pooling='max')
@@ -124,8 +121,8 @@ class DeepsatNet(tf.keras.Model):
         self.dense3 = tf.keras.layers.Dense(32, activation='relu')
         #self.dense4 = tf.keras.layers.Dense(32, activation='relu')
         
-        # Outputs axis angle representation (x, y, z, w)
-        self.dense5 = tf.keras.layers.Dense(4, activation='sigmoid')
+        # Outputs axis angle representation (x, y, z, w) on range from (-1,1)
+        self.dense5 = tf.keras.layers.Dense(4, activation='tanh')
 
     def call(self, x):
         x = self.resnet(x)
@@ -139,74 +136,43 @@ class DeepsatNet(tf.keras.Model):
     def process_output(self, output):
         """
         Brief
-            Transform axis angle on range (0, 1) to (0, pi/2) then 
-            convert to quaternion
-            Output may still be ambiguous due to symmetries, 
-            this will be resolved later by comparing to previous orientation
+            Normalizes quaternion
         Input
             Output from model, angle axis (x, y, z, w) on range (0, 1)
         Output
             Quaternion (x, y, z, w)
         """
-        #print("output:", output)
-        normalized_angle_axis = output * math.pi/2
-        #print("norm_axis", normalized_angle_axis)
+        square = tf.math.square(output)
+        square_sum = tf.math.reduce_sum(square, axis=1)
+        norm = tf.math.sqrt(square_sum)
 
-        #print("norm out:", normalized_angle_axis)
-        q_out = angle_axis_to_quat(normalized_angle_axis)
-        #print("q out:", q_out)
-        return q_out
+        shaped_norm = tf.repeat(norm, 4)
+        shaped_norm = tf.reshape(shaped_norm, shape=(norm.shape[0], 4))
+
+        normalized_out = tf.math.divide(output, shaped_norm)
+
+        return normalized_out
 
     def compute_orientation_diff(self, q1, q2):
         """
         Brief
-            Transforms points with rotations and calculates error between closest points
-            Closest points accounts for symmetries
+            Computes L2 loss two unit quaternions
         Input
             rotation1 & 2 both quaternions (x, y, z, w)
         """
-        q2_points = transform_points(q2)
-        q1_points = transform_points(q1)
-        if DEBUG:
-            print("label:", q2)
-            print("label points:", q2_points)
-            print("out:", q1)
-            print("out_points:", q1_points)
-
-        error = closest_point_error(q1_points, q2_points)
-        #print("error", error)
-
-        # sums batch errors
-        error = tf.math.reduce_sum(error)
-        #print("reduced err", error)
-        return error
+        diff = q2 - q1
+        l2 = tf.math.square(diff)
+        loss = tf.math.reduce_mean(l2)
+        return loss
 
 
-    # Use distance for now
-    # label is np array (batch, labels) where labels = (x, y, z, w) of quaternion
+
     def compute_loss(self, input, label, training=False):
         out = self.call(input)
-        #print("out:", out)
         out = self.process_output(out)
-        error = self.compute_orientation_diff(out, label)
-
-        # Quat loss adds error proportional to difference between quaternion label and output
-        # Prevents model from learning single value close enough to all cases (local min)
+        loss = self.compute_orientation_diff(out, label)
         
-        if training:
-            quat_error = tf.math.abs(out - label)
-            quat_error = tf.math.reduce_mean(quat_error, axis=0)
-            quat_error = tf.math.reduce_mean(quat_error)
-            quat_loss = quat_error * self.quat_divergence_weight
-            quat_loss = tf.cast(quat_loss, dtype=tf.float64)
-
-            error = error * self.icp_weight
-        else:
-            quat_loss = 0
-        
-
-        error = error + quat_loss
-        return error, out
+        return loss, out # return out for logging
 
     #@tf.function
     def train_step(self, input, label):
