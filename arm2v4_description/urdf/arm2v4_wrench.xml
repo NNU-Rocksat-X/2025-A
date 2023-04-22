@@ -52,7 +52,9 @@
       </body>
   </worldbody>
 
+  <!--
   <include file="mujoco/trajectory_markers.xml"/>
+  -->
 
   <include file="mujoco/R1_arm2v4_body.xml"/>
 

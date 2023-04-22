@@ -8,12 +8,13 @@ import sys
 import os
 
 gpus = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(gpus[0], True)
+#tf.config.experimental.set_memory_growth(gpus[0], True)
 # Prevent issue where other AI models use same memory
+"""
 tf.config.set_logical_device_configuration(
     gpus[0],
     [tf.config.LogicalDeviceConfiguration(memory_limit=256)])
-
+"""
 
 
 print("tf version: ", tf.__version__)
@@ -157,25 +158,33 @@ def rotate_vect_by_quat(v, q):
     # Extract vector part of quaternion
     u = q[:,:-1]
 
-    v = tf.tile(v, [u.shape[0]])
-    v = tf.reshape(v, shape=(u.shape[0], 3))
-    v = tf.cast(v, dtype=tf.float64)
+    v = tf.reshape(v, shape=(3,1))
 
     # Extract scalar part of quaternion
     s = q[:,3]
 
     # Rotates vector (essentially q*v*q_conj, but more efficient)
-    # tensor dot performs dot product on a batch
-    # linalg.cros is cross product on batch
-    vprime = 2.0 * tf.tensordot(u, v,2) * u
-    s2_part = s*s - tf.tensordot(u,u,2)
-    s2_cast = tf.broadcast_to(s2_part[:, np.newaxis], v.shape)
-    vprime = vprime + s2_cast * v
+
+    vprime = 2 * tf.linalg.matmul(u,v) * u
+
+    # Dot product of u * u
+    u_dot = tf.math.multiply(u,u)
+    u_dot = tf.reduce_sum(u_dot, axis=1)
+
+    s2_part = (s*s - u_dot) * v
+    s2_part = tf.transpose(s2_part)
+
+    v = tf.reshape(v, shape=(3))
+    v = tf.tile(v, [u.shape[0]])
+    v = tf.reshape(v, shape=(q.shape[0], 3))
+    v = tf.cast(v, dtype=tf.float64)
+
     cross = tf.linalg.cross(u,v)
     s_cast = tf.broadcast_to(s[:, np.newaxis], cross.shape)
-    vprime = vprime + 2.0 * s_cast * tf.linalg.cross(u, v)
+    s_cross_uv = 2.0 * s_cast * cross
 
-    return vprime
+    out = vprime + s2_part + s_cross_uv
+    return out
 
 def normalize_quat(q):
     square = tf.math.square(q)

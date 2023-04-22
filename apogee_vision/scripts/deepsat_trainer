@@ -1,0 +1,189 @@
+#!/usr/bin/env python3.7
+
+import numpy as np
+import json
+import os
+import rospkg
+import cv2
+from apogee_vision.deepsatnet import DeepsatNet, transform_points
+import matplotlib.pyplot as plt 
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import tensorflow as tf
+
+rospack = rospkg.RosPack()
+
+TRAINING_DIR = rospack.get_path('apogee_vision') + "/training"
+IMAGE_DIR = TRAINING_DIR + "/images/"
+LABEL_DIR = TRAINING_DIR + "/labels/"
+LOG_DIR = TRAINING_DIR + "/logs/"
+MODEL_DIR = TRAINING_DIR + "/models/"
+FILE_NAME = "object_image"
+MODEL_SHAW = "batch_13_sgd_e4_icp_1_q_div_0_2500_img_dense_32"
+
+BATCH_SIZE = 13
+VERIFY_SIZE = 1
+LOG_RATE = 25
+
+def get_dataset_labels():
+    label_path = LABEL_DIR + "labels.json"
+    if os.path.exists(label_path):
+        with open(label_path, 'r') as labelfile:
+            labels = json.load(labelfile)
+    else:
+        print("Error loading files")
+    return labels
+
+# pose is a dict
+def pose_to_ori_np(pose):
+    np_pose = np.array([pose['orientation']['x'],
+                        pose['orientation']['y'],
+                        pose['orientation']['z'],
+                        pose['orientation']['w']])
+    return np_pose
+
+
+def get_batch(labels, batch_number):
+    filenames = list(labels.keys())
+
+    batch_file_ids = np.random.choice(len(filenames), BATCH_SIZE)
+    validation_file_ids = np.random.choice(len(filenames), VERIFY_SIZE)
+
+    batch_files = [filenames[x] for x in batch_file_ids]
+    validation_files = [filenames[x] for x in validation_file_ids]
+
+    # Get batch dataset
+    batch_x = []
+    batch_labels = []
+
+    for filename in batch_files:
+        image = cv2.imread(IMAGE_DIR + filename)
+        batch_x.append(image) 
+        batch_labels.append(pose_to_ori_np(labels[filename]))
+
+    batch_x = np.array(batch_x)
+    batch_labels = np.array(batch_labels)
+
+    validation_x = []
+    validation_labels = []
+
+    # Get validation dataset
+    for filename in validation_files:
+        image = cv2.imread(IMAGE_DIR + filename)
+        validation_x.append(image)
+        validation_labels.append(pose_to_ori_np(labels[filename]))
+
+    validation_x = np.array(validation_x)
+    validation_labels = np.array(validation_labels)
+
+
+
+    return (batch_x, batch_labels, validation_x, validation_labels)
+
+
+def visualize_cube(cube, edges=None):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    cube = cube[0]
+        
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_xlim([-1, 1])
+    ax.set_ylim([-1, 1])
+    ax.set_zlim([-1, 1])
+    
+    ax.scatter(cube[:, 0], cube[:, 1], cube[:, 2], marker='o', color='black')
+    
+    plt.show()
+
+def visualize_result(model, input_image, input_label):
+    label_points = transform_points(input_label)
+    print("label:", input_label)
+    print("label_points:", label_points)
+
+
+    out_q = model.inference(input_image)
+    out_points = transform_points(out_q)
+    print("output:", out_q)
+    print("out", out_points)
+
+    diff = model.compute_orientation_diff(out_q, input_label)
+    print("difference:", diff.numpy())
+
+    visualize_cube(label_points)
+    visualize_cube(out_points)
+
+if __name__ == "__main__":
+    batch_number = 0
+    labels = get_dataset_labels()
+
+    model = DeepsatNet(icp_weight=1, quat_divergence_weight=0)
+    #model.load_weights(MODEL_DIR + MODEL_SHAW)
+
+    summary_writer = tf.summary.create_file_writer(LOG_DIR + MODEL_SHAW)
+    epoch_batch_num = 0 # used for logging, incremented with each batch in each epoch
+
+    dataset_size = len(list(labels.keys()))
+    grads = None
+    for epoch in range(-1, 10):
+        epoch_loss = []
+        epoch_valid_loss = []
+        for batch_number in range(0, int(dataset_size/BATCH_SIZE)):
+            #print("=============================== BATCH ", batch_number, " ===================")
+            if epoch == -1:
+                batch_x, batch_labels, validation_x, validation_labels = get_batch(labels, 0)
+                loss, output = model.compute_loss(batch_x, batch_labels)
+                validation_loss, output = model.compute_loss(validation_x, validation_labels)
+            else:
+                batch_x, batch_labels, validation_x, validation_labels = get_batch(labels, batch_number)
+                loss, grads = model.train_step(batch_x, batch_labels)
+                validation_loss, output = model.compute_loss(validation_x, validation_labels)
+
+            # add loss to list
+            epoch_loss.append(loss.numpy())
+            epoch_valid_loss.append(validation_loss.numpy())
+            print("Batch:", str(batch_number) + " loss:", loss.numpy(), " validation loss: ", validation_loss.numpy())
+
+            with summary_writer.as_default():
+                tf.summary.scalar('loss', loss/(BATCH_SIZE-1), step=epoch_batch_num)
+                tf.summary.scalar('validation_loss', validation_loss, step=epoch_batch_num)
+                tf.summary.scalar('out_x', output[0][0], step=epoch_batch_num)
+                tf.summary.scalar('out_y', output[0][1], step=epoch_batch_num)
+                tf.summary.scalar('out_z', output[0][2], step=epoch_batch_num)
+                tf.summary.scalar('out_w', output[0][3], step=epoch_batch_num)
+                if batch_number%LOG_RATE == 0:
+                    for i, layer in enumerate(model.layers):
+                        tf.summary.histogram('layer{0}'.format(layer.name), layer.weights[0], step=int(epoch_batch_num/LOG_RATE))
+                    
+                    for i, layer in enumerate(model.resnet.layers):
+                        if len(layer.weights) > 0:
+                            tf.summary.histogram('resnet_layer{0}'.format(layer.name), layer.weights[0], step=int(epoch_batch_num/LOG_RATE))
+
+                    if grads is not None:
+                        for i, grad in enumerate(grads):
+                            tf.summary.histogram("{}-grad".format(i), grads[i], step=int(epoch_batch_num/LOG_RATE))
+                
+            epoch_batch_num += 1
+
+        epoch_loss = sum(epoch_loss)/len(epoch_loss)
+        epoch_valid_loss = sum(epoch_valid_loss)/len(epoch_valid_loss)
+        print("=========================================================")
+        print("Epoch:", str(epoch) + " loss:", epoch_loss, " validation loss: ", epoch_valid_loss)
+        print("=========================================================")
+
+    model.save_weights(MODEL_DIR + MODEL_SHAW)
+
+    batch_x, batch_labels, validation_x, validation_labels = get_batch(labels, 0)
+    visualize_result(model, batch_x[:1], batch_labels[:1])
+
+    batch_x, batch_labels, validation_x, validation_labels = get_batch(labels, 1)
+    visualize_result(model, batch_x[:1], batch_labels[:1])
+    
+    print("Complete!")
+
+        
+
+
+
+

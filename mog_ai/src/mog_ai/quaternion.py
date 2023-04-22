@@ -72,14 +72,19 @@ def quat_conjugate(q):
     q_conj = np.array([-q[0], -q[1], -q[2], q[3]])
     return q_conj
 
+
 def rotate(v: list, q: list or Quaternion):
     """
     Rotates vector by quaternion
 
     Input
-    :param v: list with (x, y, z) for vector
-    :param q: list with (x, y, z, w) or geometry_msgs quaternion
+        :param v: list with (x, y, z) for vector
+        :param q: list with (x, y, z, w) or geometry_msgs quaternion
+    
+    Output
+        numpy vector [x, y, z]
     """
+    #print("v:", v, " q:", q)
     if isinstance(q, Quaternion):
         q = [q.x, q.y, q.z, q.w]
     v = np.array(v)
@@ -91,7 +96,6 @@ def rotate(v: list, q: list or Quaternion):
     q_qv_qconj = quaternion_multiply(q_qv, q_conj)
     vec = q_qv_qconj[:-1]
     return vec
-
 
 
 
@@ -143,6 +147,21 @@ def translate_vect(v1, v2):
     v1 = np.array(v1)
     v2 = np.array(v2)
     return np.add(v1, v2)
+
+def angle_axis_to_quat(aa):
+    """
+    Input
+        numpy angle axis (x, y, z, w)
+    Output
+        numpy quaternion (x, y, z, w)
+    """
+    q = tf.concat([
+        aa[:, 0] * np.sin(aa[:, 3] / 2),
+        aa[:, 1] * np.sin(aa[:, 3] / 2),
+        aa[:, 2] * np.sin(aa[:, 3] / 2),
+        np.cos(aa[:, 3] / 2)
+    ])
+    return q
 
 # unit test
 if __name__ == "__main__":

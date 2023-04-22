@@ -20,10 +20,38 @@ def get_multi_array(w, h):
 
     return mask_msg
 
+
+# crop_center is a tuple (x, y)
+# Size is a tuple (width, height) with the desired size after cropping
+def crop_frame(frame, crop_center, size):
+    boundary_left = crop_center[0] - int(size[0]/2)
+    boundary_right = crop_center[0] + int(size[0]/2)
+    boundary_up = crop_center[1] - int(size[1]/2)
+    boundary_down = crop_center[1] + int(size[1]/2)
+
+    if boundary_left < 0:
+        boundary_left = 0
+        boundary_right = size[0]
+    if boundary_up < 0:
+        boundary_up = 0
+        boundary_down = size[1]
+    if boundary_down > frame.shape[0]:
+        boundary_down = frame.shape[0]
+        boundary_up = frame.shape[0] - size[1]
+    if boundary_right > frame.shape[1]:
+        boundary_right = frame.shape[1]
+        boundary_left = frame.shape[1] - size[0]
+
+    cropped_frame = frame[boundary_up:boundary_down, boundary_left:boundary_right, :]
+    print(cropped_frame.shape)
+    return cropped_frame
+
 def main(show_gui=False):
+    show_gui=False
     rospy.init_node('color_filter')
 
     mask_pub = rospy.Publisher('/object_mask', UInt8MultiArray, queue_size=1)
+    obj_frame_pub = rospy.Publisher('/cam/object_frame', UInt8MultiArray, queue_size=1)
     if cv2.cuda.getCudaEnabledDeviceCount() > 0:
         rospy.loginfo("CV2 using GPU")
     else:
@@ -45,18 +73,30 @@ def main(show_gui=False):
         
         frame = np.flip(frame, 2)
 
+        """
         # Setup filter
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        lower_red = np.array([30, 0, 0])
-        upper_red = np.array([255, 20, 20])
+        lower_red = np.array([14, 0, 0])
+        upper_red = np.array([255, 45, 45])
 
         # Creating mask from color filter
         mask = cv2.inRange(rgb, lower_red, upper_red)
+        """
+        # Define the threshold for red
+        red_thresh = 15
+
+        # Split the image into its channels
+        float_frame = frame.astype(np.float32)
+        b, g, r = cv2.split(float_frame)
+
+        # Create a mask where red is greater than green and blue by the defined thresholds
+        mask = np.logical_and(r > g + red_thresh, r > b + red_thresh)
+
+        # Convert the mask to an unsigned 8-bit integer array
+        mask = np.uint8(mask * 255)
+
     
-        if show_gui:
-            frame = np.flip(frame, 0)
-            cv2.imshow('Detection', frame)
-            cv2.imshow('Mask', mask)
+        obj_frame = cv2.bitwise_and(frame, frame, mask=mask)
 
         # Remove blobs less than 12x12
         kernel = np.ones((8,8), np.uint8)
@@ -76,16 +116,33 @@ def main(show_gui=False):
 
                 # Need to publish pixel position
                 print("X: ", cx, " y: ", cy)
-                
+
+            obj_frame = crop_frame(obj_frame, (cx, cy), (224, 224))
+
+        if show_gui:
+            frame = np.flip(frame, 0)
+            obj_frame = np.flip(obj_frame, 0)
+            mask = np.flip(mask, 0)
+            cv2.imshow('Detection', frame)
+            cv2.imshow('Mask', mask)
+            cv2.imshow('Object Frame', obj_frame)
+        
 
         np_mask = np.asarray(mask, dtype=np.uint8)
-
         np_mask = np.reshape(np_mask, newshape=(np_mask.shape[0]*np_mask.shape[1]))
         
         mask_msg = get_multi_array(frame_width, frame_height)
         mask_msg.data = np_mask.tolist()
         mask_pub.publish(mask_msg)
 
+        np_obj_frame = np.asarray(obj_frame, dtype=np.uint8)
+        obj_frame_width = np_obj_frame.shape[1]
+        obj_frame_height = np_obj_frame.shape[0]
+        np_obj_frame = np.reshape(np_obj_frame, newshape=(np_obj_frame.shape[0]*np_obj_frame.shape[1]*np_obj_frame.shape[2]))
+
+        obj_frame_msg = get_multi_array(obj_frame_width, obj_frame_height)
+        obj_frame_msg.data = np_obj_frame.tolist()
+        obj_frame_pub.publish(obj_frame_msg)
 
         key = cv2.waitKey(1)
         if key == 27:
