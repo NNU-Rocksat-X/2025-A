@@ -1,4 +1,12 @@
 <mujoco model="arm2_v4">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
   <visual>
     <headlight ambient="0 0 0" diffuse="0.5 0.5 0.5" specular="1 1 1"/>
     <quality shadowsize="8192"/>
@@ -29,9 +37,12 @@
     <mesh name="finger_3_1" file="finger_3.stl" scale="0.01 0.01 0.01"/>
     <mesh name="finger_2_1" file="finger_2.stl" scale="0.01 0.01 0.01"/>
     <mesh file="../../object_description/meshes/wrench.stl" scale=".0015 .0015 .0015"/>
-    <mesh file="../../object_description/meshes/logo_cube1.stl" scale=".001 .001 .001"/>
-    <texture name="cube" file="../../object_description/meshes/cube_material.png" type="cube"/>
-    <material name="cube" texture="cube" specular="1" shininess="1"/>
+
+    <!-- Cube -->
+    <material name="204,0,0" specular="1.0" shininess="1.0" rgba="0.800000 0.000000 0.000000 1.000000"/>
+    <material name="5,5,5" specular="1.0" shininess="1.0" rgba="0.019608 0.019608 0.019608 1.000000"/>
+    <mesh file="../../object_description/Cube/Cube_0.obj" scale="0.001 0.001 0.001"/>
+    <mesh file="../../object_description/Cube/Cube_1.obj" scale="0.001 0.001 0.001"/>
   </asset>
   <worldbody>
     <light pos="0.1 1 1" dir="-0.1 -1 -1" diffuse="1 1 1"/>
@@ -48,7 +59,10 @@
 
       <body name="object" pos="-0.5 -0.2 0.3">
           <joint type="free"/>
-          <geom type="mesh" mesh="logo_cube1" rgba="1 0 0 1"/>
+          <geom mesh="Cube_0" material="5,5,5" class="visual"/>
+          <geom mesh="Cube_1" material="204,0,0" class="visual"/>
+          <geom mesh="Cube_0" class="collision"/>
+          <geom mesh="Cube_1" class="collision"/>
           <!--
           <geom type="mesh" mesh="wrench" euler="90 0 180" rgba="1 0 0 1"/>
           -->

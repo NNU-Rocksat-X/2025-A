@@ -116,7 +116,7 @@ class DeepsatNet(tf.keras.Model):
 
         # uses resnet backbone
         self.resnet = ResNet50(include_top=False, pooling='max')
-        #self.dense1 = tf.keras.layers.Dense(1024, activation='relu')
+        self.dense1 = tf.keras.layers.Dense(32, activation='relu')
         #self.dense2 = tf.keras.layers.Dense(32, activation='relu')
         self.dense3 = tf.keras.layers.Dense(32, activation='relu')
         #self.dense4 = tf.keras.layers.Dense(32, activation='relu')
@@ -126,7 +126,7 @@ class DeepsatNet(tf.keras.Model):
 
     def call(self, x):
         x = self.resnet(x)
-        #x = self.dense1(x)
+        x = self.dense1(x)
         #x = self.dense2(x)
         x = self.dense3(x)
         #x = self.dense4(x)
@@ -157,13 +157,24 @@ class DeepsatNet(tf.keras.Model):
         """
         Brief
             Computes L2 loss two unit quaternions
+            A quaternion q and -q are symmetrical so for each batch
+            the loss for q and -q are calculated then the loss output 
+            for that batch is the minimum loss between q and -q
         Input
             rotation1 & 2 both quaternions (x, y, z, w)
         """
         diff = q2 - q1
         l2 = tf.math.square(diff)
-        loss = tf.math.reduce_mean(l2)
-        return loss
+        loss = tf.math.reduce_mean(l2, axis=1)
+
+        # Calculate when q2 is - because they are symmetrical
+        neg_diff = -1*q2 - q1
+        neg_l2 = tf.math.square(neg_diff)
+        neg_loss = tf.math.reduce_mean(neg_l2, axis=1)
+        
+        min_loss = tf.math.minimum(loss, neg_loss)
+        min_loss = tf.math.reduce_mean(min_loss)
+        return min_loss
 
 
 

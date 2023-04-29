@@ -11,7 +11,7 @@ rospack = rospkg.RosPack()
 
 TRAINING_DIR = rospack.get_path('apogee_vision') + "/training"
 MODEL_DIR = TRAINING_DIR + "/models/"
-MODEL_SHAW = "logo_l2_batch_13_sgd_e4_2500_img_dense_32"
+MODEL_SHAW = "logo_l2_batch_13_sgd_e4_4000_img_dense_32_32"
 
 def np_to_msg(np_q) -> Pose:
     np_q = np_q[0] # Remove batch array

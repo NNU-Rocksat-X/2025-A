@@ -18,7 +18,7 @@ LABEL_DIR = TRAINING_DIR + "/labels/"
 LOG_DIR = TRAINING_DIR + "/logs/"
 MODEL_DIR = TRAINING_DIR + "/models/"
 FILE_NAME = "object_image"
-MODEL_SHAW = "logo_l2_batch_13_sgd_e4_2500_img_dense_32"
+MODEL_SHAW = "min_logo_l2_batch_13_sgd_e4_4000_img_dense_32_32"
 
 BATCH_SIZE = 13
 VERIFY_SIZE = 1
@@ -43,41 +43,45 @@ def pose_to_ori_np(pose):
 
 
 def get_batch(labels, batch_number):
-    filenames = list(labels.keys())
+    # Loop until you get valid dataset (prevents errors)
+    while True:
+        filenames = list(labels.keys())
 
-    batch_file_ids = np.random.choice(len(filenames), BATCH_SIZE)
-    validation_file_ids = np.random.choice(len(filenames), VERIFY_SIZE)
+        batch_file_ids = np.random.choice(len(filenames), BATCH_SIZE)
+        validation_file_ids = np.random.choice(len(filenames), VERIFY_SIZE)
 
-    batch_files = [filenames[x] for x in batch_file_ids]
-    validation_files = [filenames[x] for x in validation_file_ids]
+        batch_files = [filenames[x] for x in batch_file_ids]
+        validation_files = [filenames[x] for x in validation_file_ids]
 
-    # Get batch dataset
-    batch_x = []
-    batch_labels = []
+        # Get batch dataset
+        batch_x = []
+        batch_labels = []
 
-    for filename in batch_files:
-        image = cv2.imread(IMAGE_DIR + filename)
-        batch_x.append(image) 
-        batch_labels.append(pose_to_ori_np(labels[filename]))
+        for filename in batch_files:
+            image = cv2.imread(IMAGE_DIR + filename)
+            batch_x.append(image) 
+            batch_labels.append(pose_to_ori_np(labels[filename]))
 
-    batch_x = np.array(batch_x)
-    batch_labels = np.array(batch_labels)
+        batch_x = np.array(batch_x)
+        batch_labels = np.array(batch_labels)
 
-    validation_x = []
-    validation_labels = []
+        validation_x = []
+        validation_labels = []
 
-    # Get validation dataset
-    for filename in validation_files:
-        image = cv2.imread(IMAGE_DIR + filename)
-        validation_x.append(image)
-        validation_labels.append(pose_to_ori_np(labels[filename]))
+        # Get validation dataset
+        for filename in validation_files:
+            image = cv2.imread(IMAGE_DIR + filename)
+            validation_x.append(image)
+            validation_labels.append(pose_to_ori_np(labels[filename]))
 
-    validation_x = np.array(validation_x)
-    validation_labels = np.array(validation_labels)
+        validation_x = np.array(validation_x)
+        validation_labels = np.array(validation_labels)
 
+        if batch_x.ndim == 4:
+            return (batch_x, batch_labels, validation_x, validation_labels)
+        else:
+            pass
 
-
-    return (batch_x, batch_labels, validation_x, validation_labels)
 
 
 def visualize_cube(cube, edges=None):
@@ -126,7 +130,7 @@ if __name__ == "__main__":
 
     dataset_size = len(list(labels.keys()))
     grads = None
-    for epoch in range(-1, 50):
+    for epoch in range(-1, 80):
         epoch_loss = []
         epoch_valid_loss = []
         for batch_number in range(0, int(dataset_size/BATCH_SIZE)):

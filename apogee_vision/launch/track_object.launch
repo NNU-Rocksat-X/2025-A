@@ -3,7 +3,7 @@
     <arg name="env" default="arm2v4_wrench"/>
     <arg name="gui" default="false"/>
     <arg name="output" default="screen"/>
-    <arg name="launch_sim" default="false"/>
+    <arg name="launch_sim" default="true"/>
 
 
     <arg if="$(eval arg('env') == 'wrench')" name="ref_pcd" default="package://object_description/meshes/wrench_coarse.pcd"/>

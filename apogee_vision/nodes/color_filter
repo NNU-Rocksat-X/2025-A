@@ -117,7 +117,7 @@ def main(show_gui=False):
                 # Need to publish pixel position
                 print("X: ", cx, " y: ", cy)
 
-            obj_frame = crop_frame(obj_frame, (cx, cy), (224, 224))
+                obj_frame = crop_frame(obj_frame, (cx, cy), (224, 224))
 
         if show_gui:
             frame = np.flip(frame, 0)
