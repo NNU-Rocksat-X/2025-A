@@ -4,3 +4,4 @@ __pycache__
 *$py.class
 *.pyc
 mog_ai/training/
+apogee_vision/training/

@@ -6,6 +6,9 @@
 
 <!-- Convert arg to property -->
 <xacro:property name="arm" value="$(arg arm)"/>
+<xacro:property name="long_l" value="0.02"/>
+<xacro:property name="long_w" value="0.05"/>
+<xacro:property name="long_h" value="0.279"/>
 
 <material name="silver">
   <color rgba="0.700 0.700 0.700 1.000" />
@@ -44,7 +47,7 @@
   <origin xyz="0 0 0" rpy="1.57 0 0"/>
 </joint>
 
-  <!--
+<!--
   <link name="top_plate">
     <inertial>
         <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
@@ -53,7 +56,7 @@
     </inertial>
     
     <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 3.14"/>
         <geometry>
         <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         </geometry>
@@ -61,20 +64,85 @@
     </visual>
     
     <collision>
-        <origin xyz="0 0 0.279654" rpy="0 0 0"/>
+        <origin xyz="0 0.01 0" rpy="0 0 3.14"/>
         <geometry>
         <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         </geometry>
     </collision>
   </link>
-  -->
-  <!--
+
   <joint name="top_connector" type="fixed">
     <parent link="world"/>
     <child link="top_plate"/>
-    <origin xyz="0 0 0.279654" rpy="0 0 0"/>
+    <origin xyz="0 0 0.21" rpy="0 0 0"/>
   </joint>
-  -->
+-->
+
+
+<link name="longeron_1">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_l} ${long_w} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_1_j" type="fixed">
+  <origin xyz="0.175 0 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_1"/>
+</joint>
+
+<link name="longeron_2">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_l} ${long_w} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_2_j" type="fixed">
+  <origin xyz="-0.175 0 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_2"/>
+</joint>
+
+<link name="longeron_3">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_w} ${long_l} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_3_j" type="fixed">
+  <origin xyz="0 0.1725 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_3"/>
+</joint>
+
+<link name="longeron_4">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_w} ${long_l} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_4_j" type="fixed">
+  <origin xyz="0 -0.1775 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_4"/>
+</joint>
+
 <link name="link_1">
   <inertial>
     <origin xyz="0.000994555873334066 0.032192633992419506 0.034631373816010426" rpy="0 0 0"/>
@@ -82,14 +150,14 @@
     <inertia ixx="0.000146" iyy="0.000139" izz="6.1e-05" ixy="-0.0" iyz="-1.9e-05" ixz="-4e-06"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.00635 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.00635 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_1.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.00635 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.00635 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_1.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -103,14 +171,14 @@
     <inertia ixx="9.1e-05" iyy="2.6e-05" izz="9.6e-05" ixy="0.0" iyz="-0.0" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.041967 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.041967 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_2.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.041967 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.041967 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_2.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -124,14 +192,14 @@
     <inertia ixx="7.1e-05" iyy="6.2e-05" izz="3.8e-05" ixy="0.0" iyz="-1.2e-05" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.130967 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.130967 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_3.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.130967 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.130967 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_3.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -145,14 +213,14 @@
     <inertia ixx="9.1e-05" iyy="2.6e-05" izz="9.6e-05" ixy="-0.0" iyz="-0.0" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.166585 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.167585 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_4.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.166585 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.167585 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_4.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -166,14 +234,14 @@
     <inertia ixx="6.5e-05" iyy="5.7e-05" izz="3.4e-05" ixy="-0.0" iyz="-1e-05" ixz="-0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.255585 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.256585 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_5.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.255585 0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.256585 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_5.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -187,14 +255,14 @@
     <inertia ixx="9.1e-05" iyy="2.6e-05" izz="9.6e-05" ixy="0.0" iyz="-0.0" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0.1101 -0.291202 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.293202 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_6.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0.1101 -0.291202 0.0581" rpy="0 0 0"/>
+    <origin xyz="-0.0731 -0.293202 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/link_6.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -230,14 +298,14 @@
     <inertia ixx="2e-05" iyy="2e-05" izz="1.8e-05" ixy="0.0" iyz="-0.0" ixz="0.0"/>
   </inertial>
   <visual>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.370702 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/gripper_base.stl" scale="0.01 0.01 0.01"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="-0.0551 -0.370702 -0.1101" rpy="0 0 0"/>
     <geometry>
       <mesh filename="package://arm2v4_description/meshes/gripper_base.stl" scale="0.01 0.01 0.01"/>
     </geometry>
@@ -331,10 +399,10 @@
 
 <joint name="joint_1" type="continuous">
   <xacro:if value="${arm == 'ARM1'}">
-    <origin xyz="-0.1101 0.007 -0.0551" rpy="0 0 0"/>
+    <origin xyz="-0.1101 0.007 -0.0551" rpy="0 1.57 0"/>
   </xacro:if>
   <xacro:unless value="${arm == 'ARM1'}">
-    <origin xyz="0.0551 0.007 0.1101" rpy="0 -1.57 0"/>
+    <origin xyz="0.0551 0.007 0.1101" rpy="0 0 0"/>
   </xacro:unless>
 
   <parent link="base_link"/>
@@ -344,15 +412,15 @@
 </joint>
 
 <joint name="joint_2" type="revolute">
-  <origin xyz="0.0 0.035617 -0.003" rpy="0 0 0"/>
+  <origin xyz="0.018 0.035617 0" rpy="0 0 0"/>
   <parent link="link_1"/>
   <child link="link_2"/>
-  <axis xyz="0.0 0.0 1.0"/>
+  <axis xyz="-1.0 0.0 0.0"/>
   <limit upper="1.570796" lower="-1.570796" effort="100" velocity="100"/>
 </joint>
 
 <joint name="joint_3" type="continuous">
-  <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>
+  <origin xyz="-0.018 0.089 0" rpy="0 0 0"/>
   <parent link="link_2"/>
   <child link="link_3"/>
   <axis xyz="-0.0 1.0 -0.0"/>
@@ -360,15 +428,15 @@
 </joint>
 
 <joint name="joint_4" type="revolute">
-  <origin xyz="0.0 0.035618 -0.003" rpy="0 0 0"/>
+  <origin xyz="0.018 0.036618 0" rpy="0 0 0"/>
   <parent link="link_3"/>
   <child link="link_4"/>
-  <axis xyz="0.0 -0.0 1.0"/>
+  <axis xyz="-1.0 -0.0 0.0"/>
   <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
 </joint>
 
 <joint name="joint_5" type="continuous">
-  <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>
+  <origin xyz="-0.018 0.089 0" rpy="0 0 0"/>
   <parent link="link_4"/>
   <child link="link_5"/>
   <axis xyz="-0.0 1.0 -0.0"/>
@@ -376,25 +444,25 @@
 </joint>
 
 <joint name="joint_6" type="revolute">
-  <origin xyz="0.0 0.035617 -0.003" rpy="0 0 0"/>
+  <origin xyz="0.018 0.036617 0" rpy="0 0 0"/>
   <parent link="link_5"/>
   <child link="link_6"/>
-  <axis xyz="-0.0 -0.0 1.0"/>
+  <axis xyz="-1.0 -0.0 0.0"/>
   <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
 </joint>
 
 <joint name="joint_7" type="continuous">
  <!-- <origin xyz="0.0 0.089 0.003" rpy="0 0 0"/>-->
-  <origin xyz="0.0 0.09 0.0" rpy="-1.53 0 0"/>
+  <origin xyz="-0.018 0.0775 0" rpy="0 0 0"/>
   <parent link="link_6"/>
   <child link="gripper"/>
-  <axis xyz="-0.0 0.0 1.0"/>
+  <axis xyz="-0.0 1.0 0.0"/>
   <!--<limit upper="3.14" lower="-3.14" effort="100" velocity="100"/>-->
 </joint>
 
 
 <joint name="gripper_joint_1" type="revolute">
-  <origin xyz="0.005959 -0.022452 0.054853" rpy="0 0 0"/>
+  <origin xyz="0.006125 0.0535 0.0235" rpy="-1.53 0 0"/>
   <parent link="gripper"/>
   <child link="finger_1"/>
   <axis xyz="0.999727 0.017623 0.01534"/>
@@ -403,7 +471,7 @@
 
 
 <joint name="gripper_joint_2" type="revolute">
-  <origin xyz="-0.023955 -0.005611 0.053852" rpy="0 0 0"/>
+  <origin xyz="-0.0235 0.0535 0.006125" rpy="-1.53 0 0"/>
   <parent link="gripper"/>
   <child link="finger_2"/>
   <axis xyz="0.017134 -0.999359 0.031436"/>
@@ -411,7 +479,7 @@
 </joint>
 
 <joint name="gripper_joint_3" type="revolute">
-  <origin xyz="-0.007093 0.024302 0.053188" rpy="0 0 0"/>
+  <origin xyz="-0.006125 0.0535 -0.0235" rpy="-1.53 0 0"/>
   <parent link="gripper"/>
   <child link="finger_3"/>
   <axis xyz="-0.999727 -0.017623 -0.01534"/>
@@ -419,7 +487,7 @@
 </joint>
 
 <joint name="gripper_joint_4" type="revolute">
-  <origin xyz="0.022822 0.00746 0.054188" rpy="0 0 0"/>
+  <origin xyz="0.0235 0.0535 -0.006125" rpy="-1.53 0 0"/>
   <parent link="gripper"/>
   <child link="finger_4"/>
   <axis xyz="-0.017134 0.999359 -0.031436"/>
