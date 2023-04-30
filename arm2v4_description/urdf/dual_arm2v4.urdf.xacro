@@ -1,0 +1,168 @@
+<?xml version="1.0" ?>
+<robot name="arm2v4" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:arg name="include_base_plate" default="false"/>
+<xacro:arg name="namespace" default="ARM1"/>
+
+<xacro:property name="namespace" value="$(arg namespace)"/>
+<xacro:property name="long_l" value="0.02"/>
+<xacro:property name="long_w" value="0.05"/>
+<xacro:property name="long_h" value="0.279"/>
+
+<xacro:macro name="arm_urdf" params="arm_param:='ARM'">
+  <xacro:property name="arm" default="${arm_param}"/>
+  <xacro:include filename="$(find arm2v4_description)/urdf/arm2v4.urdf.xacro"/>
+</xacro:macro>
+
+<material name="silver">
+  <color rgba="0.700 0.700 0.700 1.000" />
+</material>
+
+<link name="world"/>
+
+
+<link name="base_link">
+  <xacro:if value="$(arg include_base_plate)">
+    <inertial>
+      <origin xyz="-0.01036605995280163 0.008118725780222396 -0.010698521307181049" rpy="0 0 0"/>
+      <mass value="0.6714813076324946"/>
+      <inertia ixx="0.004693" iyy="0.009008" izz="0.004597" ixy="0.000126" iyz="0.000275" ixz="-0.00051"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </xacro:if>
+</link>
+
+<joint name="world_joint" type="fixed">
+  <parent link="world"/>
+  <child link="base_link"/>
+  <origin xyz="0 0 0" rpy="1.57 0 0"/>
+</joint>
+
+
+
+<!--
+  <link name="top_plate">
+    <inertial>
+        <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
+        <mass value="1.5479093566761954"/>
+        <inertia ixx="0.010238" iyy="0.01139" izz="0.021617" ixy="-0.0" iyz="0.0" ixz="0.0"/>
+    </inertial>
+    
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 3.14"/>
+        <geometry>
+        <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="silver"/>
+    </visual>
+    
+    <collision>
+        <origin xyz="0 0.01 0" rpy="0 0 3.14"/>
+        <geometry>
+        <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+    </collision>
+  </link>
+
+  <joint name="top_connector" type="fixed">
+    <parent link="world"/>
+    <child link="top_plate"/>
+    <origin xyz="0 0 0.21" rpy="0 0 0"/>
+  </joint>
+-->
+
+
+
+<link name="longeron_1">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_l} ${long_w} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_1_j" type="fixed">
+  <origin xyz="0.175 0 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_1"/>
+</joint>
+
+<link name="longeron_2">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_l} ${long_w} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_2_j" type="fixed">
+  <origin xyz="-0.175 0 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_2"/>
+</joint>
+
+<link name="longeron_3">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_w} ${long_l} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_3_j" type="fixed">
+  <origin xyz="0 0.1725 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_3"/>
+</joint>
+
+<link name="longeron_4">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${long_w} ${long_l} ${long_h}"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+</link>
+
+<joint name="longeron_4_j" type="fixed">
+  <origin xyz="0 -0.1775 0.0616" rpy="0 0 0"/>
+  <parent link="world"/>
+  <child link="longeron_4"/>
+</joint>
+
+<!-- Include arm in this namespace -->
+<xacro:arm_urdf arm_param=""/>
+
+
+<!-- Load the other arm for collision avoidance -->
+<xacro:if value="${namespace == 'ARM1'}">
+    <xacro:arm_urdf arm_param="ARM2"/>
+</xacro:if>
+
+<xacro:if value="${namespace == 'ARM2'}">
+    <xacro:arm_urdf arm_param="ARM1"/>
+</xacro:if>
+
+
+
+</robot>
