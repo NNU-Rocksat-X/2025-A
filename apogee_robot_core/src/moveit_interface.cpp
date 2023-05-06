@@ -211,6 +211,9 @@ bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
         for (int i = 0; i < joint_cmds.size(); i++)
         {
             const double* joint_pos = current_state.getJointPositions(joint_names[i]);
+            ROS_INFO("---- J%i ----", i);
+            ROS_INFO("Current: %f", *joint_pos);
+            ROS_INFO("cmd: %f", joint_cmds[i]);
             if (abs(*joint_pos - joint_cmds[i]) < POSITION_ACCURACY)
                 joints_complete += 1;
         }
@@ -242,11 +245,11 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
 
 
         bool target_success = move_group->setJointValueTarget(joint_group_positions);
-        ROS_WARN("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
+        ROS_INFO("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
         moveit::planning_interface::MoveGroupInterface::Plan target_plan;
 
         bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-        ROS_DEBUG("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
+        ROS_INFO("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
 
         if (plan_success) {
             move_group->execute(target_plan);
@@ -485,14 +488,17 @@ bool MoveInterface::wait_until_grasp_complete(float grasp_position)
         robot_state::RobotState current_state(*move_group->getCurrentState());
 
         const double* joint_pos = current_state.getJointPositions("gripper_joint_1");
-        if (abs(*joint_pos - grasp_position) < POSITION_ACCURACY)
+        double pos = *joint_pos / (3.14 * 0.2);
+        ROS_INFO("joint_pos %f", pos);
+        ROS_INFO("grasp_position: %f", grasp_position);
+        if (abs(pos - grasp_position) < POSITION_ACCURACY)
             return true;
 
         if (cnt > MAX_WAIT)
             return false;
 
         cnt++;
-        ros::Duration(0.5).sleep();
+        ros::Duration(0.1).sleep();
     }
         
 
