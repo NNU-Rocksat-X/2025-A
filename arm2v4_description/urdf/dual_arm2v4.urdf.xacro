@@ -31,7 +31,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+        <mesh filename="package://arm2v4_description/meshes/base_link_full.stl" scale="0.01 0.01 0.01"/>
       </geometry>
       <material name="silver"/>
     </visual>
@@ -39,7 +39,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://arm2v4_description/meshes/base_link.stl" scale="0.01 0.01 0.01"/>
+        <mesh filename="package://arm2v4_description/meshes/base_link_full.stl" scale="0.01 0.01 0.01"/>
       </geometry>
     </collision>
   </xacro:if>
@@ -52,8 +52,8 @@
 </joint>
 
 
-
 <!--
+
   <link name="top_plate">
     <inertial>
         <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
@@ -83,7 +83,6 @@
     <origin xyz="0 0 0.21" rpy="0 0 0"/>
   </joint>
 -->
-
 
 
 <link name="longeron_1">

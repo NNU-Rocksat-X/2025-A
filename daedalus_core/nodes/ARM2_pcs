@@ -24,6 +24,10 @@ class Mission_SM:
                              'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Pickup_Wrench', Pickup_Wrench_SM,
+                    transitions={'Success': 'Unfold',
+                                 'Fail': 'Mission_Fail'})
+
+            smach.StateMachine.add('Unfold', Unfold_SM,
                     transitions={'Success': 'Mission_Success',
                                  'Fail': 'Mission_Fail'})
 

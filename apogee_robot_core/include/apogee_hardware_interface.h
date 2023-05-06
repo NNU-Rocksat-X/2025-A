@@ -26,6 +26,7 @@ class Arm2D2Interface : public hardware_interface::RobotHW
         void update_time(ros::Time time);
 
         void encoderCallBack(const moveit_msgs::DisplayRobotState &msg);
+        void otherEncoderCallBack(const moveit_msgs::DisplayRobotState &msg);
         void trajectory_cb(const control_msgs::FollowJointTrajectoryActionGoal &msg);
         void update_setpoint(void);
         //void graspCallBack(const std_msgs::Bool &msg);
@@ -33,6 +34,7 @@ class Arm2D2Interface : public hardware_interface::RobotHW
         ros::NodeHandle nh;
         ros::Publisher step_pub;
         ros::Subscriber enc_sub;
+        ros::Subscriber other_enc_sub;
         ros::Subscriber trajectory_goal_sub;
 
         ros::Time previous_time;
@@ -43,6 +45,7 @@ class Arm2D2Interface : public hardware_interface::RobotHW
 
 
         hardware_interface::JointStateInterface joint_state_interface;
+        hardware_interface::JointStateInterface other_joint_state_interface;
         hardware_interface::PositionJointInterface joint_control_interface;
 
         // Note: This isnt ideal because this 9 is static but num joints is dynamic
@@ -56,11 +59,16 @@ class Arm2D2Interface : public hardware_interface::RobotHW
         double vel[15];
         double eff[15];
 
+        double other_pos[15];
+        double other_vel[15];
+        double other_eff[15];
+
 
         std::vector<std::map<std::string, float>> gains;
 
         int num_joints = 0;
         int num_grip_joints = 0;
+        int other_num_joints = 0;
 
         std::vector<std::string> joint_names;
         std::vector<float> deg_per_steps;

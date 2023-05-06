@@ -234,11 +234,18 @@
   </collision>
 </link>
 
+
+<!-- The RPY for these joints must be changed to set start config
+     Notice for each joint the values are repeated this is so the arm
+     can be aware of the other arm 
+     CAUTION: Make sure you set R1 and R2 arm2v4_body.xml to match -->
 <joint name="${arm}joint_1" type="continuous">
   <xacro:if value="${namespace == 'ARM1'}">
+    <!-- Set ARM1 -->
     <xacro:if value="${arm == ''}">
       <origin xyz="-0.1101 0.007 -0.0551" rpy="0 1.57 0"/>
     </xacro:if>
+    <!-- Set ARM2 -->
     <xacro:unless value="${arm == ''}">
       <origin xyz="0.0551 0.007 0.1101" rpy="0 0 0"/>
     </xacro:unless>
@@ -246,9 +253,11 @@
 
   <xacro:if value="${namespace == 'ARM2'}">
     <xacro:if value="${arm == ''}">
+    <!-- Set ARM2 -->
       <origin xyz="0.0551 0.007 0.1101" rpy="0 0 0"/>
     </xacro:if>
     <xacro:unless value="${arm == ''}">
+    <!-- Set ARM1 -->
       <origin xyz="-0.1101 0.007 -0.0551" rpy="0 1.57 0"/>
     </xacro:unless>
   </xacro:if>
@@ -272,7 +281,28 @@
 </joint>
 
 <joint name="${arm}joint_3" type="continuous">
-  <origin xyz="-0.018 0.089 0" rpy="0 0 0"/>
+  <xacro:if value="${namespace == 'ARM1'}">
+    <!-- Set ARM1 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="-0.018 0.089 0" rpy="0 0 0"/>
+    </xacro:if>
+    <!-- Set ARM2 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="-0.018 0.089 0" rpy="0 -1.57 0"/>
+    </xacro:unless>
+  </xacro:if>
+
+  <xacro:if value="${namespace == 'ARM2'}">
+    <!-- Set ARM2 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="-0.018 0.089 0" rpy="0 -1.57 0"/>
+    </xacro:if>
+    <!-- Set ARM1 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="-0.018 0.089 0" rpy="0 0 0"/>
+    </xacro:unless>
+  </xacro:if>
+
   <parent link="${arm}link_2"/>
   <child link="${arm}link_3"/>
   <axis xyz="-0.0 1.0 -0.0"/>
@@ -280,11 +310,37 @@
 </joint>
 
 <joint name="${arm}joint_4" type="revolute">
-  <origin xyz="0.018 0.036618 0" rpy="0 0 0"/>
+  <xacro:if value="${namespace == 'ARM1'}">
+    <!-- Set ARM1 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="0.018 0.036618 0" rpy="0 0 0"/>
+      <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+    </xacro:if>
+    <!-- Set ARM2 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="0.018 0.036618 0" rpy="1.309 0 0"/>
+      <limit upper="3.316" lower="-0.523" effort="100" velocity="100"/>
+    </xacro:unless>
+  </xacro:if>
+
+  <xacro:if value="${namespace == 'ARM2'}">
+    <!-- Set ARM2 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="0.018 0.036618 0" rpy="1.309 0 0"/>
+      <limit upper="3.316" lower="-0.523" effort="100" velocity="100"/>
+    </xacro:if>
+    <!-- Set ARM1 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="0.018 0.036618 0" rpy="0 0 0"/>
+       <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+    </xacro:unless>
+  </xacro:if>
+
+  
   <parent link="${arm}link_3"/>
   <child link="${arm}link_4"/>
   <axis xyz="-1.0 -0.0 0.0"/>
-  <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+ 
 </joint>
 
 <joint name="${arm}joint_5" type="continuous">
@@ -296,11 +352,36 @@
 </joint>
 
 <joint name="${arm}joint_6" type="revolute">
-  <origin xyz="0.018 0.036617 0" rpy="0 0 0"/>
+  <xacro:if value="${namespace == 'ARM1'}">
+    <!-- Set ARM1 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="0.018 0.036617 0" rpy="0 0 0"/>
+      <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+    </xacro:if>
+    <!-- Set ARM2 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="0.018 0.036617 0" rpy="1.745 0 0"/>
+      <limit upper="3.316" lower="-0.523" effort="100" velocity="100"/>
+    </xacro:unless>
+  </xacro:if>
+
+  <xacro:if value="${namespace == 'ARM2'}">
+    <!-- Set ARM2 -->
+    <xacro:if value="${arm == ''}">
+      <origin xyz="0.018 0.036617 0" rpy="1.745 0 0"/>
+      <limit upper="3.316" lower="-0.523" effort="100" velocity="100"/>
+    </xacro:if>
+    <!-- Set ARM1 -->
+    <xacro:unless value="${arm == ''}">
+      <origin xyz="0.018 0.036617 0" rpy="0 0 0"/>
+      <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+    </xacro:unless>
+  </xacro:if>
+
   <parent link="${arm}link_5"/>
   <child link="${arm}link_6"/>
   <axis xyz="-1.0 -0.0 0.0"/>
-  <limit upper="1.919862" lower="-1.919862" effort="100" velocity="100"/>
+  
 </joint>
 
 <joint name="${arm}joint_7" type="continuous">
@@ -314,7 +395,7 @@
 
 
 <joint name="${arm}gripper_joint_1" type="revolute">
-  <origin xyz="0.006125 0.0535 0.0235" rpy="-1.53 0 0"/>
+  <origin xyz="0.006125 0.0535 0.0235" rpy="-2.53 0 0"/>
   <parent link="${arm}gripper"/>
   <child link="${arm}finger_1"/>
   <axis xyz="0.999727 0.017623 0.01534"/>
@@ -323,7 +404,7 @@
 
 
 <joint name="${arm}gripper_joint_2" type="revolute">
-  <origin xyz="-0.0235 0.0535 0.006125" rpy="-1.53 0 0"/>
+  <origin xyz="-0.0235 0.0535 0.006125" rpy="-1.53 0 -1"/>
   <parent link="${arm}gripper"/>
   <child link="${arm}finger_2"/>
   <axis xyz="0.017134 -0.999359 0.031436"/>
@@ -331,7 +412,7 @@
 </joint>
 
 <joint name="${arm}gripper_joint_3" type="revolute">
-  <origin xyz="-0.006125 0.0535 -0.0235" rpy="-1.53 0 0"/>
+  <origin xyz="-0.006125 0.0535 -0.0235" rpy="-0.53 0 0"/>
   <parent link="${arm}gripper"/>
   <child link="${arm}finger_3"/>
   <axis xyz="-0.999727 -0.017623 -0.01534"/>
@@ -339,7 +420,7 @@
 </joint>
 
 <joint name="${arm}gripper_joint_4" type="revolute">
-  <origin xyz="0.0235 0.0535 -0.006125" rpy="-1.53 0 0"/>
+  <origin xyz="0.0235 0.0535 -0.006125" rpy="-1.53 0 1"/>
   <parent link="${arm}gripper"/>
   <child link="${arm}finger_4"/>
   <axis xyz="-0.017134 0.999359 -0.031436"/>

@@ -166,8 +166,12 @@ Pickup_Cube_SM = smach.StateMachine(outcomes=["Success", "Fail"])
 
 with Pickup_Cube_SM:
     smach.StateMachine.add('Pre_Pickup', Joint_Pose_State("pre_pickup_cube"),
-            transitions={'Success': 'Arm_Sync_Grasp',
+            transitions={'Success': 'Open_Gripper',
                          'Fail': 'Fail'})
+
+    smach.StateMachine.add('Open_Gripper', Grasp_Cmd_State("open"),
+                            transitions={'Success': 'Arm_Sync_Grasp',
+                                        'Fail': 'Fail'})
 
     # Just for demo, you probably don't want to always wait before grasping
     smach.StateMachine.add('Arm_Sync_Grasp', ARM_Sync("pickup"),
@@ -202,8 +206,12 @@ Pickup_Wrench_SM = smach.StateMachine(outcomes=["Success", "Fail"])
 
 with Pickup_Wrench_SM:
     smach.StateMachine.add('Pre_Pickup', Joint_Pose_State("pre_pickup_wrench"),
-            transitions={'Success': 'Arm_Sync_Grasp',
+            transitions={'Success': 'Open_Gripper',
                             'Fail': 'Fail'})
+
+    smach.StateMachine.add('Open_Gripper', Grasp_Cmd_State("open"),
+                        transitions={'Success': 'Arm_Sync_Grasp',
+                                    'Fail': 'Fail'})
 
     # Just for demo, you probably don't want to always wait before grasping
     smach.StateMachine.add('Arm_Sync_Grasp', ARM_Sync("pickup"),
@@ -214,7 +222,7 @@ with Pickup_Wrench_SM:
             transitions={'Success': 'Grasp',
                             'Fail': 'Fail'})
 
-    smach.StateMachine.add('Grasp', Grasp_Cmd_State("close"),
+    smach.StateMachine.add('Grasp', Grasp_Cmd_State("grasp_cube"),
             transitions={'Success': 'Check_Grasp',
                             'Fail': 'Fail'})
 

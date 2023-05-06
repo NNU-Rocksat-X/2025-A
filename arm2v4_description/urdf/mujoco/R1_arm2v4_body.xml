@@ -31,25 +31,25 @@
                 <body name="R1_gripper_base" pos="-0.018 0.0775 0">
                   <geom solref=".004 1" pos="-0.0551 -0.370702 -0.1101" type="mesh" mesh="gripper_base"/>
                   <joint name="R1_joint_7" armature="1" pos="0 0 0" axis="0 1 0"/>
-                  <body name="R1_finger_1" pos="0.006125 0.0535 0.0235" euler="-1.53 0 0">
+                  <body name="R1_finger_1" pos="0.006125 0.0535 0.0235" euler="-0.17 0 0">
                     <inertial pos="-0.00864261 -0.0223486 0.0179735" quat="0.653281 0.270598 -0.270598 0.653281" mass="0.00589988" diaginertia="1.33333e-06 1.33333e-06 1.33333e-06"/>
                     <joint name="R1_gripper_joint_1" armature="0.01" pos="0 0 0" axis="0.999727 0.017623 0.01534" range="-1 0"/>
-                    <include file="mujoco/finger_1.xml"/>
+                    <include file="mujoco/R1_finger_1.xml"/>
                   </body>
-                  <body name="R1_finger_2" pos="-0.0235 0.0535 0.006125" euler="-1.53 0 0">
+                  <body name="R1_finger_2" pos="-0.0235 0.0535 0.006125" euler="0 0 -0.17">
                     <inertial pos="-0.0230751 0.00329087 0.0169449" quat="0 0.92388 0 0.382683" mass="0.00589981" diaginertia="1.33333e-06 1.33333e-06 1.33333e-06"/>
-                    <joint name="R1_gripper_joint_2" armature="0.01" pos="0 0 0" axis="0.017134 -0.999359 0.031436" range="-1 0"/>
-                    <include file="mujoco/finger_2.xml"/>
+                    <joint name="R1_gripper_joint_2" armature="0.01" pos="0 0 0" axis="0 0 1.0" range="-1 0"/>
+                    <include file="mujoco/R1_finger_2.xml"/>
                   </body>
-                  <body name="R1_finger_3" pos="-0.006125 0.0535 -0.0235" euler="-1.53 0 0">
+                  <body name="R1_finger_3" pos="-0.006125 0.0535 -0.0235" euler="0.17 0 0">
                     <inertial pos="0.00809087 0.0234324 0.0168113" quat="0.653281 -0.270598 0.270598 0.653281" mass="0.00589994" diaginertia="1.33333e-06 1.33333e-06 1.33333e-06"/>
-                    <joint name="R1_gripper_joint_3" armature="0.01" pos="0 0 0" axis="-0.999727 -0.017623 -0.01534" range="-1 0"/>
-                    <include file="mujoco/finger_3.xml"/>
+                    <joint name="R1_gripper_joint_3" armature="0.01" pos="0 0 0" axis="-1.0 0.0 0" range="-1 0"/>
+                    <include file="mujoco/R1_finger_3.xml"/>
                   </body>
-                  <body name="R1_finger_4" pos="0.0235 0.0535 -0.006125" euler="-1.53 0 0">
+                  <body name="R1_finger_4" pos="0.0235 0.0535 -0.006125" euler="0 0 0.17">
                     <inertial pos="0.0225221 -0.00220606 0.017841" quat="0.92388 0 0.382683 0" mass="0.00589986" diaginertia="1.33333e-06 1.33333e-06 1.33333e-06"/>
-                    <joint name="R1_gripper_joint_4" armature="0.01" pos="0 0 0" axis="-0.017134 0.999359 -0.031436" range="-1 0"/>
-                    <include file="mujoco/finger_4.xml"/>
+                    <joint name="R1_gripper_joint_4" armature="0.01" pos="0 0 0" axis="0 0 -1.0" range="-1 0"/>
+                    <include file="mujoco/R1_finger_4.xml"/>
                   </body>
                 </body>
               </body>
@@ -73,11 +73,6 @@
     <exclude name="R1_gj3_contact" body1="R1_gripper_base" body2="R1_finger_3"/>
     <exclude name="R1_gj4_contact" body1="R1_gripper_base" body2="R1_finger_4"/>
 
-    <exclude name="R1_gj1_base_contact" body1="R1_finger_1" body2="base_link"/>
-    <exclude name="R1_gj2_base_contact" body1="R1_finger_2" body2="base_link"/>
-    <exclude name="R1_gj3_base_contact" body1="R1_finger_3" body2="base_link"/>
-    <exclude name="R1_gj4_base_contact" body1="R1_finger_4" body2="base_link"/>
-    <exclude name="R1_grip_base_contact" body1="R1_gripper_base" body2="base_link"/>
   </contact>
 
   <actuator>
