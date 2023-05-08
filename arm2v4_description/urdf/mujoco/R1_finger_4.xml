@@ -1,0 +1,6 @@
+<mujoco>
+  <geom solref=".004 1" pos="-0.0786 -0.424202 -0.103975" type="mesh" mesh="gripper_4_1"/>
+  <geom solref=".004 1" pos="-0.0786 -0.424202 -0.103975" type="mesh" mesh="gripper_4_2"/>
+  <geom solref=".004 1" pos="-0.0786 -0.424202 -0.103975" type="mesh" mesh="gripper_4_3"/>
+  <geom solref=".004 1" pos="-0.0786 -0.424202 -0.103975" type="mesh" mesh="gripper_4_4"/>
+</mujoco>

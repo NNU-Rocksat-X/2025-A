@@ -1,10 +1,10 @@
 <mujoco model="arm2_v4">
   <visual>
     <headlight ambient="0 0 0" diffuse="0.5 0.5 0.5" specular="1 1 1"/>
-    <quality shadowsize="8192"/>
+    <quality shadowsize="4096"/>
   </visual>
   <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
-  <option integrator="RK4" timestep="0.00015" > <!-- cone="elliptic" impratio="50" -->
+  <option integrator="RK4" timestep="0.0002" > <!-- cone="elliptic" impratio="50" -->
     <flag gravity="disable"/>
   </option>
   <size njmax="500" nconmax="100"/>
@@ -16,7 +16,7 @@
                           fileup="../../object_description/simulation_assets/earth006005.png"
                           filedown="../../object_description/simulation_assets/earth006004.png"
                           fileback="../../object_description/simulation_assets/earth006002.png"/>
-    <mesh name="base_link" file="base_link.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="base_link" file="base_link.stl" scale="0.001 0.001 0.001"/>
     <mesh name="link_1" file="link_1.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_2" file="link_2.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_3" file="link_3.stl" scale="0.01 0.01 0.01"/>
@@ -31,9 +31,25 @@
   </asset>
   <worldbody>
     <light pos="0.1 1 1" dir="-0.1 -1 -1" diffuse="1 1 1"/>
-    <body name="base_link" pos="0 0 0" euler="1.57 0 0">
+    <body name="base_link" pos="0 0 0" euler="1.57 3.14 0">
       <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="base_link"/>
       <geom type="mesh" mesh="base_link"/>
+    </body>
+
+    <body name="longeron1" pos="0.175 0 0.0616">
+      <geom type="box" size="0.01 0.025 0.1395"/>
+    </body>
+
+    <body name="longeron2" pos="-0.175 0 0.0616">
+      <geom type="box" size="0.01 0.025 0.1395"/>
+    </body>
+
+    <body name="longeron3" pos="0 0.1725 0.0616">
+      <geom type="box" size="0.025 0.01 0.1395"/>
+    </body>
+
+    <body name="longeron4" pos="0 -0.1725 0.0616">
+      <geom type="box" size="0.025 0.01 0.1395"/>
     </body>
   </worldbody>
 

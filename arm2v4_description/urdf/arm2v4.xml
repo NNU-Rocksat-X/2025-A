@@ -16,7 +16,7 @@
                           fileup="../../object_description/simulation_assets/earth006005.png"
                           filedown="../../object_description/simulation_assets/earth006004.png"
                           fileback="../../object_description/simulation_assets/earth006002.png"/>
-    <mesh name="base_link" file="base_link.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="base_link" file="reduced_base_plate.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_1" file="link_1.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_2" file="link_2.stl" scale="0.01 0.01 0.01"/>
     <mesh name="link_3" file="link_3.stl" scale="0.01 0.01 0.01"/>

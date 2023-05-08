@@ -40,9 +40,33 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
 
     }
     
+    ROS_WARN("Setting second arm!");
+    // Set state handles for other arm
+    std::string other_arm;
+    ROS_WARN("this ns: %s", ros::this_node::getNamespace().c_str());
+    if (ros::this_node::getNamespace() == "/ARM1")
+        other_arm = "ARM2";
+    else
+        other_arm = "ARM1";
 
+    other_enc_sub = nh.subscribe("/" + other_arm + "/display_robot_state", 100, &Arm2D2Interface::otherEncoderCallBack, this);
+
+    int other_num_grip_joints;
+    std::vector<std::string> other_joint_names;
+    ros::param::get("/" + other_arm + "/stepper_config/num_joints", other_num_joints);
+    ros::param::get("/" + other_arm + "/stepper_config/num_grip_joints", other_num_grip_joints);
+    ros::param::get("/" + other_arm + "/stepper_config/joint_names", other_joint_names);
+
+    for (int i = 0; i < other_num_joints; i++) {
+        hardware_interface::JointStateHandle state_handle(other_arm + other_joint_names[i], &other_pos[i], &other_vel[i], &other_eff[i]);
+        joint_state_interface.registerHandle(state_handle);
+    }
+
+
+    ROS_WARN("REGISTERING INTERFACES!");
     registerInterface(&joint_state_interface);
     registerInterface(&joint_control_interface);
+    //registerInterface(&other_joint_state_interface);
 
     // Initialize values
     for (int i = 0; i < num_joints; i++) {
@@ -51,6 +75,14 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
         vel[i] = 0.0;
         eff[i] = 0.0;
     }
+
+    for (int i = 0; i < other_num_joints; i++)
+    {
+        other_pos[i] = 0.0;
+        other_vel[i] = 0.0;
+        other_eff[i] = 0.0;
+    }
+
 
 
 
@@ -178,6 +210,16 @@ void Arm2D2Interface::encoderCallBack(const moveit_msgs::DisplayRobotState &msg)
         eff[i] = 0.0;
     }
 
+}
+
+void Arm2D2Interface::otherEncoderCallBack(const moveit_msgs::DisplayRobotState &msg)
+{
+    for (int i = 0; i < other_num_joints; i++)
+    {
+        other_pos[i] = msg.state.joint_state.position[i];
+        other_vel[i] = msg.state.joint_state.velocity[i];
+        other_eff[i] = 0.0;
+    }
 }
 
 void Arm2D2Interface::trajectory_cb(const control_msgs::FollowJointTrajectoryActionGoal &msg)

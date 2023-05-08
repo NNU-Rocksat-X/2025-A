@@ -1,9 +1,8 @@
 <mujoco>
   <asset>
-    <mesh name="finger_2_100" file="finger_2/finger_2_1.stl" scale="0.01 0.01 0.01"/>
-    <mesh name="finger_2_200" file="finger_2/finger_2_2.stl" scale="0.01 0.01 0.01"/>
-    <mesh name="finger_2_300" file="finger_2/finger_2_3.stl" scale="0.01 0.01 0.01"/>
-    <mesh name="finger_2_400" file="finger_2/finger_2_4.stl" scale="0.01 0.01 0.01"/>
-    <mesh name="finger_2_500" file="finger_2/finger_2_5.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_2_1" file="finger_2/gripper_2_1_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_2_2" file="finger_2/gripper_2_2_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_2_3" file="finger_2/gripper_2_3_1.stl" scale="0.01 0.01 0.01"/>
+    <mesh name="gripper_2_4" file="finger_2/gripper_2_4_1.stl" scale="0.01 0.01 0.01"/>
   </asset>
 </mujoco>

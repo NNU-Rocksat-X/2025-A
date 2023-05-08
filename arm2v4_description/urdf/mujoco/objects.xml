@@ -3,7 +3,7 @@
     <mesh file="../../object_description/meshes/wrench.stl" scale=".0015 .0015 .0015"/>
   </asset>
   <worldbody>
-    <body name="ball1" pos="0.09 0.025 0.035">
+    <body name="ball1" pos="0.1 0.05 0.037">
         <joint type="free"/>
         <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
     </body>
@@ -18,7 +18,7 @@
         <geom type="box" size="0.015 0.015 0.015" condim="6" rgba="1 0 0 1"/>
     </body>
 
-    <body name="wrench" pos="-0.05 -0.1 0.01">
+    <body name="wrench" pos="-0.22 -0.125 0.075">
         <joint type="free"/>
         <geom type="mesh" mesh="wrench" euler="1.57 3.14 0" rgba="1 0 0 1"/>
     </body>
