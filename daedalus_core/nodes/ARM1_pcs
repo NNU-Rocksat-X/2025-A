@@ -60,6 +60,17 @@ class IRL_SM:
                     transitions={'Ready': 'Wait_for_TE',
                                  'Timeout': 'Mission_Fail'})
 
+            smach.StateMachine.add('Blink_on', PCS_Activate_State('led'),
+                    transitions={'Complete': 'Blink_Delay',
+                                 'Error': 'Mission_Fail'})
+
+            smach.StateMachine.add('Blink_Delay', Wait_State(1),
+                    transitions={'Complete': 'Blink_off'})
+
+            smach.StateMachine.add('Blink_off', PCS_Deactivate_State('led'),
+                    transitions={'Complete': 'Wait_for_TE',
+                                 'Error': 'Mission_Fail'})
+
             smach.StateMachine.add('Wait_for_TE', Detector_Status('te_detection'),
                     transitions={'On': 'TE_Sync',
                                  'Off': 'Wait_for_TE_delay'})
