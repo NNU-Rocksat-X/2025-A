@@ -6,15 +6,6 @@ import smach_ros
 
 from daedalus_core.daedalus_services.move_cmds import *
 
-"""
-Look at namespace for the other arm.
-This is used to communicate with the other arm
-"""
-other_arm = None
-if rospy.get_namespace() == "/ARM1/":
-    other_arm = "/ARM2/"
-else:
-    other_arm = "/ARM1/"
 
 """
 =============================================================================
