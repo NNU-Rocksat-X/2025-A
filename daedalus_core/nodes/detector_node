@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+import rospy
+from daedalus_core.signal_detector import Detector
+from daedalus_msgs.srv import SignalStatus, SignalStatusResponse
+
+TE_PIN = 5 # pin 29
+FULL_INHIBIT_PIN = 0 # whatever pin that is
+PARTIAL_INHIBIT_PIN = 0
+
+PERSISTENCE_THRESHOLD = 10
+
+te_detector = Detector(TE_PIN, PERSISTENCE_THRESHOLD)
+
+def te_status_cb(req):
+    state = te_detector.get_state()
+    return SignalStatusResponse(state)
+
+def main():
+    rospy.init_node("detector_node")
+    rospy.Service("te_detection", SignalStatus, te_status_cb)
+    #rospy.Service("partial_inhibit_detection", SignalStatus, # add callback function name)
+    #rospy.Service("full_inhibit_detection", SignalStatus, # add callback function name)
+
+    rate = rospy.Rate(10)
+
+
+    while not rospy.is_shutdown():
+        te_detector.detect()
+        rospy.loginfo("State: " + str(te_detector.get_state()))
+        rate.sleep()
+
+if __name__ == "__main__":
+    main()
+
+
+# To verify:
+# 1. roscore
+# 2. rosservice list
+#   Make sure all 3 detection services are listed
+# 3. rosservice call <detector name>
+#   Turn it on and off and make sure this returns the correct value
