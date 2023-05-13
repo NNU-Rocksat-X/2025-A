@@ -57,7 +57,7 @@ class IRL_SM:
     def mission_sm(self):
         with self.sm:
             smach.StateMachine.add('Wait_for_Jetson_Sync', ARM_Sync(0, timeout=30),
-                    transitions={'Ready': 'Wait_for_TE',
+                    transitions={'Ready': 'Blink_on',
                                  'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Blink_on', PCS_Activate_State('led'),
