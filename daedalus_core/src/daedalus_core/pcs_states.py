@@ -146,6 +146,7 @@ class ARM_Sync(smach.State):
         return 'Ready'
 
 
+
 """
 =============================================================================
                             MANEUVER STATE MACHINES

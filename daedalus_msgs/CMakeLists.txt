@@ -29,6 +29,7 @@ add_service_files(
     PredictPosition.srv
     ObjectObservation.srv
     TrajectoryPoints.srv 
+    SignalStatus.srv
 )
 
 

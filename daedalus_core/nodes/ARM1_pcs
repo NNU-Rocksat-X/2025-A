@@ -1,14 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import smach
 import smach_ros
 
 
-from daedalus_core.pcs_states import *
+#from daedalus_core.pcs_states import *
+from daedalus_core.pcs_hw_states import *
 
 
-class Mission_SM:
+class Simulation_SM:
     def __init__(self):
 
         # Create a SMACH state machine
@@ -44,7 +45,26 @@ class Mission_SM:
         outcome = self.sm.execute()
 
 
+
+class IRL_SM:
+    def __init__(self):
+
+        # Create a SMACH state machine
+        self.sm = smach.StateMachine(outcomes=["Mission_Success", "Mission_Fail"])
+
+        self.mission_sm()
+
+    def mission_sm(self):
+        with self.sm:
+            smach.StateMachine.add('Wait_for_TE', Detector_Status('/te_detection'),
+                    transitions={'On': 'Mission_Success',
+                                 'Off': 'Wait_for_TE'})
+
+    def run(self):
+        outcome = self.sm.execute()
+    
+
 if __name__ == "__main__":
     rospy.init_node("mission_sm")
-    sm = Mission_SM()
+    sm = IRL_SM()
     sm.run()
