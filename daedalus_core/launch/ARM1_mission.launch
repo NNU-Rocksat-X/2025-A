@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
+    <node pkg="daedalus_core" name="ARM1_pcs" type="ARM1_pcs" output="screen"/>
+</launch>
