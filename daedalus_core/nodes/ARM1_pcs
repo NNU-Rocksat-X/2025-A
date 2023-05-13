@@ -56,6 +56,10 @@ class IRL_SM:
 
     def mission_sm(self):
         with self.sm:
+            smach.StateMachine.add('Wait_for_Jetson_Sync', ARM_Sync(0, timeout=15),
+                    transitions={'Ready': 'Success_led',
+                                 'Timeout': 'Mission_Fail'})
+
             smach.StateMachine.add('Wait_for_TE', Detector_Status('te_detection'),
                     transitions={'On': 'Wait_for_Jetson_Sync',
                                  'Off': 'Wait_for_TE_delay'})
