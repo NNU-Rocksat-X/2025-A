@@ -154,9 +154,19 @@ class PCS_State(smach.State):
 
 class PCS_Activate_State(PCS_State):
     def execute(self, userdata):
-        self.device_service(True)
+        status = self.device_service(True)
+
+        if status.done:
+            return 'Complete'
+        else:
+            return 'Error'
 
 class PCS_Deactivate_State(PCS_State):
     def execute(self, userdata):
-        self.device_service(False)
+        status = self.device_service(False)
+
+        if status.done:
+            return 'Complete'
+        else:
+            return 'Error'
 
