@@ -116,3 +116,10 @@ class Wait_State(smach.State):
         rospy.sleep(self.wait_time)
 
         return 'Complete'
+
+
+class PCS_Activate_State(smach.State):
+    """
+    """
+    def __init__(self, activation):
+        smach.State.__init__(self, outcomes=['Complete'])

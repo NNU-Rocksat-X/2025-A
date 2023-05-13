@@ -6,9 +6,11 @@ source ~/catkin_ws/devel/setup.bash
 
 ROS_MASTER_URI=http://daedalus1:11311
 ROS_HOSTNAME=$1
-echo "Launching..."
+echo "Launching for $1"
 
-if [[$1 == "daedalus1"]]; 
+ARM1_HOSTNAME="daedalus1"
+
+if [ "$ROS_HOSTNAME" == daedalus1 ]; 
 then
     roslaunch daedalus_core ARM1_mission.launch
 else

@@ -30,6 +30,7 @@ add_service_files(
     ObjectObservation.srv
     TrajectoryPoints.srv 
     SignalStatus.srv
+    DeviceCmd.srv
 )
 
 

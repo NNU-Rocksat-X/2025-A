@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import rospy
+import RPi.GPIO as GPIO
+import sys
+
+from daedalus_msgs.srv import DeviceCmd, DeviceCmdResponse
+
+GPIO.setmode(GPIO.BCM)
+
+class Led:
+    def __init__(self, name, pin):
+        rospy.init_node("detector_node")
+        print("pin", pin)
+        self.name = name
+        self.pin = int(pin)
+        self.rate = rospy.Rate(5)
+
+        GPIO.setup(self.pin, GPIO.OUT)
+        rospy.Service(name, DeviceCmd, self.cmd_callback)
+
+    def cmd_callback(self, req):
+        GPIO.output(self.pin, req.activation)
+        print(req.activation)
+        return DeviceCmdResponse(True)
+
+    def run(self):
+        while not rospy.is_shutdown():
+            self.rate.sleep()
+    
+
+
+if __name__ == "__main__":
+    
+    if len(sys.argv) < 3:
+        rospy.logerror("Incorrect args")
+    else:
+        led = Led(sys.argv[1], sys.argv[2])
+        led.run()
