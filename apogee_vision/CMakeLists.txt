@@ -18,19 +18,19 @@ find_package(catkin REQUIRED
     roscpp
     std_msgs
     daedalus_msgs
-    PCL
-    pcl_ros
+    #PCL
+    #pcl_ros
 )
 
 find_package(OpenCV REQUIRED)
-find_package(PCL REQUIRED)
-find_package(Ceres REQUIRED)
+#find_package(PCL REQUIRED)
+#find_package(Ceres REQUIRED)
 
 include_directories(
     include
     ${catkin_INCLUDE_DIRS} 
-    ${PCL_INCLUDE_DIRS}
-    ${CERES_INCLUDE_DIRS}
+    #${PCL_INCLUDE_DIRS}
+    #${CERES_INCLUDE_DIRS}
 )
 
 catkin_python_setup()
@@ -39,12 +39,13 @@ catkin_package(
     CATKIN_DEPENDS
         rospy
         roscpp
-        pcl_ros
+        #pcl_ros
         daedalus_msgs
 )
 
 catkin_install_python(
     PROGRAMS
+        nodes/depth_cam_server
         scripts/depth_view
         scripts/view
         scripts/point_cloud_py

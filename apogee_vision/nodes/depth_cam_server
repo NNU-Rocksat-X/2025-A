@@ -1,50 +1,266 @@
 #!/usr/bin/env python3
 
+
+# import rospy
+# import cv2
+# import numpy as np
+
+# from apogee_vision.realsense_camera import RealsenseCamera
+
+# #from sensor_msgs.msg import Image
+
+# from std_msgs.msg import MultiArrayDimension, MultiArrayLayout, Float32MultiArray, UInt8MultiArray
+
+# WIDTH = 640
+# HEIGHT = 480
+
+
+# # def cv_to_imgmsg(img):
+# #     img_msg = Image()
+# #     img_msg.header.stamp = rospy.Time.now()
+# #     img_msg.height = img.shape[0]
+# #     img_msg.width = img.shape[1]
+# #     img_msg.encoding = 'bgr8'
+# #     img_msg.is_bigendian = False
+# #     img_msg.step = 3 * img.shape[1]
+# #     img_msg.data = img.tostring()
+# #     return img_msg
+
+    
+
+# def publish_rgb_depth_image(rgb_image, depth_image):
+#         #rgb_image = np.asanyarray(rgb_image.get_data())
+#         depth_image = np.asanyarray(depth_image.get_data())
+
+
+#         rospy.init_node('rgb_depth_publisher')
+#         rgb_pub = rospy.Publisher('rgb_image', UInt8MultiArray, queue_size=10)
+#         depth_pub = rospy.Publisher('depth_image', Float32MultiArray, queue_size=10)
+    
+#         # Convert the OpenCV images to ROS Image messages
+#         rgb_msg = UInt8MultiArray()
+#         rgb_msg.layout.dim.append(MultiArrayDimension())
+#         rgb_msg.layout.dim.append(MultiArrayDimension())
+#         rgb_msg.layout.dim.append(MultiArrayDimension())
+#         rgb_msg.layout.dim[0].label = "height"
+#         rgb_msg.layout.dim[1].label = "width"
+#         rgb_msg.layout.dim[2].label = "channels"
+#         rgb_msg.layout.dim[0].size = HEIGHT
+#         rgb_msg.layout.dim[1].size = WIDTH
+#         rgb_msg.layout.dim[2].size = 3
+#         rgb_msg.layout.dim[0].stride = HEIGHT * WIDTH * 3
+#         rgb_msg.layout.dim[1].stride = WIDTH * 3
+#         rgb_msg.layout.dim[2].stride = 3
+#         rgb_msg.data = rgb_image.flatten().tolist()
+    
+#         depth_msg = Float32MultiArray()
+#         depth_msg.layout.dim.append(MultiArrayDimension())
+#         depth_msg.layout.dim.append(MultiArrayDimension())
+#         depth_msg.layout.dim[0].label = "height"
+#         depth_msg.layout.dim[1].label = "width"
+#         depth_msg.layout.dim[0].size = HEIGHT
+#         depth_msg.layout.dim[1].size = WIDTH
+#         depth_msg.layout.dim[0].stride = WIDTH
+#         depth_msg.layout.dim[1].stride = 1
+#         depth_msg.data = depth_image.flatten().tolist()
+
+#         rgb_pub.publish(rgb_msg)
+#         depth_pub.publish(depth_msg)
+    
+#         rospy.loginfo("RGB and depth images published")
+
+# class CamServer():
+       
+
+#     def __init__(self):
+#         self.rs = RealsenseCamera()
+
+#        # rospy.init_node('depth_cam_server')
+#         #self.rgb_pub = rospy.Publisher('/camera/rgb', Image, queue_size=10)
+#         #self.depth_pub = rospy.Publisher('/camera/depth', Image, queue_size=10)
+
+
+
+#     def run(self):
+#         FILE_PATH = "/home/norman/catkin_ws/depth_cam_test.avi"
+#         FPS = 15
+#         RECORD_TIME = 5
+#         NUM_FRAMES = FPS * RECORD_TIME 
+        
+#         VIDEO = True
+
+#         if VIDEO:
+#            fcc = cv2.VideoWriter_fourcc(*'XVID')
+#            writer = cv2.VideoWriter(FILE_PATH, fcc, FPS, (WIDTH,HEIGHT))
+#            print(cv2.cuda.getCudaEnabledDeviceCount())
+    
+#            while not rospy.is_shutdown():
+#                ret, bgr_frame, depth_frame = self.rs.get_frame_stream()
+#                if ret == False:
+#                    rospy.logwarn("Error reading depth cam")
+#                else:
+#                    #writer.write(bgr_frame)
+#                    # Publish the RGB and depth images as ROS MultiArrays
+#                    publish_rgb_depth_image(bgr_frame, depth_frame)
+#                    #color_image = np.asanyarray(bgr_frame.get_data())
+#                    cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+#                    cv2.imshow('RealSense', bgr_frame)
+                
+            
+#            writer.release()
+
+#         #Just keeping the image code in here
+#         #else:
+#             # 
+#             # #while not rospy.is_shutdown():
+#             # ret, bgr_frame, depth_frame = self.rs.get_frame_stream()
+#             # if ret == False:
+#             #     rospy.logwarn("Error reading depth cam")
+#             # else:
+#             #     #rgb_msg = CvBridge().cv2_to_imgmsg(bgr_frame, encoding='bgr8')
+#             #     rgb_msg = cv_to_imgmsg(bgr_frame)
+#             #     #depth_msg = CvBridge().cv2_to_imgmsg(depth_frame, encoding='32FC1')
+
+#             #     self.rgb_pub.publish(rgb_msg)
+#             #     #depth_pub.publish(depth_msg)
+
+#             #     photo_path="/home/norman/catkin_ws/depth_cam_test.jpg"
+#             #     cv2.imwrite(photo_path, bgr_frame)
+            
+
+# if __name__ == "__main__":
+#     server = CamServer()
+#     server.run()
+
+
+## License: Apache 2.0. See LICENSE file in root directory.
+## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
+
+###############################################
+##      Open CV and Numpy integration        ##
+###############################################
+
 import rospy
-import cv2
+import pyrealsense2 as rs
 import numpy as np
+import cv2
+from std_msgs.msg import MultiArrayDimension, MultiArrayLayout, Float32MultiArray, UInt8MultiArray
 
-from apogee_vision.realsense_camera import RealsenseCamera
+WIDTH = 640
+HEIGHT = 480
+FILE_PATH = "/home/norman/catkin_ws/depth_cam_test.avi"
+FPS = 15
+RECORD_TIME = 5
+NUM_FRAMES = FPS * RECORD_TIME 
 
-from sensor_msgs.msg import Image
-
-def cv_to_imgmsg(img):
-    img_msg = Image()
-    img_msg.header.stamp = rospy.Time.now()
-    img_msg.height = img.shape[0]
-    img_msg.width = img.shape[1]
-    img_msg.encoding = 'bgr8'
-    img_msg.is_bigendian = False
-    img_msg.step = 3 * img.shape[1]
-    img_msg.data = img.tostring()
-    return img_msg
-
-class CamServer():
-    def __init__(self):
-        self.rs = RealsenseCamera()
-
-        rospy.init_node('depth_cam_server')
-        self.rgb_pub = rospy.Publisher('/camera/rgb', Image, queue_size=10)
-        self.depth_pub = rospy.Publisher('/camera/depth', Image, queue_size=10)
+def publish_rgb_depth_image(rgb_image, depth_image):
+        rgb_image = np.asanyarray(rgb_image.get_data())
+        depth_image = np.asanyarray(depth_image.get_data())
 
 
+        rospy.init_node('rgb_depth_publisher')
+        rgb_pub = rospy.Publisher('rgb_image', UInt8MultiArray, queue_size=10)
+        depth_pub = rospy.Publisher('depth_image', Float32MultiArray, queue_size=10)
+    
+        # Convert the OpenCV images to ROS Image messages
+        rgb_msg = UInt8MultiArray()
+        rgb_msg.layout.dim.append(MultiArrayDimension())
+        rgb_msg.layout.dim.append(MultiArrayDimension())
+        rgb_msg.layout.dim.append(MultiArrayDimension())
+        rgb_msg.layout.dim[0].label = "height"
+        rgb_msg.layout.dim[1].label = "width"
+        rgb_msg.layout.dim[2].label = "channels"
+        rgb_msg.layout.dim[0].size = HEIGHT
+        rgb_msg.layout.dim[1].size = WIDTH
+        rgb_msg.layout.dim[2].size = 3
+        rgb_msg.layout.dim[0].stride = HEIGHT * WIDTH * 3
+        rgb_msg.layout.dim[1].stride = WIDTH * 3
+        rgb_msg.layout.dim[2].stride = 3
+        rgb_msg.data = rgb_image.flatten().tolist()
+    
+        depth_msg = Float32MultiArray()
+        depth_msg.layout.dim.append(MultiArrayDimension())
+        depth_msg.layout.dim.append(MultiArrayDimension())
+        depth_msg.layout.dim[0].label = "height"
+        depth_msg.layout.dim[1].label = "width"
+        depth_msg.layout.dim[0].size = HEIGHT
+        depth_msg.layout.dim[1].size = WIDTH
+        depth_msg.layout.dim[0].stride = WIDTH
+        depth_msg.layout.dim[1].stride = 1
+        depth_msg.data = depth_image.flatten().tolist()
 
-    def run(self):
-        #while not rospy.is_shutdown():
-        ret, bgr_frame, depth_frame = self.rs.get_frame_stream()
-        if ret == False:
-            rospy.logwarn("Error reading depth cam")
-        else:
-            #rgb_msg = CvBridge().cv2_to_imgmsg(bgr_frame, encoding='bgr8')
-            rgb_msg = cv_to_imgmsg(bgr_frame)
-            #depth_msg = CvBridge().cv2_to_imgmsg(depth_frame, encoding='32FC1')
+        rgb_pub.publish(rgb_msg)
+        depth_pub.publish(depth_msg)
+    
+        rospy.loginfo("RGB and depth images published")
 
-            self.rgb_pub.publish(rgb_msg)
-            #depth_pub.publish(depth_msg)
 
-            photo_path="/home/norman/catkin_ws/depth_cam_test.jpg"
-            cv2.imwrite(photo_path, bgr_frame)
+def main():
+    # Configure depth and color streams
+    pipeline = rs.pipeline()
+    config = rs.config()
+
+    # Get device product line for setting a supporting resolution
+    pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+    pipeline_profile = config.resolve(pipeline_wrapper)
+    device = pipeline_profile.get_device()
+    device_product_line = str(device.get_info(rs.camera_info.product_line))
+
+    found_rgb = False
+    for s in device.sensors:
+        if s.get_info(rs.camera_info.name) == 'RGB Camera':
+            found_rgb = True
+            break
+    if not found_rgb:
+        print("The demo requires Depth camera with Color sensor")
+        exit(0)
+
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+    if device_product_line == 'L500':
+        config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+    else:
+        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+    # Start streaming
+    pipeline.start(config)
+
+    fcc = cv2.VideoWriter_fourcc(*'XVID')
+    writer = cv2.VideoWriter(FILE_PATH, fcc, FPS, (WIDTH,HEIGHT))
+            
+
+    try:
+        while not rospy.is_shutdown():
+
+            # Wait for a coherent pair of frames: depth and color
+            frames = pipeline.wait_for_frames()
+            depth_frame = frames.get_depth_frame()
+            color_frame = frames.get_color_frame()
+            if not depth_frame or not color_frame:
+                continue
+
+            # Convert images to numpy arrays
+            #depth_image = np.asanyarray(depth_frame.get_data())
+            #color_image = np.asanyarray(color_frame.get_data())
+            publish_rgb_depth_image(color_frame, depth_frame)
+
+            color_image = np.asanyarray(color_frame.get_data())
+            #images = np.hstack((color_frame))
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('RealSense', color_image)
+
+            writer.write(color_image)
+        
+
+
+            cv2.waitKey(1)
+
+    finally:
+
+        # Stop streaming
+        pipeline.stop()
+
+        writer.release()
 
 if __name__ == "__main__":
-    server = CamServer()
-    server.run()
+    main()

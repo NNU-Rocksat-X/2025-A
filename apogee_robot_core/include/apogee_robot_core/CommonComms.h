@@ -32,7 +32,7 @@ typedef struct response_packet
     // Header
     uint8_t seq;
     uint8_t reserved;
-    uint32_t joint_step_position[NUM_JOINTS];
+    int32_t joint_step_position[NUM_JOINTS];
     uint16_t crc;
 } RESPacket;
 
