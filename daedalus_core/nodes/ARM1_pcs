@@ -64,8 +64,12 @@ class IRL_SM:
                     transitions={'Complete': 'Wait_for_TE'})
             
             smach.StateMachine.add('Wait_for_Jetson_Sync', ARM_Sync("TE", timeout=15),
-                    transitions={'Ready': 'Mission_Success',
+                    transitions={'Ready': 'Success_led',
                                  'Timeout': 'Mission_Fail'})
+
+            smach.StateMachine.add('Success_led', PCS_Activate_State('led'),
+                    transitions={'Complete': 'Mission_Success',
+                                 'Error': 'Mission_Fail'})
 
     def run(self):
         outcome = self.sm.execute()

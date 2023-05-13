@@ -4,6 +4,7 @@ import rospy
 import smach
 import smach_ros
 from daedalus_msgs.srv import SignalStatus
+from daedalus_msgs.srv import DeviceCmd
 
 """
 =============================================================================
@@ -117,9 +118,45 @@ class Wait_State(smach.State):
 
         return 'Complete'
 
+"""
+=============================================================================
+                    PAYLOAD CONTROL SYSTEM (PCS)
+=============================================================================
+"""
 
-class PCS_Activate_State(smach.State):
-    """
-    """
-    def __init__(self, activation):
-        smach.State.__init__(self, outcomes=['Complete'])
+"""
+The vision behind the PCS is that each device is a node which has a state it can be in
+such as Enabled, Disabled, various fault states, etc
+and there are states used to control the various devices from the main state machine
+or sub state machines.
+
+Marsha implemented this and it worked well, but it was complicated.
+Example at https://github.com/aborger/Marsha/tree/flight_left/marsha_core/src/marsha_core
+
+Due to schedule constraints this is the reduced functionality version
+
+
+Use the activate and deactivate states to control nodes by their name.
+
+For example:
+
+smach.StateMachine.add('Success_led', PCS_Activate_State('led'),
+                    transitions={'Complete': 'Mission_Success',
+                                 'Error': 'Mission_Fail'})
+"""
+
+class PCS_State(smach.State):
+    def __init__(self, device_name):
+        smach.State.__init__(self, outcomes=['Complete', 'Error'])
+
+        self.device_name = device_name
+        self.device_service = rospy.ServiceProxy(device_name, DeviceCmd)
+
+class PCS_Activate_State(PCS_State):
+    def execute(self, userdata):
+        self.device_service(True)
+
+class PCS_Deactivate_State(PCS_State):
+    def execute(self, userdata):
+        self.device_service(False)
+
