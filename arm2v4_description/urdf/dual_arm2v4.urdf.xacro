@@ -55,14 +55,14 @@
 <!--
 
   <link name="top_plate">
-    <inertial>
+    <inertial>                             
         <origin xyz="-2.154281413321998e-06 0.0035387814754625734 -0.0056639470834143136" rpy="0 0 0"/>
         <mass value="1.5479093566761954"/>
         <inertia ixx="0.010238" iyy="0.01139" izz="0.021617" ixy="-0.0" iyz="0.0" ixz="0.0"/>
     </inertial>
     
     <visual>
-        <origin xyz="0 0 0" rpy="0 0 3.14"/>
+        <origin xyz="0 0 0.0127" rpy="0 0 3.14"/>
         <geometry>
         <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         </geometry>
@@ -70,20 +70,20 @@
     </visual>
     
     <collision>
-        <origin xyz="0 0.01 0" rpy="0 0 3.14"/>
+        <origin xyz="0 0.01 0.0127" rpy="0 0 3.14"/>
         <geometry>
         <mesh filename="package://arm2d2_v2_description/meshes/base_plate.stl" scale="0.001 0.001 0.001"/>
         </geometry>
     </collision>
-  </link>
+  </link> 
 
   <joint name="top_connector" type="fixed">
     <parent link="world"/>
     <child link="top_plate"/>
     <origin xyz="0 0 0.21" rpy="0 0 0"/>
   </joint>
--->
 
+-->
 
 <link name="longeron_1">
   <visual>

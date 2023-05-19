@@ -94,7 +94,7 @@ void Arm2D2Interface::read() {
 
 
 
-
+// this is the PID controller which can be copy and pasted into the teensy
 // Returns velocity
 double Arm2D2Interface::pid_controller(int joint_id, double position_cmd)
 {
@@ -197,7 +197,7 @@ void Arm2D2Interface::write()
 
     for(int i = 0; i < num_joints-num_grip_joints; i++) {  
         //ROS_INFO("J%i - %f", i, cmd[i]);    
-        msg.steps.push_back(pid_controller(i, cmd[i]));
+        msg.steps.push_back(pid_controller(i, cmd[i])); // convert output of pid_controller from rad to steps
     }
 
     step_pub.publish(msg);
@@ -205,7 +205,7 @@ void Arm2D2Interface::write()
 
 void Arm2D2Interface::encoderCallBack(const moveit_msgs::DisplayRobotState &msg) {
     for(int i = 0; i < num_joints; i++) {
-        pos[i] = msg.state.joint_state.position[i];
+        pos[i] = msg.state.joint_state.position[i]; // convert from steps to rad
         vel[i] = msg.state.joint_state.velocity[i];
         eff[i] = 0.0;
     }
