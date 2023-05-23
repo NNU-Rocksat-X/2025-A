@@ -9,6 +9,8 @@
 #include <daedalus_msgs/TeensyMsg.h>
 #include <math.h>
 
+#include<unistd.h>
+
 #define BUFFER_SIZE (50)
 
 using namespace std;
@@ -46,7 +48,7 @@ void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
         double deg_sec = msg->steps[i];
         double deg_ms = deg_sec;
         int step_ms = (int)(deg_ms / deg_per_step[i]);
-        tx.joint_velocity_cmd[i] = step_ms;
+        tx.joint_velocity_cmd[i] = int(deg_ms);
         //ROS_INFO("deg/sec: %f", deg_sec);
         //ROS_INFO("deg/ms: %f", deg_ms);
         //ROS_INFO("J%i: %i", i, step_ms);
@@ -117,26 +119,40 @@ int main(int argc, char** argv)
         {
             seq = 0;
         }
+        cout << "1" << endl;
         tx.crc = crc16((unsigned char*)&tx, (int)sizeof(CMDPacket) - 4); // Subtract 2 so the crc is not calculated over the crc
-        teensy_tx.open("/dev/ttyACM0");
+        teensy_tx.open("/dev/ttyTHS1");                           // Set Serial port here
         teensy_tx.write((char*)&tx, sizeof(CMDPacket));
         teensy_tx.close();
 
+        cout << "2" << endl;
+
         char buffer[BUFFER_SIZE];
-        teensy_rx.open("/dev/ttyACM0");
+        teensy_rx.open("/dev/ttyTHS1");  
+        
+        cout << "2.5" << endl;
+
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
+
+        cout << "2.75" << endl;
+
         ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
+
+        cout << "3" << endl;
+
+        teensy_rx.close();
+
         for (int i = 0; i < NUM_JOINTS; i++)
         {
             robotState.state.joint_state.velocity[i] = 0;
             robotState.state.joint_state.effort[i] = 0;
             // TODO: add adjust angle, but it causes problems
-            robotState.state.joint_state.position[i] = deg_to_rad(rx.joint_step_position[i] * deg_per_enc_step[i]);
+            robotState.state.joint_state.position[i] =  rx.joint_step_position[i]; //deg_to_rad(rx.joint_step_position[i] * deg_per_enc_step[i]);
             ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
         robotStatePub.publish(robotState);
 
-        teensy_rx.close();
+        
 
         ros::spinOnce();
         rate.sleep();
