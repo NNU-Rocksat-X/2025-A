@@ -6,25 +6,25 @@
       <inertial pos="0.000994556 0.0321926 0.0346314" quat="0.983573 -0.108607 0.0374803 0.139225" mass="0.04795" diaginertia="0.000146434 0.000143118 5.64483e-05"/>
       <joint name="R2_joint_1" armature="0.5" pos="0 0 0" axis="0 -1 0" /> <!-- range="-1.0472 3.14159" -->
       <geom solref=".004 1" pos="-0.0551 -0.00635 -0.1101" type="mesh" mesh="link_1"/>
-      <body name="R2_link_2" pos="0.018 0.035617 0">
+      <body name="R2_link_2" pos="0.018 0.035617 0" euler="-0.0698132 0 0">
         <inertial pos="-4.23295e-05 0.0492156 0.00307385" quat="0.5 0.5 -0.5 0.5" mass="0.0072516" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
         <joint name="R2_joint_2" armature="0.1" pos="0 0 0" axis="-1 0 0" range="-2.5 2.5"/>
         <geom solref=".004 1" pos="-0.0731 -0.041967 -0.1101" type="mesh" mesh="link_2"/>
-        <body name="R2_link_3" pos="-0.018 0.089 0" euler="0 -1.57 0">
+        <body name="R2_link_3" pos="-0.018 0.089 0" euler="0 -0.24242623 0">
           <inertial pos="-1.38234e-05 0.0302244 0.0200511" quat="0.980785 -0.19509 0 0" mass="0.0010804" diaginertia="7.1e-05 6.69706e-05 3.30294e-05"/>
           <joint name="R2_joint_3" armature="0.5" pos="0 0 0" axis="0 1 0"/>
           <geom solref=".004 1" pos="-0.0551 -0.130967 -0.1101" type="mesh" mesh="link_3"/>
-          <body name="R2_link_4" pos="0.018 0.036618 0" euler="1.309 0 0">
+          <body name="R2_link_4" pos="0.018 0.036618 0" euler="-1.664346 0 0">
             <inertial pos="-4.23295e-05 0.0491281 0.00307385" quat="0.5 0.5 -0.5 0.5" mass="0.0872515" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-            <joint name="R2_joint_4" armature="0.5" pos="0 0 0" axis="-1 0 0" range="-0.523 3.316"/>
+            <joint name="R2_joint_4" armature="0.5" pos="0 0 0" axis="-1 0 0" range="-3.41 0.0872665"/>
             <geom solref=".004 1" pos="-0.0731 -0.167585 -0.1101" type="mesh" mesh="link_4"/>
-            <body name="R2_link_5" pos="-0.018 0.089 0">
+            <body name="R2_link_5" pos="-0.018 0.089 0" euler="0 -2.24346 0">
               <inertial pos="6.10956e-05 0.0293393 0.017904" quat="0.984034 -0.177983 0 0" mass="0.0774864" diaginertia="6.5e-05 6.07398e-05 3.02602e-05"/>
               <joint name="R2_joint_5"  armature="0.1" pos="0 0 0" axis="0 1 0"/>
               <geom solref=".004 1" pos="-0.0551 -0.256585 -0.1101" type="mesh" mesh="link_5"/>
-              <body name="R2_link_6" pos="0.018 0.036617 0" euler="1.745 0 0">
+              <body name="R2_link_6" pos="0.018 0.036617 0" euler="1.6281267 0 0">
                 <inertial pos="6.94042e-10 0.0491711 0.00307282" quat="0.5 0.5 -0.5 0.5" mass="0.0870349" diaginertia="9.6e-05 9.1e-05 2.6e-05"/>
-                <joint name="R2_joint_6" armature="1" pos="0 0 0" axis="-1 0 0" range="-0.523 3.316"/>
+                <joint name="R2_joint_6" armature="1" pos="0 0 0" axis="-1 0 0" range="0 3.14"/>
                 <geom solref=".004 1" pos="-0.0731 -0.293202 -0.1101" type="mesh" mesh="link_6"/>
                 <body name="R2_gripper_base" pos="-0.018 0.0775 0">
                   <geom solref=".004 1" pos="-0.0551 -0.370702 -0.1101" type="mesh" mesh="gripper_base"/>
@@ -74,6 +74,7 @@
     <exclude name="R2_gb2_contact" body1="base_link" body2="R2_finger_2"/>
     <exclude name="R2_gb3_contact" body1="base_link" body2="R2_finger_3"/>
     <exclude name="R2_gb4_contact" body1="base_link" body2="R2_finger_4"/>
+    <exclude name="R2_gripper_mount_contact" body1="R2_gripper_base" body2="base_link"/>
   </contact>
 
   <actuator>
