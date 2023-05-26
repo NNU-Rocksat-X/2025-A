@@ -29,6 +29,7 @@ joints:
     - 0.0
     - 0.0
     - 0.0
+    - 0.0
 
   test2:
     - -2
@@ -372,5 +373,5 @@ joints:
 grip_pose:
   open: 1
   close: -0.1
-  half_close: 0.5
+  half_close: 0.75
 
