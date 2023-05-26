@@ -8,7 +8,7 @@
         <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
     </body>
 
-    <body name="ball2" pos="-0.065 -0.11 0.03">
+    <body name="ball2" pos="-0.065 -0.11 0.08">
         <joint type="free"/>
         <geom type="sphere" size="0.02" rgba="1 0 0 1"/>
     </body>
