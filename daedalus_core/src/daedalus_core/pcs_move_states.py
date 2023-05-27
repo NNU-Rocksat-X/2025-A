@@ -6,6 +6,8 @@ import smach_ros
 
 from daedalus_core.daedalus_services.move_cmds import *
 
+pickup_fail_1_flag = False
+
 
 """
 =============================================================================
@@ -225,46 +227,18 @@ with Fold_SM:
                                  'Fail': 'Fail'})
 
 
-"""
---------------------------------------~+=|=+~- Pickup Obj ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references pickup_obj_1 in poses.yaml
-- ToDo: add computer vision feedback to this movement
-    - only if we need it though. Im not convinced we need it yet but then again we don't know if we need it 
-"""
-
-pickup_obj_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
-
-with pickup-obj_1_SM:
-    for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_1_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-                                 # we need to have something here to implement the computer vision seeing the ball in the gripper?
-
 
 """
 --------------------------------------~+=|=+~- Pickup Obj 1 ~+=|=+~---------------------------------------
 
-- Exatly like the unfold, but references pickup_obj_1 in poses.yaml
-- ToDo: add computer vision feedback to this movement
-    - only if we need it though. Im not convinced we need it yet but then again we don't know if we need it 
+- ARM1 Picks up Ball 1
+- Test Ready
 """
 
 pickup_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
 
-with pickup-obj_1_SM:
+with pickup_obj_1_SM:
     for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
 
@@ -284,7 +258,7 @@ with pickup-obj_1_SM:
 """
 -------------------------------------~+=|=+~- Pickup Obj 2 ~+=|=+~---------------------------------------
 
-- Exatly like the unfold, but references pickup_obj_2 in poses.yaml
+- ARM2 Function
 """
 
 pickup_obj_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
@@ -310,7 +284,7 @@ with pickup_obj_2_SM:
 """
 -------------------------------------~+=|=+~- Pickup Obj 3 ~+=|=+~---------------------------------------
 
-- Exatly like the unfold, but references pickup_obj_2 in poses.yaml
+- ARM 2 Function
 """
 
 pickup_obj_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
@@ -330,7 +304,7 @@ with pickup_obj_3_SM:
                     transitions={'Success': 'step_' + str(i+1),
                                  'Fail': 'Fail'})
 
-                                 # Vision Feedback.. Although im starting to think we dont really need it if we can nail the movements here on earth
+     smach.StateMachine.add()                            
 
 
 """
@@ -580,3 +554,32 @@ with pickup_obj_3:
                     transitions={'Success': 'step_' + str(i+1),
                                  'Fail': 'Fail'})
             
+
+
+
+"""
+============================================================================================================
+                                                   H O M E                                                  
+============================================================================================================
+
+-------------------------------------~+=|=+~- Home Position 1 ~+=|=+~---------------------------------------
+
+- Exatly like the unfold, but references throw_obj_3 in poses.yaml
+"""
+
+home_pos_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+
+with home_pos_1_SM:
+    if pickup_fail_1_flag == 1:
+        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home')
+                               transitions={'Success': 'Pickup_Fail_1', 
+                                            'Fail': 'Fail'})
+        
+    elif pickup_fail_1_flag == 2:
+        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home') # ToDo: Set ARM1_Home in ARM1_poses.yaml
+                           transitions={'Success': 'Move_On',
+                                        'Fail': 'Fail'}) 
+    
+    else:
+        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home')
+                               transition={'Success': 'home_pos_1_SM'})
