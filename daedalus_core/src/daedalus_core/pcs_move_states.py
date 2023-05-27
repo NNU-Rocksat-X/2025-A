@@ -232,6 +232,7 @@ with Fold_SM:
 --------------------------------------~+=|=+~- Pickup Obj 1 ~+=|=+~---------------------------------------
 
 - ARM1 Picks up Ball 1
+- ARM1 moves to the ball, checks to see if its grasped
 - Test Ready
 """
 
@@ -251,8 +252,51 @@ with pickup_obj_1_SM:
             smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
                     transitions={'Success': 'step_' + str(i+1),
                                  'Fail': 'Fail'})
+            
+    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
+                           transitions={'Success': 'Check_Grasp',
+                                        'Fail': 'Try_Again'})
 
-                                 # we need to have something here to implement the computer vision seeing the ball in the gripper?
+    smach.StateMachine.add('Check_Grasp', Is_Grasped(),             
+                           transitions={'Success': 'Post_Pickup',
+                                        'Fail': 'Try_Again'})
+    
+    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
+                           transitions={'Success': 'Check_Grasp',
+                                        'Fail': 'Try_Again'})
+    
+    smach.StateMachine.add('Try_Again', Is_Grasped(), 
+                           transitions={'Success': 'Post_Pickup',
+                                        'Fail': 'Fail'})
+                           
+    smach.StateMachine.add('Post_Pickup', Joint_Pose_State('active_home/'),
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
+
+
+"""
+-------------------------------------~+=|=+~- Handoff Obj 1 ~+=|=+~---------------------------------------
+
+- Moves to Handoff position and waits for Arm_Sync
+"""
+
+throw_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
+
+with throw_1_SM:
+    smach.StateMachine.add('Move_To_Handy', Joint_Pose_State(),
+                           transitions={'Success': 'Wait_For_Sync',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Wait_For_Sync', ARM_Sync('handoff_1'),
+                           transitions={'Success': 'Handoff',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Handoff')
+
+
+
+
 
 
 """
@@ -277,6 +321,14 @@ with pickup_obj_2_SM:
             smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_2/' + step_str, allowed_attempts=2),
                     transitions={'Success': 'step_' + str(i+1),
                                  'Fail': 'Fail'})
+            
+    smach.StateMachine.add('Check_Grasp', Is_Grasped(),
+                           transitions={'Success': 'Post_Pickup',
+                                        'Fail': 'Fail'})
+
+    smach.StateMachine.add('Post_Pickup', Joint_Pose_State('active_home/'),
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
 
                                  # same thing here, computer vision to add feedback to this movement
 
@@ -364,7 +416,7 @@ with throw_2_SM:
 throw_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_THROW_OBJ_3_STEPS = len(rospy.get_param('joints/throw_obj_3'))
 
-with pickup_obj_3:
+with throw_3_SM:
     for i in range(0, NUM_THROW_OBJ_3_STEPS):
         step_str = 'step_' + str(i)
 
@@ -390,7 +442,7 @@ with pickup_obj_3:
 pickup_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
 
-with pickup-obj_1_SM:
+with pickup_obj_1_SM:
     for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
 
@@ -404,7 +456,7 @@ with pickup-obj_1_SM:
                     transitions={'Success': 'step_' + str(i+1),
                                  'Fail': 'Fail'})
 
-                                 # we need to have something here to implement the computer vision seeing the ball in the gripper?
+    smach.StateMachine.add('')                             # we need to have something here to implement the computer vision seeing the ball in the gripper?
 
 
 """
@@ -516,7 +568,7 @@ with throw_2_SM:
 throw_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_THROW_OBJ_3_STEPS = len(rospy.get_param('joints/throw_obj_3'))
 
-with pickup_obj_3:
+with throw_3_SM:
     for i in range(0, NUM_THROW_OBJ_3_STEPS):
         step_str = 'step_' + str(i)
 
@@ -540,7 +592,7 @@ with pickup_obj_3:
 discard_obj_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_DISCARD_OBJ_1_STEPS = len(rospy.get_param('joints/discard_obj'))
 
-with pickup_obj_3:
+with discard_obj_SM:
     for i in range(0, NUM_DISCARD_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
 
@@ -583,3 +635,5 @@ with home_pos_1_SM:
     else:
         smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home')
                                transition={'Success': 'home_pos_1_SM'})
+        
+    smach.StateMachine.add()
