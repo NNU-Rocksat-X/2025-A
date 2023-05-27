@@ -226,9 +226,12 @@ with Fold_SM:
                     transitions={'Success': 'step_' + str(i-1),
                                  'Fail': 'Fail'})
 
-
-
 """
+============================================================================================================
+                                                  OBJECT 1                                                  
+============================================================================================================
+
+
 --------------------------------------~+=|=+~- Pickup Obj 1 ~+=|=+~---------------------------------------
 
 - ARM1 Picks up Ball 1
@@ -278,362 +281,255 @@ with pickup_obj_1_SM:
 -------------------------------------~+=|=+~- Handoff Obj 1 ~+=|=+~---------------------------------------
 
 - Moves to Handoff position and waits for Arm_Sync
+- Move on to Home if any of the states fail
 """
 
-throw_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+handoff_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
 
-with throw_1_SM:
-    smach.StateMachine.add('Move_To_Handy', Joint_Pose_State(),
+with handoff_1_SM:
+    smach.StateMachine.add('Move_To_Handy', Joint_Pose_State("pre_handoff"), # TODO add handoff poses to poses.yaml
                            transitions={'Success': 'Wait_For_Sync',
                                         'Fail': 'Fail'})
     
-    smach.StateMachine.add('Wait_For_Sync', ARM_Sync('handoff_1'),
+    smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_1", 10), # TODO Sync all the sycn states so that they all match up
                            transitions={'Success': 'Handoff',
                                         'Fail': 'Fail'})
     
-    smach.StateMachine.add('Handoff')
-
-
-
-
-
-
-"""
--------------------------------------~+=|=+~- Pickup Obj 2 ~+=|=+~---------------------------------------
-
-- ARM2 Function
-"""
-
-pickup_obj_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_2_STEPS = len(rospy.get_param('joints/pickup_obj_2'))
-
-with pickup_obj_2_SM:
-    for i in range(0, NUM_PICKUP_OBJ_2_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_2_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-            
-    smach.StateMachine.add('Check_Grasp', Is_Grasped(),
-                           transitions={'Success': 'Post_Pickup',
+    smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_1a"),
+                           transitions={'Success': 'Open_Gripper',
                                         'Fail': 'Fail'})
-
-    smach.StateMachine.add('Post_Pickup', Joint_Pose_State('active_home/'),
+    
+    smach.StateMachine.add('Open_Gripper', Joint_Pose_State("handoff_2b"),
+                           transitions={'Success': 'Post_Handoff',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Post_Handoff', Joint_Pose_State("handoff_1c"),
                            transitions={'Success': 'Success',
                                         'Fail': 'Fail'})
-
-                                 # same thing here, computer vision to add feedback to this movement
-
-
+    
 """
--------------------------------------~+=|=+~- Pickup Obj 3 ~+=|=+~---------------------------------------
-
-- ARM 2 Function
-"""
-
-pickup_obj_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_3_STEPS = len(rospy.get_param('joints/pickup_obj_2'))
-
-with pickup_obj_3_SM:
-    for i in range(0, NUM_PICKUP_OBJ_3_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_3_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-     smach.StateMachine.add()                            
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 1 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_1 in poses.yaml
-"""
-
-throw_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
-
-with throw_1_SM:
-    for i in range(0, NUM_THROW_OBJ_1_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_1_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 2 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_2 in poses.yaml
-"""
-
-throw_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_2_STEPS = len(rospy.get_param('joints/throw_obj_1'))
-
-with throw_2_SM:
-    for i in range(0, NUM_THROW_OBJ_2_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_2_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 3 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_3 in poses.yaml
-"""
-
-throw_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_3_STEPS = len(rospy.get_param('joints/throw_obj_3'))
-
-with throw_3_SM:
-    for i in range(0, NUM_THROW_OBJ_3_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_3_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
---------------------------------------~+=|=+~- Pickup Obj 1 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references pickup_obj_1 in poses.yaml
-- ToDo: add computer vision feedback to this movement
-    - only if we need it though. Im not convinced we need it yet but then again we don't know if we need it 
-"""
-
-pickup_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
-
-with pickup_obj_1_SM:
-    for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_1_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-    smach.StateMachine.add('')                             # we need to have something here to implement the computer vision seeing the ball in the gripper?
-
-
-"""
--------------------------------------~+=|=+~- Pickup Obj 2 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references pickup_obj_2 in poses.yaml
-"""
-
-pickup_obj_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_2_STEPS = len(rospy.get_param('joints/pickup_obj_2'))
-
-with pickup_obj_2_SM:
-    for i in range(0, NUM_PICKUP_OBJ_2_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_2_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-                                 # same thing here, computer vision to add feedback to this movement
-
-
-"""
--------------------------------------~+=|=+~- Pickup Obj 3 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references pickup_obj_2 in poses.yaml
-"""
-
-pickup_obj_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_PICKUP_OBJ_3_STEPS = len(rospy.get_param('joints/pickup_obj_2'))
-
-with pickup_obj_3_SM:
-    for i in range(0, NUM_PICKUP_OBJ_3_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_PICKUP_OBJ_3_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-                                 # Vision Feedback.. Although im starting to think we dont really need it if we can nail the movements here on earth
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 1 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_1 in poses.yaml
-"""
-
-throw_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
-
-with throw_1_SM:
-    for i in range(0, NUM_THROW_OBJ_1_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_1_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 2 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_2 in poses.yaml
-"""
-
-throw_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_2_STEPS = len(rospy.get_param('joints/throw_obj_1'))
-
-with throw_2_SM:
-    for i in range(0, NUM_THROW_OBJ_2_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_2_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_2/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
--------------------------------------~+=|=+~- Throw Obj 3 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_3 in poses.yaml
-"""
-
-throw_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_THROW_OBJ_3_STEPS = len(rospy.get_param('joints/throw_obj_3'))
-
-with throw_3_SM:
-    for i in range(0, NUM_THROW_OBJ_3_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_THROW_OBJ_3_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('throw_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-
-
-"""
--------------------------------------~+=|=+~- Discard Obj 1 ~+=|=+~---------------------------------------
-
-- Exatly like the unfold, but references throw_obj_3 in poses.yaml
-"""
-
-discard_obj_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
-NUM_DISCARD_OBJ_1_STEPS = len(rospy.get_param('joints/discard_obj'))
-
-with discard_obj_SM:
-    for i in range(0, NUM_DISCARD_OBJ_1_STEPS):
-        step_str = 'step_' + str(i)
-
-        if i == NUM_DISCARD_OBJ_1_STEPS - 1:
-            smach.StateMachine.add(step_str, Joint_Pose_State('discard_obj/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
-                                 'Fail': 'Fail'})
-
-        else:
-            smach.StateMachine.add(step_str, Joint_Pose_State('discard_obj/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'step_' + str(i+1),
-                                 'Fail': 'Fail'})
-            
-
-
-
-"""
-============================================================================================================
-                                                   H O M E                                                  
-============================================================================================================
-
 -------------------------------------~+=|=+~- Home Position 1 ~+=|=+~---------------------------------------
 
-- Exatly like the unfold, but references throw_obj_3 in poses.yaml
+- ARM1
+- Ready for testing
 """
 
 home_pos_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 
 with home_pos_1_SM:
-    if pickup_fail_1_flag == 1:
-        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home')
-                               transitions={'Success': 'Pickup_Fail_1', 
-                                            'Fail': 'Fail'})
-        
-    elif pickup_fail_1_flag == 2:
-        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home') # ToDo: Set ARM1_Home in ARM1_poses.yaml
-                           transitions={'Success': 'Move_On',
-                                        'Fail': 'Fail'}) 
+    smach.StateMachine.add('Go_Home', Joint_Pose_State("active_home"), # TODO add active home to the poses.yaml
+                           transitions={'Success': 'Sync_Up', 
+                                        'Fail': 'Fail'})
+
+    smach.StateMachine.add('Sync_Up', ARM_Sync("obj_2_ready", 15), # wait here until arm 2 has gotten rid of the object
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})        
+
+
+
+"""
+============================================================================================================
+                                                  OBJECT 2                                                  
+============================================================================================================
+
+-------------------------------------~+=|=+~- Handoff Obj 2 ~+=|=+~---------------------------------------
+
+- 
+- 
+"""
+
+handoff_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+
+with handoff_2_SM:
+    smach.StateMachine.add('Move_To_Handy', Joint_Pose_State("pre_handoff"), # move to general position w/ gripper open
+                           transitions={'Success': 'Wait_For_Sync',
+                                        'Fail': 'Fail'})
     
-    else:
-        smach.StateMachine.add('go_home', Joint_Pose_State('ARM1_Home')
-                               transition={'Success': 'home_pos_1_SM'})
-        
-    smach.StateMachine.add()
+    smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_2", 20), # wait for arm2 to be ready
+                           transitions={'Success': 'handoff',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_2a"), # move closer to the target position
+                           transitions={'Success': 'Open_Gripper',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Close_Gripper', Joint_Pose_State("handoff_2b"), # close the gripper
+                           transitions={'Success': 'Check_Gripper',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Check_Gripper', Is_Grasped(),  # check the gripper to ensure we "caught" the ball
+                            transitions={'Success': 'Post_Handoff',
+                                        'Fail': 'Try_Again'})
+    
+    smach.StateMachine.add('Post_Handoff', Joint_Pose_State("handoff_2c"), # Move away from the other arm becasuse we got it yay
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
+
+    smach.StateMachine.add('Try_Again_A', Is_Grasped(), # Check again because we might not have got it the first time
+                           transitions={'Succes': 'Post_Handoff',
+                                        'Fail': 'Fail'})
+
+
+"""
+-------------------------------------~+=|=+~- Discard Obj 1 ~+=|=+~---------------------------------------
+
+- Gets rid of whats in the gripper by iterating through the discard_obj_2 poses in the yaml
+- TODO add a fail-safe state-state-machine if the gripper returns that there is something inside it
+"""
+
+discard_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+NUM_DISCARD_OBJ_1_STEPS = len(rospy.get_param('joints/discard_obj'))
+
+with discard_obj_1_SM:
+    for i in range(0, NUM_DISCARD_OBJ_1_STEPS):
+        step_str = 'step_' + str(i)
+
+        if i == NUM_DISCARD_OBJ_1_STEPS - 1:
+            smach.StateMachine.add(step_str, Joint_Pose_State('discard_obj_2/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'Success',
+                                 'Fail': 'Fail'})
+
+        else:
+            smach.StateMachine.add(step_str, Joint_Pose_State('discard_obj_2/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'step_' + str(i+1),
+                                 'Fail': 'Fail'})
+   
+    smach.StateMachine.add('Check_Gripper', Is_Grasped(),
+                           transitions={'Success': 'Fail',
+                                        'Fail': 'Success'}) # Check to see if there is anything in the gripper (empty is success)
+
+
+"""
+-------------------------------------~+=|=+~- Home Position 2 ~+=|=+~---------------------------------------
+
+-
+-
+"""
+home_pos_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+
+with home_pos_2_SM:
+    smach.StateMachine.add('Go_Home', Joint_Pose_State("active_home"), 
+                           transitions={'Success': 'Sync_Up', 
+                                        'Fail': 'Fail'})
+
+    smach.StateMachine.add('Sync_Up', ARM_Sync("obj_3_ready", 15), # wait here until arm 2 is ready to recieve 
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})        
+
+"""
+============================================================================================================
+                                                  OBJECT 3                                                  
+============================================================================================================
+
+"""
+"""
+--------------------------------------~+=|=+~- Pickup Obj 3 ~+=|=+~---------------------------------------
+
+- ARM1 Picks up Cube 1
+- ARM1 moves to the cube, checks to see if its grasped
+- Test Ready
+"""
+
+pickup_obj_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+NUM_PICKUP_OBJ_3_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
+
+with pickup_obj_1_SM:
+    for i in range(0, NUM_PICKUP_OBJ_3_STEPS):
+        step_str = 'step_' + str(i)
+
+        if i == NUM_PICKUP_OBJ_3_STEPS - 1:
+            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'Success',
+                                 'Fail': 'Fail'})
+
+        else:
+            smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'step_' + str(i+1),
+                                 'Fail': 'Fail'})
+            
+    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
+                           transitions={'Success': 'Check_Grasp',
+                                        'Fail': 'Try_Again'})
+
+    smach.StateMachine.add('Check_Grasp', Is_Grasped(),             
+                           transitions={'Success': 'Post_Pickup',
+                                        'Fail': 'Try_Again'})
+    
+    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
+                           transitions={'Success': 'Check_Grasp',
+                                        'Fail': 'Try_Again'})
+    
+    smach.StateMachine.add('Try_Again', Is_Grasped(), 
+                           transitions={'Success': 'Post_Pickup',
+                                        'Fail': 'Fail'})
+                           
+    smach.StateMachine.add('Post_Pickup', Joint_Pose_State('active_home/'),
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
+
+
+"""
+-------------------------------------~+=|=+~- Handoff Obj 3 ~+=|=+~---------------------------------------
+
+- Moves to Handoff position and waits for Arm_Sync
+- Move on to Home if any of the states fail
+"""
+
+handoff_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+#NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
+
+with handoff_1_SM:
+    smach.StateMachine.add('Move_To_Handy', Joint_Pose_State("pre_handoff"), # TODO add handoff poses to poses.yaml
+                           transitions={'Success': 'Wait_For_Sync',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_1", 10), # TODO Sync all the sycn states so that they all match up
+                           transitions={'Success': 'Handoff',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_1a"),
+                           transitions={'Success': 'Open_Gripper',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Open_Gripper', Joint_Pose_State("handoff_2b"),
+                           transitions={'Success': 'Post_Handoff',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Post_Handoff', Joint_Pose_State("handoff_1c"),
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
+    
+"""
+-------------------------------------~+=|=+~- Home Position 3 ~+=|=+~---------------------------------------
+
+- ARM1
+- Ready for testing
+"""
+
+home_pos_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+
+with home_pos_3_SM:
+    smach.StateMachine.add('Go_Home', Joint_Pose_State("active_home"), # TODO add active home to the poses.yaml
+                           transitions={'Success': 'Sync_Up', 
+                                        'Fail': 'Fail'})
+
+    smach.StateMachine.add('Sync_Up', ARM_Sync("done", 15), # wait here until arm 2 has gotten rid of the object
+                           transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
