@@ -37,24 +37,63 @@ class Mission_SM:
 
 
 # start SM here
-            smach.StateMachine.add('Init_Arms', init_arms(), transitions={'Success': 'Unfold_Arms', 'Fail': 'init'})
+            smach.StateMachine.add('Init_Arms', init_arms(), 
+                                   transitions={'Success': 'ARM_Sync', #maybe change this for testing?
+                                                 'Fail': 'init'})
+            
+            smach.StateMachine.add('ARM_Sync', ARM_Sync('init', timeout=60),
+                                   transitions={'Ready': 'Unfold_Arms',
+                                                'Timeout' : 'init_Arms'})
 
-            smach.StateMachine.add('Unfold_Arms', unfold_SM, transitions={'Success': 'Pickup_Obj_1', 'Fail': 'init'})
+            smach.StateMachine.add('Unfold_Arms', unfold_SM(), 
+                                   transitions={'Success': 'Pickup_Obj_1',
+                                                 'Fail': 'Init_Arms'})
 
 # ball 1
-            smach.StateMachine.add('AI_Catch_1', catch_SM_1, transitions={'Success': 'Discard', 'Fail': 'Home_Pos_1'})
-            smach.StateMachine.add('Discard', discard_obj_1_SM, transitions={'Else': 'Home_Pos_1'})
-            smach.StateMachine.add('Home_Pos_1', home_pos_1_SM, tranitions={'Pickup_Fail_1': 'Pickup_Obj_2', 'Move_On': "Home_Pos_1"})
+            smach.StateMachine.add('Ready_to_Receive_Obj1', ready_to_transfer(),
+                                   transitions={'Success': 'Wait_for_ARM1_Obj1',
+                                                'Fail': 'Home_Pos_1'} )
+            smach.StateMachine.add('Wait_For_ARM1_Obj1', wait_for_ARM1(), 
+                                   transitions={'Ready': 'Receive_Obj_1',
+                                                 'Timout': 'Home_Pos_1'})
+            smach.StateMachine.add('Receive_Obj_1', receive_Obj(),
+                                   transitions={'Success': 'Discard',
+                                                'Fail': 'Home_Pos_1'})
+            smach.StateMachine.add('Discard', discard_obj_SM(), 
+                                   transitions={'Success': 'Home_Pos_1',
+                                                'Fail': 'Home_Pos_1'})
+            smach.StateMachine.add('Home_Pos_1', home_pos_1_SM(), 
+                                   tranitions={'Success': 'Pickup_Obj_2',
+                                               'Fail': 'Home_Pos_1'})
 
 # ball 2
-            smach.StateMachine.add('Pickup_Obj_2', pickup_obj_3_SM, transitions={'Success': 'Throw_2', 'Fail': 'Home_Pos_2'})
-            smach.StateMachine.add('Throw_2', throw_2_SM, transitions={'Else': 'Home_pos_2'})
-            smach.StateMachine.add('Home_Pos_2', home_pos_3_SM, transitions={'Pickup_Fail_2': 'Pickup_Obj_2', 'Done': 'Fold_Arms', 'Else': 'Home_Pos_2', 'Throw_Flag': 'AI_Catch_3'})
+            smach.StateMachine.add('Pickup_Obj_2', pickup_obj_2_SM(), 
+                                   transitions={'Success': 'Ready_To_Give_Obj_2',
+                                                 'Fail': 'Home_Pos_2'})
+            smach.StateMachine.add('Ready_To_Give_Obj_2', ready_to_transfer(),
+                                   transitions={'Else': 'Wait_for_ARM1_Obj2'})
+            smach.StateMachine.add('Wait_for_ARM1_Obj2', wait_for_ARM1(),
+                                   transitions={'Ready': 'Tranfer_Obj2',
+                                                'Timout': 'home_pos_2'})
+            smach.StateMachine.add('Transfer_Obj2', give_obj(),
+                                    transitions={'Else': 'Home_pos_2'})
+            smach.StateMachine.add('Home_Pos_2', home_pos_2_SM(), 
+                                   transitions={'Else': 'Ready_To_Recieve_Obj3'})
 
 # cube 1
-            smach.StateMachine.add('AI_Catch_3', catch_SM, transitions={'Success': 'Discard', 'Fail': 'Home_Pos_3'})
-            smach.StateMachine.add('Discard', discard_obj_3_SM, transitions={'Else': 'Home_Pos_3'})
-            smach.StateMachine.add('Home_Pos_3', home_pos_3_SM, tranitions={'Pickup_Fail_3': 'Pickup_Obj_3', 'Done': 'Fold_Arms'})
+            smach.StateMachine.add('Ready_to_Receive_Obj3', ready_to_transfer(),
+                                   transitions={'Ready': 'Wait_for_ARM1_Obj3',
+                                                'Fail': 'Mission_Fail'} )
+            smach.StateMachine.add('Wait_For_ARM1_Obj3', wait_for_ARM1(), 
+                                   transitions={'Ready': 'Receive_Obj_3',
+                                                 'Timout': 'Home_Pos_3'})
+            smach.StateMachine.add('Receive_Obj_3', receive_Obj(),
+                                   transitions={'Else': 'Discard'})
+            smach.StateMachine.add('Discard', discard_obj_SM(), 
+                                   transitions={'Else': 'Home_Pos_3'})
+            smach.StateMachine.add('Home_Pos_3', home_pos_3_SM(), 
+                                   tranitions={'Else': 'Fold_Arms'})
+
 
 # done
             smach.stateMachine.add('Fold_Arms', fold_arms_SM, transitions={'Success': 'Deinit', 'Fail': 'Fold_Arms'})
