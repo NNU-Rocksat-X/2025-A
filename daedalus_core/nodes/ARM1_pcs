@@ -4,8 +4,9 @@ import rospy
 import smach
 import smach_ros
 
+print("Importing...")
 
-#from daedalus_core.pcs_move_states import *
+from daedalus_core.pcs_move_states import *
 from daedalus_core.pcs_states import *
 
 
@@ -27,7 +28,6 @@ class Simulation_SM:
                 transitions={'Ready': 'Pickup_Cube',
                              'Timeout': 'Mission_Fail'})
             
-
             #smach.StateMachine.add('Pickup_Cube', Pickup_Cube_SM,
             #        transitions={'Success': 'Unfold',
             #                     'Fail': 'Mission_Fail'})
@@ -56,11 +56,11 @@ class Simulation_SM:
                                                  'Fail': 'Home_Pos_1'}) #done
             
             smach.StateMachine.add('Handoff_1', handoff_1_SM, 
-                                   transitions={'Success': 'Home_Pos_1'
+                                   transitions={'Success': 'Home_Pos_1',
                                                 'Fail': 'Home_Pos_1'}) #done
             
             smach.StateMachine.add('Home_Pos_1', home_pos_1_SM, 
-                                   tranitions={'Success': 'Handoff_2'
+                                   tranitions={'Success': 'Handoff_2',
                                                'Fail': 'Fail'}) #done
 
 # ball 2

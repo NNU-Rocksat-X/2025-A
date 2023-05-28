@@ -14,20 +14,20 @@ pickup_fail_1_flag = False
                             MOVE STATE TEMPLATES
 =============================================================================
 """
-"""
+
 class Move_State(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['Success', 'Fail'])
 
 class Joint_Pose_State(smach.State):
     
-    Takes pose name as parameter and executes, transitions to next state when done.
-
+    #Takes pose name as parameter and executes, transitions to next state when done.
+    """
     USAGE EXAMPLE
         smach.StateMachine.add('Pre_Throw', Joint_Pose_State("pre_throw"),
                   transitions={'Success': 'Jetson_Sync_1',
                                'Fail': 'Ball_Status'})
-    
+    """
     def __init__(self, pose, allowed_attempts=1):
         smach.State.__init__(self, outcomes=['Success', 'Fail'])
         self.pose = pose
@@ -44,7 +44,7 @@ class Joint_Pose_State(smach.State):
             return 'Success'
         else:
             return 'Fail'
-"""
+
 class Grasp_Cmd_State(smach.State):
     """
     Executes grasp cmd then transitions when done
