@@ -5,6 +5,7 @@ import smach
 import smach_ros
 
 from daedalus_core.daedalus_services.move_cmds import *
+from daedalus_core.pcs_util import *
 
 pickup_fail_1_flag = False
 
