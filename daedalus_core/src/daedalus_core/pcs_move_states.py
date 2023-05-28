@@ -14,20 +14,20 @@ pickup_fail_1_flag = False
                             MOVE STATE TEMPLATES
 =============================================================================
 """
-
+"""
 class Move_State(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['Success', 'Fail'])
 
 class Joint_Pose_State(smach.State):
-    """
+    
     Takes pose name as parameter and executes, transitions to next state when done.
 
     USAGE EXAMPLE
         smach.StateMachine.add('Pre_Throw', Joint_Pose_State("pre_throw"),
                   transitions={'Success': 'Jetson_Sync_1',
                                'Fail': 'Ball_Status'})
-    """
+    
     def __init__(self, pose, allowed_attempts=1):
         smach.State.__init__(self, outcomes=['Success', 'Fail'])
         self.pose = pose
@@ -44,7 +44,7 @@ class Joint_Pose_State(smach.State):
             return 'Success'
         else:
             return 'Fail'
-
+"""
 class Grasp_Cmd_State(smach.State):
     """
     Executes grasp cmd then transitions when done
@@ -378,10 +378,10 @@ with handoff_2_SM:
 - TODO add a fail-safe state-state-machine if the gripper returns that there is something inside it
 """
 
-discard_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+discard_obj_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_DISCARD_OBJ_1_STEPS = len(rospy.get_param('joints/discard_obj'))
 
-with discard_obj_1_SM:
+with discard_obj_2_SM:
     for i in range(0, NUM_DISCARD_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
 
@@ -479,7 +479,7 @@ with pickup_obj_1_SM:
 handoff_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 #NUM_THROW_OBJ_1_STEPS = len(rospy.get_param('joints/throw_obj_1'))
 
-with handoff_1_SM:
+with handoff_3_SM:
     smach.StateMachine.add('Move_To_Handy', Joint_Pose_State("pre_handoff"), # TODO add handoff poses to poses.yaml
                            transitions={'Success': 'Wait_For_Sync',
                                         'Fail': 'Fail'})

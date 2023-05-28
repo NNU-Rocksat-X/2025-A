@@ -64,11 +64,11 @@ class Simulation_SM:
                                                'Fail': 'Fail'}) #done
 
 # ball 2
-            smach.StateMachine.add('Handoff_2', handloff_2_SM, 
+            smach.StateMachine.add('Handoff_2', handoff_2_SM, 
                                    transitions={'Success': 'Discard',
                                                 'Fail': 'Home_Pos_2'}) # done
             
-            smach.StateMachine.add('Discard', discard_obj_SM,
+            smach.StateMachine.add('Discard', discard_obj_2_SM,
                                    transitions={'Success': 'Home_Pos_2',
                                                 'Fail': 'Home_Pos_2'})
 
@@ -81,7 +81,7 @@ class Simulation_SM:
                                    transitions={'Success': 'Throw_3',
                                                 'Fail': 'Home_Pos_3'})
             
-            smach.StateMachine.add('Throw_3', throw_3_SM,
+            smach.StateMachine.add('Throw_3', handoff_3_SM,
                                    transitions={'Else': 'Home_pos_3'})
             
             smach.StateMachine.add('Home_Pos_3', home_pos_3_SM,

@@ -53,15 +53,19 @@ class Mission_SM:
             smach.StateMachine.add('Ready_to_Receive_Obj1', ready_to_transfer(),
                                    transitions={'Success': 'Wait_for_ARM1_Obj1',
                                                 'Fail': 'Home_Pos_1'} )
+            
             smach.StateMachine.add('Wait_For_ARM1_Obj1', wait_for_ARM1(), 
                                    transitions={'Ready': 'Receive_Obj_1',
                                                  'Timout': 'Home_Pos_1'})
+            
             smach.StateMachine.add('Receive_Obj_1', receive_Obj(),
                                    transitions={'Success': 'Discard',
                                                 'Fail': 'Home_Pos_1'})
+            
             smach.StateMachine.add('Discard', discard_obj_SM(), 
                                    transitions={'Success': 'Home_Pos_1',
                                                 'Fail': 'Home_Pos_1'})
+            
             smach.StateMachine.add('Home_Pos_1', home_pos_1_SM(), 
                                    tranitions={'Success': 'Pickup_Obj_2',
                                                'Fail': 'Home_Pos_1'})
