@@ -249,7 +249,7 @@ with pickup_obj_1_SM:
 
         if i == NUM_PICKUP_OBJ_1_STEPS - 1:
             smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
+                    transitions={'Success': 'Grasp',
                                  'Fail': 'Fail'})
 
         else:
@@ -263,10 +263,6 @@ with pickup_obj_1_SM:
 
     smach.StateMachine.add('Check_Grasp', Is_Grasped(),             
                            transitions={'Success': 'Post_Pickup',
-                                        'Fail': 'Try_Again'})
-    
-    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
-                           transitions={'Success': 'Check_Grasp',
                                         'Fail': 'Try_Again'})
     
     smach.StateMachine.add('Try_Again', Is_Grasped(), 
@@ -294,8 +290,8 @@ with handoff_1_SM:
                                         'Fail': 'Fail'})
     
     smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_1", 10), # TODO Sync all the sycn states so that they all match up
-                           transitions={'Success': 'Handoff',
-                                        'Fail': 'Fail'})
+                           transitions={'Ready': 'Handoff',
+                                        'Timeout': 'Fail'})
     
     smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_1a"),
                            transitions={'Success': 'Open_Gripper',
@@ -324,8 +320,8 @@ with home_pos_1_SM:
                                         'Fail': 'Fail'})
 
     smach.StateMachine.add('Sync_Up', ARM_Sync("obj_2_ready", 15), # wait here until arm 2 has gotten rid of the object
-                           transitions={'Success': 'Success',
-                                        'Fail': 'Fail'})        
+                           transitions={'Ready': 'Success',
+                                        'Timeout': 'Fail'})        
 
 
 
@@ -348,11 +344,11 @@ with handoff_2_SM:
                                         'Fail': 'Fail'})
     
     smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_2", 20), # wait for arm2 to be ready
-                           transitions={'Success': 'handoff',
-                                        'Fail': 'Fail'})
+                           transitions={'Ready': 'Handoff',
+                                        'Timeout': 'Fail'})
     
     smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_2a"), # move closer to the target position
-                           transitions={'Success': 'Open_Gripper',
+                           transitions={'Success': 'Close_Gripper',
                                         'Fail': 'Fail'})
     
     smach.StateMachine.add('Close_Gripper', Joint_Pose_State("handoff_2b"), # close the gripper
@@ -361,14 +357,14 @@ with handoff_2_SM:
     
     smach.StateMachine.add('Check_Gripper', Is_Grasped(),  # check the gripper to ensure we "caught" the ball
                             transitions={'Success': 'Post_Handoff',
-                                        'Fail': 'Try_Again'})
+                                        'Fail': 'Try_Again_A'})
     
     smach.StateMachine.add('Post_Handoff', Joint_Pose_State("handoff_2c"), # Move away from the other arm becasuse we got it yay
                            transitions={'Success': 'Success',
                                         'Fail': 'Fail'})
 
     smach.StateMachine.add('Try_Again_A', Is_Grasped(), # Check again because we might not have got it the first time
-                           transitions={'Succes': 'Post_Handoff',
+                           transitions={'Success': 'Post_Handoff',
                                         'Fail': 'Fail'})
 
 
@@ -415,8 +411,8 @@ with home_pos_2_SM:
                                         'Fail': 'Fail'})
 
     smach.StateMachine.add('Sync_Up', ARM_Sync("obj_3_ready", 15), # wait here until arm 2 is ready to recieve 
-                           transitions={'Success': 'Success',
-                                        'Fail': 'Fail'})        
+                           transitions={'Ready': 'Success',
+                                        'Timeout': 'Fail'})        
 
 """
 ============================================================================================================
@@ -435,13 +431,13 @@ with home_pos_2_SM:
 pickup_obj_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_PICKUP_OBJ_3_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
 
-with pickup_obj_1_SM:
+with pickup_obj_3_SM:
     for i in range(0, NUM_PICKUP_OBJ_3_STEPS):
         step_str = 'step_' + str(i)
 
         if i == NUM_PICKUP_OBJ_3_STEPS - 1:
             smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_3/' + step_str, allowed_attempts=2),
-                    transitions={'Success': 'Success',
+                    transitions={'Success': 'Check_Grasp',
                                  'Fail': 'Fail'})
 
         else:
@@ -456,10 +452,7 @@ with pickup_obj_1_SM:
     smach.StateMachine.add('Check_Grasp', Is_Grasped(),             
                            transitions={'Success': 'Post_Pickup',
                                         'Fail': 'Try_Again'})
-    
-    smach.StateMachine.add('Grasp', Joint_Pose_State('grasp_cube/'), 
-                           transitions={'Success': 'Check_Grasp',
-                                        'Fail': 'Try_Again'})
+
     
     smach.StateMachine.add('Try_Again', Is_Grasped(), 
                            transitions={'Success': 'Post_Pickup',
@@ -486,8 +479,8 @@ with handoff_3_SM:
                                         'Fail': 'Fail'})
     
     smach.StateMachine.add('Wait_For_Sync', ARM_Sync("handoff_1", 10), # TODO Sync all the sycn states so that they all match up
-                           transitions={'Success': 'Handoff',
-                                        'Fail': 'Fail'})
+                           transitions={'Ready': 'Handoff',
+                                        'Timeout': 'Fail'})
     
     smach.StateMachine.add('Handoff', Joint_Pose_State("handoff_1a"),
                            transitions={'Success': 'Open_Gripper',
@@ -516,8 +509,8 @@ with home_pos_3_SM:
                                         'Fail': 'Fail'})
 
     smach.StateMachine.add('Sync_Up', ARM_Sync("done", 15), # wait here until arm 2 has gotten rid of the object
-                           transitions={'Success': 'Success',
-                                        'Fail': 'Fail'})        
+                           transitions={'Ready': 'Success',
+                                        'Timeout': 'Fail'})        
 
 
 

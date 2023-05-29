@@ -17,6 +17,7 @@ class Simulation_SM:
         self.sm = smach.StateMachine(outcomes=["Mission_Success", "Mission_Fail"])
 
         self.mission_sm()
+        
 
     
     def mission_sm(self):
@@ -24,9 +25,9 @@ class Simulation_SM:
 
             #example states
             
-            smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
-                transitions={'Ready': 'Pickup_Cube',
-                             'Timeout': 'Mission_Fail'})
+            #smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
+             #   transitions={'Ready': 'Unfold',
+              #               'Timeout': 'Mission_Fail'})
             
             #smach.StateMachine.add('Pickup_Cube', Pickup_Cube_SM,
             #        transitions={'Success': 'Unfold',
@@ -42,17 +43,17 @@ class Simulation_SM:
 
 # states to follow the state machine
 
-            smach.StateMachine.add('Init_Arms', init_arms(), 
-                                   transitions={'Success': 'Unfold_Arms', 
-                                                'Fail': 'init'})
+            #smach.StateMachine.add('Init_Arms', init_arms(), 
+            #                       transitions={'Success': 'Unfold_Arms', 
+            #                                    'Fail': 'init'})
 
-            smach.StateMachine.add('Unfold_Arms', unfold_SM, 
-                                   transitions={'Success': 'Pickup_Obj_1',
-                                                'Fail': 'init'})
+            #smach.StateMachine.add('Unfold_Arms', unfold_SM, 
+            #                       transitions={'Success': 'Pickup_Obj_1',
+            #                                    'Fail': 'init'})
 
 # ball 1
             smach.StateMachine.add('Pickup_Obj_1', pickup_obj_1_SM,
-                                    transitions={'Successs': 'Handoff_1',
+                                    transitions={'Success': 'Handoff_1',
                                                  'Fail': 'Home_Pos_1'}) #done
             
             smach.StateMachine.add('Handoff_1', handoff_1_SM, 
@@ -60,8 +61,8 @@ class Simulation_SM:
                                                 'Fail': 'Home_Pos_1'}) #done
             
             smach.StateMachine.add('Home_Pos_1', home_pos_1_SM, 
-                                   tranitions={'Success': 'Handoff_2',
-                                               'Fail': 'Fail'}) #done
+                                   transitions={'Success': 'Handoff_2',
+                                               'Fail': 'Handoff_2'}) #done
 
 # ball 2
             smach.StateMachine.add('Handoff_2', handoff_2_SM, 
@@ -72,9 +73,9 @@ class Simulation_SM:
                                    transitions={'Success': 'Home_Pos_2',
                                                 'Fail': 'Home_Pos_2'})
 
-            smach.StateMachine.add('Home_Pos_2', home_pos_SM,
-                                   tranitions={'Success': 'Home_Pos_2',
-                                               'Move_On': 'Pickup_Obj_3'})
+            smach.StateMachine.add('Home_Pos_2', home_pos_2_SM,
+                                   transitions={'Success': 'Home_Pos_2',
+                                               'Fail': 'Pickup_Obj_3'})
 
 # cube 1
             smach.StateMachine.add('Pickup_Obj_3', pickup_obj_3_SM,
@@ -82,16 +83,16 @@ class Simulation_SM:
                                                 'Fail': 'Home_Pos_3'})
             
             smach.StateMachine.add('Throw_3', handoff_3_SM,
-                                   transitions={'Else': 'Home_pos_3'})
+                                   transitions={'Success': 'Home_Pos_3',
+                                   'Fail': 'Home_Pos_3'})
             
             smach.StateMachine.add('Home_Pos_3', home_pos_3_SM,
-                                   transitions={'Pickup_Fail_3': 'Pickup_Obj_3',
-                                                'Done': 'Fold_Arms',
-                                                'Else': 'Home_Pos_3'})
+                                   transitions={'Success': 'Fold_Arms',
+                                   'Fail': 'Fold_Arms'})
 
 # done
-            smach.stateMachine.add('Fold_Arms', fold_SM, transitions={'Success': 'Deinit', 'Fail': 'Fold_Arms'})
-            smach.StateMachine.add('Deinit', deinit_SM, transitions={'Else': 'Deinit'})
+            smach.StateMachine.add('Fold_Arms', Fold_SM, transitions={'Success': 'Mission_Success', 'Fail': 'Mission_Fail'})
+            #smach.StateMachine.add('Deinit', deinit_SM, transitions={'Else': 'Deinit'})
 
 
     def run(self):
@@ -147,5 +148,5 @@ class IRL_SM:
 
 if __name__ == "__main__":
     rospy.init_node("mission_sm")
-    sm = IRL_SM()
+    sm = Simulation_SM()
     sm.run()

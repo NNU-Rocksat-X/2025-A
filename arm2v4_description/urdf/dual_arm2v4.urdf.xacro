@@ -20,7 +20,7 @@
 
 <link name="world"/>
 
-
+<!---->
 <link name="base_link">
   <xacro:if value="$(arg include_base_plate)">
     <inertial>
@@ -28,6 +28,8 @@
       <mass value="0.6714813076324946"/>
       <inertia ixx="0.004693" iyy="0.009008" izz="0.004597" ixy="0.000126" iyz="0.000275" ixz="-0.00051"/>
     </inertial>
+
+    <!--
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -42,6 +44,7 @@
         <mesh filename="package://arm2v4_description/meshes/base_link_full.stl" scale="0.01 0.01 0.01"/>
       </geometry>
     </collision>
+    -->
   </xacro:if>
 </link>
 

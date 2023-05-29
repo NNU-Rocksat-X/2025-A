@@ -1,7 +1,8 @@
 <launch>
     <group ns="ARM1">
-        <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
+        <include file="$(find arm2v4_description)/launch/config.launch"/>
+        <!--<node pkg="daedalus_core" name="detector_node" type="detector_node"/>-->
         <node pkg="daedalus_core" name="ARM1_pcs" type="ARM1_pcs" output="screen"/>
-        <node pkg="daedalus_core" name="led" type="led_node" args="led 6"/>
+        <!--<node pkg="daedalus_core" name="led" type="led_node" args="led 6"/>-->
     </group>
 </launch>
