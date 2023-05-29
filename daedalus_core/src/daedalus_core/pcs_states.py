@@ -83,6 +83,7 @@ class PCS_State(smach.State):
         smach.State.__init__(self, outcomes=['Complete', 'Error'])
 
         self.device_name = device_name
+        rospy.wait_for_service(device_name)
         self.device_service = rospy.ServiceProxy(device_name, DeviceCmd)
 
 class PCS_Activate_State(PCS_State):

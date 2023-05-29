@@ -7,7 +7,6 @@ import smach_ros
 
 from daedalus_core.pcs_states import *
 
-
 class Mission_SM:
     def __init__(self):
 
@@ -108,7 +107,41 @@ class Mission_SM:
         outcome = self.sm.execute()
 
 
+class Inhibit_Test_SM:
+    def __init__(self):
+
+        # Create a SMACH state machine
+        self.sm = smach.StateMachine(outcomes=["Mission_Success", "Mission_Fail"])
+
+        self.mission_sm()
+
+    def mission_sm(self):
+        with self.sm:
+            smach.StateMachine.add('Set_To_Off', PCS_Deactivate_State('led'),
+                                   transitions={'Complete' : 'Turn_On',
+                                                'Error': 'Mission_Fail'})
+
+            smach.StateMachine.add('Turn_On', PCS_Activate_State('led'),
+                                   transitions={'Complete': 'Check_For_Inhibit',
+                                                'Error': 'Mission_Fail'})
+
+            smach.StateMachine.add('Check_For_Inhibit', Detector_Status('full_inhibit_detection'),
+                                  transitions={'On' : 'Check_For_Inhibit_Delay',
+                                               'Off' : 'Finish'})
+            
+            smach.StateMachine.add('Check_For_Inhibit_Delay', Wait_State(1),
+                                  transitions={'Complete': 'Check_For_Inhibit'})
+            
+            
+            smach.StateMachine.add('Finish', PCS_Deactivate_State('led'),
+                    transitions={'Complete': 'Mission_Success',
+                                 'Error': 'Mission_Fail'})
+
+    def run(self):
+        outcome = self.sm.execute()
+
+
 if __name__ == "__main__":
     rospy.init_node("mission_sm")
-    sm = Mission_SM()
+    sm = Inhibit_Test_SM()
     sm.run()
