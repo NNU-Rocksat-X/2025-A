@@ -18,11 +18,10 @@ def main():
 
     print('Running...')
     while not rospy.is_shutdown():
-        frame_buffer = rospy.wait_for_message("/depth", Float32MultiArray, timeout=None)
+        frame_buffer = rospy.wait_for_message("/depth_image", Float32MultiArray, timeout=None)
         frame_height = frame_buffer.layout.dim[0].size
         frame_width = frame_buffer.layout.dim[1].size
 
-        
 
         np_frame = np.array(list(frame_buffer.data))
         frame = np.reshape(np_frame, (frame_height, frame_width)).astype(np.float32)
@@ -31,9 +30,15 @@ def main():
         #print("min: ", np.min(frame), "max: ", np.max(frame), "avg: ", np.average(frame))
         frame = frame.astype(np.uint8)
 
-        frame = np.flip(frame, 0)
+        #frame = np.flip(frame, 0)
         #print(frame)
-        cv2.imshow('Detection', frame)
+        for i in range(20):
+            frame[230+i,310] = 0
+            frame[230+i,330] = 0
+            frame[230,310+i] = 0
+            frame[250,310+i] = 0
+        cv2.imshow('Depth_Detection', frame)
+        print(f'{frame[240,320]}')
 
         key = cv2.waitKey(1)
         if key == 27:

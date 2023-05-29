@@ -20,7 +20,7 @@ def get_multi_array(w, h):
 
     return mask_msg
 
-def main(show_gui=False):
+def main(show_gui=True):
     rospy.init_node('color_filter')
 
     mask_pub = rospy.Publisher('/object_mask', UInt8MultiArray, queue_size=1)
@@ -34,7 +34,7 @@ def main(show_gui=False):
         
     print('Running...')
     while not rospy.is_shutdown():
-        frame_buffer = rospy.wait_for_message("/frame", UInt8MultiArray, timeout=None)
+        frame_buffer = rospy.wait_for_message("/rgb_image", UInt8MultiArray, timeout=None)
         frame_height = frame_buffer.layout.dim[0].size
         frame_width = frame_buffer.layout.dim[1].size
         frame_channels = frame_buffer.layout.dim[2].size
@@ -43,20 +43,27 @@ def main(show_gui=False):
         np_frame = np.array(list(frame_buffer.data))
         frame = np.reshape(np_frame, (frame_height, frame_width, frame_channels)).astype(np.uint8)
         
-        frame = np.flip(frame, 2)
+        #frame = np.flip(frame, 2)
 
         # Setup filter
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        lower_red = np.array([30, 0, 0])
-        upper_red = np.array([255, 20, 20])
+        rgb = frame#cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        lower_red = np.array([0, 0, 30])
+        upper_red = np.array([100, 20,255])
 
         # Creating mask from color filter
         mask = cv2.inRange(rgb, lower_red, upper_red)
     
         if show_gui:
-            frame = np.flip(frame, 0)
+            #frame = np.flip(frame, 0)
+
+            for i in range(20):
+                frame[230+i,310] = 0
+                frame[230+i,330] = 0
+                frame[230,310+i] = 0
+                frame[250,310+i] = 0
             cv2.imshow('Detection', frame)
             cv2.imshow('Mask', mask)
+            print(f'{frame[240, 320]}')
 
         # Remove blobs less than 12x12
         kernel = np.ones((8,8), np.uint8)

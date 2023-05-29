@@ -1,5 +1,7 @@
 #include <ros/ros.h>
 #include <fstream>
+#include <termios.h>
+//#include <fcntl.h>
 
 #include <std_msgs/Bool.h>
 #include <assert.h>
@@ -17,8 +19,10 @@ using namespace std;
 
 static_assert(sizeof(CMDPacket) < BUFFER_SIZE, "Buffer too small.");
 
+
 CMDPacket tx;
 RESPacket rx;
+
 uint8_t seq;
 std::vector<double> deg_per_step;
 std::vector<double> deg_per_enc_step;
@@ -97,7 +101,6 @@ int main(int argc, char** argv)
     robotState.state.joint_state.velocity.resize(NUM_JOINTS);
     robotState.state.joint_state.effort.resize(NUM_JOINTS);
 
-
     ofstream teensy_tx;
     ifstream teensy_rx;
 
@@ -119,28 +122,30 @@ int main(int argc, char** argv)
         {
             seq = 0;
         }
-        cout << "1" << endl;
-        tx.crc = crc16((unsigned char*)&tx, (int)sizeof(CMDPacket) - 4); // Subtract 2 so the crc is not calculated over the crc
-        teensy_tx.open("/dev/ttyTHS1");                           // Set Serial port here
-        teensy_tx.write((char*)&tx, sizeof(CMDPacket));
-        teensy_tx.close();
 
-        cout << "2" << endl;
+        //cout << "1" << endl;
+    
+        tx.crc = crc16((unsigned char*)&tx, (int)sizeof(CMDPacket) - 4); // Subtract 2 so the crc is not calculated over the crc
+        //cout << "2" << endl;
+        teensy_tx.open("/dev/ttyACM0");                           // Set Serial port here
+        //cout << "3" << endl;
+        teensy_tx.write((char*)&tx, sizeof(CMDPacket));
+        //cout << "4" << endl;
+        teensy_tx.close();
+        //cout << "5" << endl;
 
         char buffer[BUFFER_SIZE];
-        teensy_rx.open("/dev/ttyTHS1");  
-        
-        cout << "2.5" << endl;
-
+        teensy_rx.open("/dev/ttyACM0"); 
+        //cout << "6" << endl; 
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
+        //cout << "7" << endl;
 
-        cout << "2.75" << endl;
+        //cout << "read success" << endl;
 
         ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
-
-        cout << "3" << endl;
-
         teensy_rx.close();
+
+        //cout << "8" << endl;
 
         for (int i = 0; i < NUM_JOINTS; i++)
         {
@@ -152,7 +157,7 @@ int main(int argc, char** argv)
         }
         robotStatePub.publish(robotState);
 
-        
+        cout << endl;
 
         ros::spinOnce();
         rate.sleep();
