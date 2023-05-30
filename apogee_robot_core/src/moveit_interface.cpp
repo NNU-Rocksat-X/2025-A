@@ -237,22 +237,36 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
     std::string param =  joint_param + req.pose_name;
     ROS_INFO("Going to joint state: %s", param.c_str());
 
+    // testing if publishing works
+    //ros::NodeHandle nh;
+    //ros::Publisher jointPosePub = nh.advertise<<moveit_msgs::joint_pose_cmd>>("/ARM1/joint_pose_cmd", 2);
+
+
     std::vector<double> joint_group_positions;
 
     if (ros::param::get(param, joint_group_positions))
     {
         ROS_INFO("Joint angles: %f, %f, %f", joint_group_positions[0], joint_group_positions[1], joint_group_positions[2]);
 
-
+        //ROS_INFO("we should add the publish here -----------------------------------------------------------");
+        std::cout << " joint pose cmd -----------" << std::endl;
+        sleep(30);
+        bool plan_success = true;
+ /*//to remove motoion planning start comment out here 
         bool target_success = move_group->setJointValueTarget(joint_group_positions);
         ROS_INFO("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
         moveit::planning_interface::MoveGroupInterface::Plan target_plan;
 
         bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
         ROS_INFO("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
-
+*/
         if (plan_success) {
-            move_group->execute(target_plan);
+            //move_group->execute(target_plan); // comment this out so that we dont use the motion planning and we just iterate to the next positions f
+            // end comment here 
+            //jointPosePub.publish(joint_group_positions); // publish joint positions to joint_pose_cmd so that the CB gets called
+
+            std::system("rostopic pub /ARM1/joint_pose_cmd daedalus_core/teensyMsg \"steps: -0 \n- 0\n -0\n- 0\n- 0\n- 0\n- 0\"");
+
             bool completion_status = wait_until_complete(joint_group_positions);
             res.done = completion_status;
             return true;

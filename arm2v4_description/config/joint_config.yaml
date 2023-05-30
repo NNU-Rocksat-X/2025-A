@@ -13,13 +13,35 @@ stepper_config:
     - gripper_joint_2
     - gripper_joint_3
     - gripper_joint_4
-  deg_per_step:
+  deg_per_step: # this actually needs to be rad per step
   # current values are estimates
-    - 0.0225 #0.09    # 360 / 4000
-    - 0.0128 #0.018   # 5000 / 90
-    - 0.0134 #0.036   # 90 / 2500
-    - 0.1 #0.3     # 90 / 300
-    - 0.1 #0.3     # 90 / 300
+    - 0.6 #0.09    # 360 / 4000
+    - 0.05 #0.018   # 5000 / 90
+    - 0.3 #0.036   # 90 / 2500
+    - 0.05 #0.3     # 90 / 300
+    - 0.3 #0.3     # 90 / 300
+    - 0.3
+    - 0.3
+
+  rad_per_enc_step:
+    - 0.000532
+    - 0.0000436
+    - 0.000873
+    - 0.000145
+    - 0.000873
+    - 0.000873
+    - 0.000262
+
+  deg_per_enc_step: # steps per radian
+    - 1909.9 # (4000 * 6) / (2pi) is enc_steps per radian
+    - 22918.3 # (4000)
+    - 1146.9 # (300 * 4 * 6) / (2pi) is enc_steps per radian
+    - 6875.5
+    - 1146.9
+    - 1146.9
+    - 3819.7 # (4000 * 6) / (2pi) is enc_steps per radian
+
+
   gripper_gain: 50
   gains:
     joint_1: {p: 60,  d: 0, i: 0.01, i_clamp: 1}

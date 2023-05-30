@@ -16,27 +16,23 @@ inline unsigned short crc16(const unsigned char* data_p, unsigned char length){
     return crc;
 }
 
-
 typedef struct cmd_packet
 {
-
     // Header 
+    uint8_t FRAME_SYNC_LSB;
+    uint8_t FRAME_SYNC_MSB;
     uint8_t seq;
     uint8_t led;
+    int32_t joint_velocity_cmd[NUM_JOINTS];
     uint16_t crc;
-
-    float joint_velocity_cmd[NUM_JOINTS];
-
-
 } CMDPacket;
 
 typedef struct response_packet
 {
-    uint32_t joint_step_position[NUM_JOINTS]; // will be uint32_t
-
     // Header
     uint8_t seq;
     uint8_t reserved;
+    int32_t joint_step_position[NUM_JOINTS];
     uint16_t crc;
 } RESPacket;
 
