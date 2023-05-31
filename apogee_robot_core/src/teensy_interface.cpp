@@ -46,7 +46,6 @@ void led_cb(const std_msgs::Bool::ConstPtr& msg)
 void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
 {
     cout << "Position Callback----------------------------------------------------" << endl;
-    sleep(10);
 
     //sleep(1000);
     //ROS_INFO("Velocity-------------");
@@ -83,8 +82,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     ros::Subscriber sub = nh.subscribe("/led", 1, led_cb);
-    ros::Subscriber ctrl_sub = nh.subscribe("/ARM1/joint_pose_cmd", 2, &positionCB);
-    ros::Publisher robotStatePub = nh.advertise<moveit_msgs::DisplayRobotState>("/ARM1/display_robot_state", 2);
+    ros::Subscriber ctrl_sub = nh.subscribe("joint_position_cmd", 2, &positionCB);
+    ros::Publisher robotStatePub = nh.advertise<moveit_msgs::DisplayRobotState>("display_robot_state", 2);
 
     moveit_msgs::DisplayRobotState robotState;
 
@@ -136,30 +135,29 @@ int main(int argc, char** argv)
         teensy_tx.write((char*)&tx, sizeof(CMDPacket));
         teensy_tx.close();
 
-        for (int ii = 0; ii < NUM_JOINTS; ++ii) {
+        /*for (int ii = 0; ii < NUM_JOINTS; ++ii) {
             cout << tx.joint_velocity_cmd[ii] << endl;// output the output to the teensy
             
-        }
-        cout << endl;
+        }*/
 
         char buffer[BUFFER_SIZE];
         teensy_rx.open("/dev/ttyACM0"); 
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
 
-        //ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
+        ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
         teensy_rx.close();
 
         for (int i = 0; i < NUM_JOINTS; i++)
         {
+            // Robotstate is in radians
             robotState.state.joint_state.velocity[i] = 0;
             robotState.state.joint_state.effort[i] = 0;
             // TODO: add adjust angle, but it causes problems
             robotState.state.joint_state.position[i] = rx.joint_step_position[i] * rad_per_enc_step[i];
             //ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
+        ROS_INFO("publishing");
         robotStatePub.publish(robotState);
-
-        cout << endl;
 
         ros::spinOnce();
         rate.sleep();

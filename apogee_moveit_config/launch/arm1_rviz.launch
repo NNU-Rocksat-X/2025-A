@@ -1,0 +1,9 @@
+<launch>
+
+    <group ns="ARM1">
+        <include if="$(arg launch_rviz)" file="$(find apogee_moveit_config)/launch/moveit_rviz.launch">
+            <arg name="ns" value="ARM1"/>
+        </include>
+    </group>
+
+</launch>
