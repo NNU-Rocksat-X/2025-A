@@ -39,8 +39,8 @@
         <node pkg="apogee_robot_core" name="ARM1_deeze_nuts" type="teensy_interface" output="screen"/>
     </group>
 
-    <!--
-    <include file="$(find mujoco_ros)/launch/sim.launch" >
+    
+    <!--<include file="$(find mujoco_ros)/launch/sim.launch" >
         <arg name="env" value="$(arg version)"/>
         <arg name="dual" value="$(arg dual)"/>
     </include>-->

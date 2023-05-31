@@ -39,6 +39,7 @@ class Joint_Pose_State(smach.State):
         attempts = 0
 
         while not complete and attempts < self.allowed_attempts:
+            #joint_pose_cmd(self.pose)
             complete = joint_pose_cmd(self.pose).done
 
         if complete:

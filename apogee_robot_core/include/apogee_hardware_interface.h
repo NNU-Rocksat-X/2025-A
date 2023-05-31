@@ -8,10 +8,15 @@
 #include <control_msgs/FollowJointTrajectoryActionGoal.h>
 #include <string.h>
 #include <algorithm>
+//#include <termios.h>
 
 #include <std_msgs/Int16.h>
 #include <daedalus_msgs/TeensyMsg.h>
 #include <moveit_msgs/DisplayRobotState.h>
+
+#include <termios.h>
+#include <fstream>
+#include <iostream>
 
 #define HEADSTART (0.2)
 

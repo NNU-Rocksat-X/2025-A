@@ -1,5 +1,8 @@
 #include <apogee_hardware_interface.h>
 
+//using namespace std;
+
+
 // Rate is used to interfpolate trajectories
 Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
     nh = nh_;
@@ -185,6 +188,7 @@ void Arm2D2Interface::update_setpoint()
 
 void Arm2D2Interface::write() 
 {
+    std::cout << "Hardware Interface - write" << std::endl;
     static int update_cnt = 0;
     if (update_cnt > 1)
     {
@@ -197,7 +201,7 @@ void Arm2D2Interface::write()
 
     for(int i = 0; i < num_joints-num_grip_joints; i++) {  
         //ROS_INFO("J%i - %f", i, cmd[i]);    
-        msg.steps.push_back(pid_controller(i, cmd[i])); // convert output of pid_controller from rad to steps
+        msg.steps.push_back(cmd[i]); //pid_controller(i, cmd[i])); // convert output of pid_controller from rad to steps
     }
 
     step_pub.publish(msg);
@@ -224,6 +228,7 @@ void Arm2D2Interface::otherEncoderCallBack(const moveit_msgs::DisplayRobotState 
 
 void Arm2D2Interface::trajectory_cb(const control_msgs::FollowJointTrajectoryActionGoal &msg)
 {
+    std::cout << "Trajectory Callback" << std::endl;
     position_setpoints.clear();
     setpoint_times.clear();
     current_trajectory_point = 0; // start at one because point 0 is the beginning state

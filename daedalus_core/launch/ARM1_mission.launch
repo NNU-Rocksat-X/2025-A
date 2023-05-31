@@ -1,5 +1,6 @@
 <launch>
     <group ns="ARM1">
+        <!--<include file="$(find apogee_robot_core)/launch/arm2d2.launch"/>--><!--Connor thinks maybe this is supposed to be here-->
         <include file="$(find arm2v4_description)/launch/config.launch"/>
         <!--<node pkg="daedalus_core" name="detector_node" type="detector_node"/>-->
         <node pkg="daedalus_core" name="ARM1_pcs" type="ARM1_pcs" output="screen"/>

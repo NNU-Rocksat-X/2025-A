@@ -26,9 +26,19 @@ class Simulation_SM:
             #example states
             
             #smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
-             #   transitions={'Ready': 'Unfold',
+             #   transitions={'Ready': 'Check_For_Inhibit',
               #               'Timeout': 'Mission_Fail'})
+
+        
+            print("start state machine")
+
+            #smach.StateMachine.add('Check_For_Inhibit', Detector_Status('full_inhibit_detection'),
+            #                       transitions={'On' : 'Check_For_Inhibit_Delay',
+            #                                    'Off' : 'Unfold'})
             
+            #smach.StateMachine.add('Check_For_Inhibit_Delay', Wait_State(1),
+            #                       transitions={'Complete': 'Check_For_Inhibit'})
+
             #smach.StateMachine.add('Pickup_Cube', Pickup_Cube_SM,
             #        transitions={'Success': 'Unfold',
             #                     'Fail': 'Mission_Fail'})
@@ -36,20 +46,9 @@ class Simulation_SM:
             smach.StateMachine.add('Unfold', Unfold_SM,
                     transitions={'Success': 'Mission_Success',
                                  'Fail': 'Mission_Fail'})
-
-
-
-
-
+            
 # states to follow the state machine
 
-            #smach.StateMachine.add('Init_Arms', init_arms(), 
-            #                       transitions={'Success': 'Unfold_Arms', 
-            #                                    'Fail': 'init'})
-
-            #smach.StateMachine.add('Unfold_Arms', unfold_SM, 
-            #                       transitions={'Success': 'Pickup_Obj_1',
-            #                                    'Fail': 'init'})
 
 # ball 1
             smach.StateMachine.add('Pickup_Obj_1', pickup_obj_1_SM,
@@ -96,8 +95,8 @@ class Simulation_SM:
 
 
     def run(self):
-        folding = rospy.get_param('joints/folding')
-        print(len(folding))
+        #folding = rospy.get_param('joints/folding')
+        #print(len(folding))
         outcome = self.sm.execute()
 
 
@@ -149,4 +148,5 @@ class IRL_SM:
 if __name__ == "__main__":
     rospy.init_node("mission_sm")
     sm = Simulation_SM()
+    print("Begin Run SM")
     sm.run()
