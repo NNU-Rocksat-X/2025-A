@@ -515,11 +515,20 @@ with home_pos_3_SM:
 
 
 
+"""
+============================================================================================================
+                                            Partial-Inhibit Test                                                  
+============================================================================================================
 
+"""
 
+Partial_Inhibit_Test_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 
-
-
+with Partial_Inhibit_Test_SM:
+    """
+    ADD STATE MATCHINE FOR PARTIAL INHIBIT TEST
+    """
+    
 
 
 

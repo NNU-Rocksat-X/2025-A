@@ -6,12 +6,13 @@ from daedalus_msgs.srv import SignalStatus, SignalStatusResponse
 
 TE_PIN = 5 # pin 29
 FULL_INHIBIT_PIN = 21 # pin 40
-PARTIAL_INHIBIT_PIN = 0
+PARTIAL_INHIBIT_PIN = 20 # pin 38
 
 PERSISTENCE_THRESHOLD = 10
 
 te_detector = Detector(TE_PIN, PERSISTENCE_THRESHOLD)
-full_inhibit_detector = Detector(FULL_INHIBIT_PIN, 0)
+full_inhibit_detector = Detector(FULL_INHIBIT_PIN, PERSISTENCE_THRESHOLD)
+partial_inhibit_detector = Detector(PARTIAL_INHIBIT_PIN, PERSISTENCE_THRESHOLD)
 
 def te_status_cb(req):
     state = te_detector.get_state()
@@ -21,10 +22,14 @@ def full_inhibit_status(req):
     state = full_inhibit_detector.get_state()
     return SignalStatusResponse(state)
 
+def partial_inhibit_status(req):
+    state = partial_inhibit_detector.get_state()
+    return SignalStatusResponse(state)
+
 def main():
     rospy.init_node("detector_node")
     rospy.Service("te_detection", SignalStatus, te_status_cb)
-    #rospy.Service("partial_inhibit_detection", SignalStatus, # add callback function name)
+    rospy.Service("partial_inhibit_detection", SignalStatus, partial_inhibit_status)
     rospy.Service("full_inhibit_detection", SignalStatus, full_inhibit_status)
 
     rate = rospy.Rate(10)
@@ -33,6 +38,7 @@ def main():
     while not rospy.is_shutdown():
         te_detector.detect()
         full_inhibit_detector.detect()
+        partial_inhibit_detector.detect()
         rospy.loginfo("TE_State: " + str(te_detector.get_state()))
         rospy.loginfo("Inhibit_State: " + str(full_inhibit_detector.get_state()))
         rate.sleep()
