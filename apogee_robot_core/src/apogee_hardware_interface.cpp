@@ -188,7 +188,7 @@ void Arm2D2Interface::update_setpoint()
 
 void Arm2D2Interface::write() 
 {
-    std::cout << "Hardware Interface - write" << std::endl;
+    //std::cout << "Hardware Interface - write" << std::endl;
     static int update_cnt = 0;
     if (update_cnt > 1)
     {

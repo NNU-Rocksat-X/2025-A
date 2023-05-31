@@ -206,6 +206,7 @@ bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
 
     while (joints_complete < joint_cmds.size())
     {
+        ROS_INFO("Waiting for move to finish...");
         joints_complete = 0;
         robot_state::RobotState current_state(*move_group->getCurrentState());
         for (int i = 0; i < joint_cmds.size(); i++)
@@ -250,22 +251,20 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
 
         //ROS_INFO("we should add the publish here -----------------------------------------------------------");
         std::cout << " joint pose cmd -----------" << std::endl;
-        sleep(30);
-        bool plan_success = true;
- /*//to remove motoion planning start comment out here 
+
         bool target_success = move_group->setJointValueTarget(joint_group_positions);
         ROS_INFO("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
         moveit::planning_interface::MoveGroupInterface::Plan target_plan;
 
         bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
         ROS_INFO("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
-*/
+
         if (plan_success) {
-            //move_group->execute(target_plan); // comment this out so that we dont use the motion planning and we just iterate to the next positions f
+            move_group->execute(target_plan); // comment this out so that we dont use the motion planning and we just iterate to the next positions f
             // end comment here 
             //jointPosePub.publish(joint_group_positions); // publish joint positions to joint_pose_cmd so that the CB gets called
 
-            std::system("rostopic pub /ARM1/joint_pose_cmd daedalus_core/teensyMsg \"steps: -0 \n- 0\n -0\n- 0\n- 0\n- 0\n- 0\"");
+            //std::system("rostopic pub /ARM1/joint_pose_cmd daedalus_core/teensyMsg \"steps: -0 \n- 0\n -0\n- 0\n- 0\n- 0\n- 0\"");
 
             bool completion_status = wait_until_complete(joint_group_positions);
             res.done = completion_status;
