@@ -25,7 +25,7 @@ RESPacket rx;
 
 uint8_t seq;
 std::vector<double> deg_per_step;
-std::vector<double> deg_per_enc_step;
+std::vector<double> enc_steps_per_rad;
 std::vector<double> rad_per_enc_step;
 
 double rad_to_deg(double rad)
@@ -45,7 +45,7 @@ void led_cb(const std_msgs::Bool::ConstPtr& msg)
 
 void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
 {
-    cout << "Position Callback----------------------------------------------------" << endl;
+    //cout << "Position Callback----------------------------------------------------" << endl;
 
     //sleep(1000);
     //ROS_INFO("Velocity-------------");
@@ -55,8 +55,8 @@ void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
         // CMDPacket needs cmd in terms of steps/ms
         double deg_sec = msg->steps[i];
         double deg_ms = deg_sec;
-        int step_ms = (int)(deg_ms / deg_per_enc_step[i]);
-        tx.joint_velocity_cmd[i] = int(deg_ms);
+        int step_ms = (int)(deg_ms * enc_steps_per_rad[i]);
+        tx.joint_velocity_cmd[i] = int(step_ms);
         //ROS_INFO("deg/sec: %f", deg_sec);
         //ROS_INFO("deg/ms: %f", deg_ms);
         //ROS_INFO("J%i: %i", i, step_ms);
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     if (ros::param::has("/stepper_config/joint_names")) {
         ros::param::get("/stepper_config/joint_names", joint_names);
         ros::param::get("/stepper_config/deg_per_step", deg_per_step);
-        ros::param::get("/stepper_config/deg_per_enc_step", deg_per_enc_step);
+        ros::param::get("/stepper_config/deg_per_enc_step", enc_steps_per_rad);
         ros::param::get("/stepper_config/rad_per_enc_step", rad_per_enc_step);
     } else {
         ROS_ERROR("Stepper config param not loaded!");
@@ -135,16 +135,11 @@ int main(int argc, char** argv)
         teensy_tx.write((char*)&tx, sizeof(CMDPacket));
         teensy_tx.close();
 
-        /*for (int ii = 0; ii < NUM_JOINTS; ++ii) {
-            cout << tx.joint_velocity_cmd[ii] << endl;// output the output to the teensy
-            
-        }*/
+
 
         char buffer[BUFFER_SIZE];
         teensy_rx.open("/dev/ttyACM0"); 
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
-
-        ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
         teensy_rx.close();
 
         for (int i = 0; i < NUM_JOINTS; i++)
@@ -156,7 +151,14 @@ int main(int argc, char** argv)
             robotState.state.joint_state.position[i] = rx.joint_step_position[i] * rad_per_enc_step[i];
             //ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
-        ROS_INFO("publishing");
+
+        ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
+        for (int ii = 0; ii < NUM_JOINTS; ++ii) {
+            ROS_INFO("Joint: %u Output: %u Input: %f", ii + 1, tx.joint_velocity_cmd[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
+        }
+        ROS_INFO("\n");
+
+        //ROS_INFO("publishing");
         robotStatePub.publish(robotState);
 
         ros::spinOnce();

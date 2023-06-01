@@ -36,7 +36,7 @@
     </group>
 
     <group ns="ARM1">
-        <node pkg="apogee_robot_core" name="ARM1_deeze_nuts" type="teensy_interface"/>
+        <node pkg="apogee_robot_core" name="ARM1_deeze_nuts" type="teensy_interface" output="screen"/>
     </group>
 
     
