@@ -111,6 +111,40 @@ class PCS_Deactivate_State(PCS_State):
 
 
 
+"""
+============================================================================================================
+                                            Partial-Inhibit lightbulb Test                                                  
+============================================================================================================
+
+"""
+
+Partial_Inhibit_LightBulb_Test_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+
+with Partial_Inhibit_LightBulb_Test_SM:
+    smach.StateMachine.add('Blink_on', PCS_Activate_State('led'),
+                            transitions={'Complete' : 'Blink_delay',
+                                        'Error' : 'Fail'})
+    smach.StateMachine.add('Blink_delay', Wait_State(0.5),
+                            transitions={'Complete': 'Blink_off'})
+
+    smach.StateMachine.add('Blink_off', PCS_Deactivate_State('led'),
+                            transitions={'Complete' : 'Blink_delay_2',
+                                        'Error' : 'Fail'})
+    
+    smach.StateMachine.add('Blink_delay_2', Wait_State(0.5),
+                            transitions={'Complete': 'Blink_on_2'})
+
+    smach.StateMachine.add('Blink_on_2', PCS_Activate_State('led'),
+                            transitions={'Complete' : 'Blink_delay_3',
+                                        'Error' : 'Fail'})
+    
+    smach.StateMachine.add('Blink_delay_3', Wait_State(0.5),
+                            transitions={'Complete': 'Blink_off_2'})
+
+    smach.StateMachine.add('Blink_off_2', PCS_Deactivate_State('led'),
+                            transitions={'Complete' : 'Success',
+                                        'Error' : 'Fail'})
+    
 
 
 

@@ -6,6 +6,7 @@ import smach_ros
 
 from daedalus_core.daedalus_services.move_cmds import *
 from daedalus_core.pcs_util import *
+from daedalus_core.pcs_states import *
 
 pickup_fail_1_flag = False
 
@@ -516,11 +517,27 @@ with home_pos_3_SM:
 
 
 
+"""
+============================================================================================================
+                                            Partial-Inhibit Test                                                  
+============================================================================================================
 
+"""
 
+Partial_Inhibit_Test_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 
+with Partial_Inhibit_Test_SM:
 
-
+    smach.StateMachine.add('Open_Gripper', Grasp_Cmd_State("open"),
+                            transitions={'Success': 'Delay',
+                                        'Fail': 'Fail'})
+    
+    smach.StateMachine.add('Delay', Wait_State(1),
+                           transitions={'Complete': 'Close_Gripper'})
+    
+    smach.StateMachine.add('Close_Gripper', Grasp_Cmd_State("close"),
+                            transitions={'Success': 'Success',
+                                        'Fail': 'Fail'})
 
 
 

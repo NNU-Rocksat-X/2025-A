@@ -11,8 +11,8 @@ PARTIAL_INHIBIT_PIN = 20 # pin 38
 PERSISTENCE_THRESHOLD = 10
 
 te_detector = Detector(TE_PIN, PERSISTENCE_THRESHOLD)
-full_inhibit_detector = Detector(FULL_INHIBIT_PIN, 0)
-partial_inhibit_detector = Detector(PARTIAL_INHIBIT_PIN, 0)
+full_inhibit_detector = Detector(FULL_INHIBIT_PIN, PERSISTENCE_THRESHOLD)
+partial_inhibit_detector = Detector(PARTIAL_INHIBIT_PIN, PERSISTENCE_THRESHOLD)
 
 def te_status_cb(req):
     state = te_detector.get_state()
@@ -24,6 +24,7 @@ def full_inhibit_status(req):
 
 def partial_inhibit_status(req):
     state = partial_inhibit_detector.get_state()
+    return SignalStatusResponse(state)
 
 def main():
     rospy.init_node("detector_node")
@@ -37,6 +38,7 @@ def main():
     while not rospy.is_shutdown():
         te_detector.detect()
         full_inhibit_detector.detect()
+        partial_inhibit_detector.detect()
         rospy.loginfo("TE_State: " + str(te_detector.get_state()))
         rospy.loginfo("Full_Inhibit_State: " + str(full_inhibit_detector.get_state()))
         rospy.loginfo("Partial_Inhibit_State: " + str(full_inhibit_detector.get_state()))
