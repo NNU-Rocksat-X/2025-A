@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ## License: Apache 2.0. See LICENSE file in root directory.
 ## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
@@ -57,11 +57,15 @@ file_folder = f'/home/norman/catkin_ws/Videos/{date}/{hms}'
 
 file_num = 0
 
+rospy.loginfo("Waiting for TE detection")
+
 try:
     while not rospy.is_shutdown():
+
         rospy.wait_for_service('te_detection')
-        TE_detection = rospy.ServiceProxy('te_detection', SignalStatus).status
+        TE_detection = rospy.ServiceProxy('te_detection', SignalStatus)
         if TE_detection:
+            rospy.loginfo("TE detected")
 
             color_file_name = f'{file_folder}/ColorVideoFile{file_num}.avi'
             color_writer = cv2.VideoWriter(color_file_name, fcc, FPS, (WIDTH, HEIGHT))
@@ -82,16 +86,24 @@ try:
                 color_image = np.asanyarray(color_frame.get_data())
 
                 # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
-                depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+                depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.22), cv2.COLORMAP_JET)
 
                 color_writer.write(color_image)
-                depth_writer.write(depth_image)
+                depth_writer.write(depth_colormap)
 
             color_writer.release()
             depth_writer.release()
             rospy.loginfo(f'release VideoFile{file_num}')
-               
+            print(f'release VideoFile{file_num}')
+            file_num += 1
+
+
+        else:       
             time.sleep(1)
+
+except KeyboardInterrupt:
+    # Stop streaming
+    pipeline.stop()
 
 finally:
 

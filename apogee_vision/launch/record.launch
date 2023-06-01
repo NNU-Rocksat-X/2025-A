@@ -1,0 +1,7 @@
+<launch>
+
+    <node name="realsense_record" pkg="apogee_vision" type="realsense_record"/>
+    <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
+
+
+</launch>
