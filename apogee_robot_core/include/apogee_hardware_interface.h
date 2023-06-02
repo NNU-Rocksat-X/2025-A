@@ -38,9 +38,7 @@ class Arm2D2Interface : public hardware_interface::RobotHW
         ros::Time previous_time;
         ros::Time current_time;
 
-        
         //ros::Subscriber grip_sub;
-
 
         hardware_interface::JointStateInterface joint_state_interface;
         hardware_interface::PositionJointInterface joint_control_interface;

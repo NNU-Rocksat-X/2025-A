@@ -46,13 +46,13 @@ void led_cb(const std_msgs::Bool::ConstPtr& msg)
 void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
 {
     //cout << "Position Callback----------------------------------------------------" << endl;
-
-    //sleep(1000);
-    //ROS_INFO("Velocity-------------");
+    //ROS_INFO("Sleeping...");
+    //sleep(10);
+    ROS_INFO("--Position Callback--");
     for (int i = 0; i < NUM_JOINTS; i++)
     {
         // teensy msg gives radians/sec
-        // CMDPacket needs cmd in terms of steps/ms
+
         double deg_sec = msg->steps[i];
         double deg_ms = deg_sec;
         int step_ms = (int)(deg_ms * enc_steps_per_rad[i]);
@@ -152,11 +152,11 @@ int main(int argc, char** argv)
             //ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
 
-        ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
-        for (int ii = 0; ii < NUM_JOINTS; ++ii) {
-            ROS_INFO("Joint: %u Output: %u Input: %f", ii + 1, tx.joint_velocity_cmd[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
-        }
-        ROS_INFO("\n");
+        // ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
+        // for (int ii = 0; ii < NUM_JOINTS; ++ii) {
+        //     ROS_INFO("Joint: %u Output: %u Input: %f", ii + 1, tx.joint_velocity_cmd[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
+        // }
+        // ROS_INFO("\n");
 
         //ROS_INFO("publishing");
         robotStatePub.publish(robotState);

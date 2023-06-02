@@ -42,6 +42,10 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
     graspPub = nh->advertise<std_msgs::Float32>("grip_position_cmd", 1);
     display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
 
+    posePub = nh->advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 10);
+
+    //display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 2, true);
+
     ros::param::get(ros::this_node::getNamespace() + "/stepper_config/num_joints", num_joints);
     ROS_INFO("Running with %i joints", num_joints);
 
@@ -209,14 +213,15 @@ bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
         ROS_INFO("Waiting for move to finish...");
         joints_complete = 0;
         robot_state::RobotState current_state(*move_group->getCurrentState());
-        for (int i = 0; i < joint_cmds.size(); i++)
+        for (int i = 0; i < 7; i++) // removed size of joint_cmds to replace it with 7.. trying to remove hang time from this function
         {
             const double* joint_pos = current_state.getJointPositions(joint_names[i]);
             ROS_INFO("---- J%i ----", i);
             ROS_INFO("Current: %f", *joint_pos);
             ROS_INFO("cmd: %f", joint_cmds[i]);
-            if (abs(*joint_pos - joint_cmds[i]) < POSITION_ACCURACY)
+            if (abs(*joint_pos - joint_cmds[i]) < POSITION_ACCURACY) {
                 joints_complete += 1;
+            }
         }
 
         if (cnt > MAX_WAIT*10)
@@ -238,22 +243,24 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
     std::string param =  joint_param + req.pose_name;
     ROS_INFO("Going to joint state: %s", param.c_str());
 
-    std::vector<double> joint_group_positions;
+    std::vector<double> joint_group_positions; // changed from double to float
 
     if (ros::param::get(param, joint_group_positions))
     {
         ROS_INFO("Joint angles: %f, %f, %f", joint_group_positions[0], joint_group_positions[1], joint_group_positions[2]);
 
-        bool target_success = move_group->setJointValueTarget(joint_group_positions);
-        ROS_INFO("Target status: %s", target_success ? "SUCCESSFUL" : "FAILED");
-        moveit::planning_interface::MoveGroupInterface::Plan target_plan;
-        //bool plan_success = true;
-        bool plan_success = (move_group->plan(target_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-        ROS_INFO("Plan status: %s", plan_success ? "SUCCESSFUL" : "FAILED");
+        bool plan_success = true;
 
         if (plan_success) {
-            move_group->execute(target_plan); // comment this out so that we dont use the motion planning and we just iterate to the next positions f
-            // end comment here 
+            daedalus_msgs::TeensyMsg teensyMsg;
+
+            //ROS_INFO("Size of joint_group_positions: %f", joint_group_positions.size());
+
+            for (int kk = 0; kk < joint_group_positions.size(); ++kk) { 
+                teensyMsg.steps.push_back(joint_group_positions[kk]);
+            }
+
+            posePub.publish(teensyMsg);
 
             bool completion_status = wait_until_complete(joint_group_positions);
             res.done = completion_status;

@@ -165,10 +165,10 @@ void Arm2D2Interface::write()
 
     for(int i = 0; i < num_joints-num_grip_joints; i++) {  
         //ROS_INFO("J%i - %f", i, cmd[i]);    
-        msg.steps.push_back(cmd[i]); //pid_controller(i, cmd[i]));
+        //msg.steps.push_back(cmd[i]); //pid_controller(i, cmd[i]));
     }
 
-    step_pub.publish(msg);
+    //step_pub.publish(msg);
 }
 
 void Arm2D2Interface::encoderCallBack(const moveit_msgs::DisplayRobotState &msg) {

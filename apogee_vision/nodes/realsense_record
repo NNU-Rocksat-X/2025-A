@@ -54,6 +54,8 @@ os.system(f'mkdir /home/norman/catkin_ws/Videos/{date}')
 hms = time.strftime('%H-%M-%S', time.localtime())
 os.system(f'mkdir /home/norman/catkin_ws/Videos/{date}/{hms}')
 file_folder = f'/home/norman/catkin_ws/Videos/{date}/{hms}'
+depth_file_folder = file_folder + f'/RawDepthFrames'
+os.system(f'mkdir {depth_file_folder}')
 
 file_num = 0
 
@@ -65,6 +67,7 @@ try:
         rospy.wait_for_service('te_detection')
         TE_detection = rospy.ServiceProxy('te_detection', SignalStatus)
         if TE_detection:
+        # if True:
             rospy.loginfo("TE detected")
 
             color_file_name = f'{file_folder}/ColorVideoFile{file_num}.avi'
@@ -90,6 +93,7 @@ try:
 
                 color_writer.write(color_image)
                 depth_writer.write(depth_colormap)
+                cv2.imwrite(f'{depth_file_folder}/frame{file_num}-{frame_num}.png', depth_image)
 
             color_writer.release()
             depth_writer.release()

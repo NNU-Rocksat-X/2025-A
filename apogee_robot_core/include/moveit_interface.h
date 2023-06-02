@@ -18,6 +18,7 @@
 #include <std_msgs/Empty.h>
 #include <std_srvs/Trigger.h>
 #include <moveit_msgs/DisplayTrajectory.h>
+#include <daedalus_msgs/TeensyMsg.h>
 
 #include <daedalus_msgs/MoveCmd.h>
 #include <daedalus_msgs/PositionCmd.h>
@@ -68,6 +69,7 @@ class MoveInterface {
 
         ros::Publisher graspPub;
         ros::Publisher display_publisher;
+        ros::Publisher posePub; // added publisher for the joint position cmds
 
 
         std::string pose_param;
