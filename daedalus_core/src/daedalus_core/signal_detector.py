@@ -2,6 +2,7 @@
 
 import RPi.GPIO as GPIO
 import time
+import rospy
 
 
 GPIO.setmode(GPIO.BCM)
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     p1 = Detector(5,20)
     p1.detect()
 
-    while True:
+    while not rospy.is_shutdown():
         time.sleep(0.1)
         p1.detect()
 
