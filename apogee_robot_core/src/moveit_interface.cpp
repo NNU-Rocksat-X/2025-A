@@ -42,7 +42,7 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
     graspPub = nh->advertise<std_msgs::Float32>("grip_position_cmd", 1);
     display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
 
-    posePub = nh->advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 10);
+    posePub = nh->advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 7);
 
     //display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 2, true);
 
@@ -262,6 +262,8 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
 
             posePub.publish(teensyMsg);
 
+            ros::Duration(0.1).sleep();
+
             bool completion_status = wait_until_complete(joint_group_positions);
             res.done = completion_status;
             return true;
@@ -273,6 +275,7 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
     } else {
         res.done = false;
         ROS_WARN("Joint pose does not exist!");
+        
         return true;
     }
 

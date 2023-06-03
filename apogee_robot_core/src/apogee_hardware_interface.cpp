@@ -21,7 +21,7 @@ Arm2D2Interface::Arm2D2Interface(ros::NodeHandle &nh_) {
         ROS_ERROR("Stepper Config Parameters Not Loaded!");
     }
 
-    step_pub = nh.advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 10);
+    //step_pub = nh.advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 10);
     enc_sub = nh.subscribe("display_robot_state", 100, &Arm2D2Interface::encoderCallBack, this);
     trajectory_goal_sub = nh.subscribe("arm2d2/controllers/position/follow_joint_trajectory/goal", 100, 
                                         &Arm2D2Interface::trajectory_cb, this);
@@ -161,7 +161,7 @@ void Arm2D2Interface::write()
     } else {
         update_cnt++;
     }
-    daedalus_msgs::TeensyMsg msg;
+    //daedalus_msgs::TeensyMsg msg;
 
     for(int i = 0; i < num_joints-num_grip_joints; i++) {  
         //ROS_INFO("J%i - %f", i, cmd[i]);    

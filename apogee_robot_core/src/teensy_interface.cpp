@@ -49,14 +49,22 @@ void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
     //ROS_INFO("Sleeping...");
     //sleep(10);
     ROS_INFO("--Position Callback--");
-    for (int i = 0; i < NUM_JOINTS; i++)
+    for (int l = 0; l < NUM_JOINTS; l++)
     {
         // teensy msg gives radians/sec
 
-        double deg_sec = msg->steps[i];
+        //ROS_INFO("1");
+
+        double deg_sec = msg->steps[l];
+        //ROS_INFO("deg_sec: %f", deg_sec);
         double deg_ms = deg_sec;
-        int step_ms = (int)(deg_ms * enc_steps_per_rad[i]);
-        tx.joint_velocity_cmd[i] = int(step_ms);
+        //ROS_INFO("deg_ms: %f", deg_ms);
+        int32_t step_ms = (int32_t)(deg_ms * enc_steps_per_rad[l]);
+        //ROS_INFO("Step_ms: %i", step_ms);
+        tx.joint_velocity_cmd[l] = step_ms;
+        //cout << "POSES----------------------"
+        // ROS_INFO("Step: %i Value: %i", l, step_ms);
+        // ROS_INFO("joint_velocity_cmd: %i", tx.joint_velocity_cmd[l]);
         //ROS_INFO("deg/sec: %f", deg_sec);
         //ROS_INFO("deg/ms: %f", deg_ms);
         //ROS_INFO("J%i: %i", i, step_ms);
@@ -91,7 +99,7 @@ int main(int argc, char** argv)
     if (ros::param::has("/stepper_config/joint_names")) {
         ros::param::get("/stepper_config/joint_names", joint_names);
         ros::param::get("/stepper_config/deg_per_step", deg_per_step);
-        ros::param::get("/stepper_config/deg_per_enc_step", enc_steps_per_rad);
+        ros::param::get("/stepper_config/enc_steps_per_rad", enc_steps_per_rad);
         ros::param::get("/stepper_config/rad_per_enc_step", rad_per_enc_step);
     } else {
         ROS_ERROR("Stepper config param not loaded!");
@@ -142,21 +150,23 @@ int main(int argc, char** argv)
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
         teensy_rx.close();
 
+        //rad_per_enc_step[3] = 0.000145;
+
         for (int i = 0; i < NUM_JOINTS; i++)
         {
             // Robotstate is in radians
             robotState.state.joint_state.velocity[i] = 0;
             robotState.state.joint_state.effort[i] = 0;
-            // TODO: add adjust angle, but it causes problems
             robotState.state.joint_state.position[i] = rx.joint_step_position[i] * rad_per_enc_step[i];
+            //ROS_INFO("%f", rad_per_enc_step[i]);
             //ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
 
-        // ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
-        // for (int ii = 0; ii < NUM_JOINTS; ++ii) {
-        //     ROS_INFO("Joint: %u Output: %u Input: %f", ii + 1, tx.joint_velocity_cmd[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
-        // }
-        // ROS_INFO("\n");
+        ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
+        for (int ii = 0; ii < NUM_JOINTS; ++ii) {
+            ROS_INFO("Joint: %i Output: %i Input: %f", ii + 1, tx.joint_velocity_cmd[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
+        }
+        ROS_INFO("\n");
 
         //ROS_INFO("publishing");
         robotStatePub.publish(robotState);
