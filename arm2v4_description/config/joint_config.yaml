@@ -22,6 +22,7 @@ stepper_config:
     - 0.3 #0.3     # 90 / 300
     - 0.3
     - 0.3
+    - 1
 
   rad_per_enc_step:
     - 0.000532
@@ -31,6 +32,7 @@ stepper_config:
     - 0.000873
     - 0.000873
     - 0.000262
+    - 1
 
   enc_steps_per_rad: # steps per radian
     - 1909.9 # (4000 * 6) / (2pi) is enc_steps per radian
@@ -40,6 +42,7 @@ stepper_config:
     - 1146.9
     - 1146.9
     - 3819.7 # (4000 * 6) / (2pi) is enc_steps per radian
+    - 1
 
 
   gripper_gain: 50

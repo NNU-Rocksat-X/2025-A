@@ -75,7 +75,7 @@ class MoveInterface {
         std::string pose_param;
         std::string joint_param;
         
-        int num_joints = 6;
+        int num_joints = 8;
 
         // Default RTT planning timeout
         float ik_timeout = 0.07;
