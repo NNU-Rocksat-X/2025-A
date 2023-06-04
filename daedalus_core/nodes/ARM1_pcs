@@ -55,37 +55,37 @@ class Simulation_SM:
                                     transitions={'Success': 'Handoff_1',
                                                  'Fail': 'Home_Pos_1'}) #done
             
-            smach.StateMachine.add('Handoff_1', handoff_1_SM, 
+            smach.StateMachine.add('Handoff_1', handoff_1_SM_ARM1, 
                                    transitions={'Success': 'Home_Pos_1',
                                                 'Fail': 'Home_Pos_1'}) #done
             
-            smach.StateMachine.add('Home_Pos_1', home_pos_1_SM, 
+            smach.StateMachine.add('Home_Pos_1', home_pos_1_SM_ARM1, 
                                    transitions={'Success': 'Handoff_2',
-                                               'Fail': 'Handoff_2'}) #done
+                                               'Fail': 'Mission_Fail'}) #done
 
 # ball 2
-            smach.StateMachine.add('Handoff_2', handoff_2_SM, 
+            smach.StateMachine.add('Handoff_2', handoff_2_SM_ARM1, 
                                    transitions={'Success': 'Discard',
                                                 'Fail': 'Home_Pos_2'}) # done
             
-            smach.StateMachine.add('Discard', discard_obj_2_SM,
+            smach.StateMachine.add('Discard', discard_obj_2_SM_ARM1,
                                    transitions={'Success': 'Home_Pos_2',
                                                 'Fail': 'Home_Pos_2'})
 
-            smach.StateMachine.add('Home_Pos_2', home_pos_2_SM,
+            smach.StateMachine.add('Home_Pos_2', home_pos_2_SM_ARM1,
                                    transitions={'Success': 'Home_Pos_2',
                                                'Fail': 'Pickup_Obj_3'})
 
 # cube 1
-            smach.StateMachine.add('Pickup_Obj_3', pickup_obj_3_SM,
+            smach.StateMachine.add('Pickup_Obj_3', pickup_obj_3_SM_ARM1,
                                    transitions={'Success': 'Throw_3',
                                                 'Fail': 'Home_Pos_3'})
             
-            smach.StateMachine.add('Throw_3', handoff_3_SM,
+            smach.StateMachine.add('Throw_3', handoff_3_SM_ARM1,
                                    transitions={'Success': 'Home_Pos_3',
                                    'Fail': 'Home_Pos_3'})
             
-            smach.StateMachine.add('Home_Pos_3', home_pos_3_SM,
+            smach.StateMachine.add('Home_Pos_3', home_pos_3_SM_ARM1,
                                    transitions={'Success': 'Fold_Arms',
                                    'Fail': 'Fold_Arms'})
 
