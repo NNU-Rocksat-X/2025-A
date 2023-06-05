@@ -246,10 +246,10 @@ with Fold_SM:
 - Test Ready
 """
 
-pickup_obj_1_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+pickup_obj_1_SM_ARM1 = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
 
-with pickup_obj_1_SM:
+with pickup_obj_1_SM_ARM1:
     for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
 
@@ -326,10 +326,10 @@ home_pos_1_SM_ARM1 = smach.StateMachine(outcomes=['Success', 'Fail'])
 
 with home_pos_1_SM_ARM1:
     smach.StateMachine.add('Go_Home', Joint_Pose_State("active_home"), # TODO add active home to the poses.yaml
-                           transitions={'Success': 'Sync_Up', 
+                           transitions={'Success': 'Sync_Arms', 
                                         'Fail': 'Fail'})
 
-    smach.StateMachine.add('Sync_Up', ARM_Sync("handoff_2", timeout = 20), # wait here until arm 2 has gotten rid of the object
+    smach.StateMachine.add('Sync_Arms', ARM_Sync("handoff_2", timeout = 20), # wait here until arm 2 has gotten rid of the object
                            transitions={'Ready': 'Success',
                                         'Timeout': 'Fail'})        
 
@@ -417,9 +417,9 @@ with discard_obj_2_SM_ARM1:
 -
 -
 """
-home_pos_2_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+home_pos_2_SM_ARM1 = smach.StateMachine(outcomes=['Success', 'Fail'])
 
-with home_pos_2_SM:
+with home_pos_2_SM_ARM1:
     smach.StateMachine.add('Go_Home', Joint_Pose_State('active_home'), 
                            transitions={'Success': 'Sync_Up', 
                                         'Fail': 'Fail'})
@@ -479,9 +479,9 @@ with pickup_obj_3_SM_ARM1:
 - Move on to Home if any of the states fail
 """
 
-handoff_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+handoff_3_SM_ARM1 = smach.StateMachine(outcomes=['Success', 'Fail'])
 
-with handoff_3_SM:
+with handoff_3_SM_ARM1:
     smach.StateMachine.add('Move_To_Handy', Joint_Pose_State('pre_handoff'), # TODO add handoff poses to poses.yaml
                            transitions={'Success': 'Wait_For_Sync',
                                         'Fail': 'Fail'})
@@ -517,9 +517,9 @@ with handoff_3_SM:
 - Ready for testing
 """
 
-home_pos_3_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+home_pos_3_SM_ARM1 = smach.StateMachine(outcomes=['Success', 'Fail'])
 
-with home_pos_3_SM:
+with home_pos_3_SM_ARM1:
     smach.StateMachine.add('Go_Home', Joint_Pose_State("active_home"), # TODO add active home to the poses.yaml
                            transitions={'Success': 'Sync_Up', 
                                         'Fail': 'Fail'})
@@ -554,10 +554,10 @@ with handoff_1_SM_ARM2:
                                         'Timeout': 'Fail'})
     
     smach.StateMachine.add('Handoff', Joint_Pose_State('handoff_1a'), # move closer to the target position
-                           transitions={'Success': 'Close_Gripper',
+                           transitions={'Success': 'Pre_Close_Gripper',
                                         'Fail': 'Fail'})
     
-    smach.StateMachine.add('Close_Gripper', Joint_Pose_State('handoff_1b'), 
+    smach.StateMachine.add('Pre_Close_Gripper', Joint_Pose_State('handoff_1b'), 
                            transitions={'Success': 'Check_Gripper',
                                         'Fail': 'Fail'})
     

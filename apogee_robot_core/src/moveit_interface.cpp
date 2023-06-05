@@ -213,7 +213,7 @@ bool MoveInterface::wait_until_complete(std::vector<double> joint_cmds)
         ROS_INFO("Waiting for move to finish...");
         joints_complete = 0;
         robot_state::RobotState current_state(*move_group->getCurrentState());
-        for (int i = 0; i < 7; i++) // removed size of joint_cmds to replace it with 7.. trying to remove hang time from this function
+        for (int i = 0; i < 8; i++) // removed size of joint_cmds to replace it with 7.. trying to remove hang time from this function
         {
             const double* joint_pos = current_state.getJointPositions(joint_names[i]);
             ROS_INFO("---- J%i ----", i);

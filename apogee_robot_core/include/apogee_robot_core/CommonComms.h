@@ -1,7 +1,7 @@
 #ifndef COMMON_COMMS_H_
 #define COMMON_COMMS_H_
 
-#define NUM_JOINTS (7) // 6 DOF + Gripper
+#define NUM_JOINTS (8) // 6 DOF + Gripper
 
 
 inline unsigned short crc16(const unsigned char* data_p, unsigned char length){

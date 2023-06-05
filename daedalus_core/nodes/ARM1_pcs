@@ -43,17 +43,17 @@ class Simulation_SM:
             #        transitions={'Success': 'Unfold',
             #                     'Fail': 'Mission_Fail'})
 
-            smach.StateMachine.add('Unfold', Unfold_SM,
-                    transitions={'Success': 'Mission_Success',
-                                 'Fail': 'Mission_Fail'})
+        #     smach.StateMachine.add('Unfold', Unfold_SM,
+        #             transitions={'Success': 'Mission_Success',
+        #                          'Fail': 'Mission_Fail'})
             
 # states to follow the state machine
 
 
 # ball 1
-            smach.StateMachine.add('Pickup_Obj_1', pickup_obj_1_SM,
-                                    transitions={'Success': 'Handoff_1',
-                                                 'Fail': 'Home_Pos_1'}) #done
+            smach.StateMachine.add('Pickup_Obj_1', pickup_obj_1_SM_ARM1,
+                                    transitions={'Success': 'Mission_Success',
+                                                 'Fail': 'Mission_Fail'}) #done
             
             smach.StateMachine.add('Handoff_1', handoff_1_SM_ARM1, 
                                    transitions={'Success': 'Home_Pos_1',
