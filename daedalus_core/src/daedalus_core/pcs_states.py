@@ -51,6 +51,61 @@ class Wait_State(smach.State):
 
         return 'Complete'
 
+
+class Check_Inhibit(smach.State):
+
+    """
+        Checks the status of the inhibit pin on the current Jetson the other Jetson
+        If both inhibit pins return true, then Partial_Inhibit is returned
+        If both inhibit pins are false, then No_Inhibit is returned
+        If only one inhibit pin is true, then Full_Inhibit is returned
+        If the other Jetson's pin state is not published, then eventually it will return timeout
+
+        INPUT
+            timeout - Number of seconds before transitioning to timeout
+            poll_period - The period in seconds to poll the state of the other arm
+
+        USAGE EXAMPLE
+            smach.StateMachine.add('Check_Inhibit', Check_Inhibit(timeout=20),
+                                    transitions={'Full_Inhibit': 'Do_Nothing',
+                                                'Partial_Inhibit': 'Partial_Inhibit_Procedure',
+                                                'No_Inhibit': 'Unfold',
+                                                'Timeout': 'init'})
+    """
+
+
+    def __init__(self, timeout=10, poll_period=0.1):
+        smach.State.__init__(self, outcomes=['Full_Inhibit', 'Partial_Inhibit', 'No_Inhibit', 'Timeout'])
+        rospy.wait_for_service('full_inhibit_detection')
+        self.inhibit_status = rospy.ServiceProxy('full_inhibit_detection', SignalStatus)
+        self.timeout = timeout
+        self.poll_period = poll_period
+
+    def execute(self, userdata):
+        time_elapsed = 0
+        other_arm_param = other_arm + 'inhibit_status'
+
+        rospy.set_param('inhibit_status', self.inhibit_status)
+
+        # Wait until other arm has a inhibit status set
+        while not rospy.has_param(other_arm_param):
+            rospy.logwarn("Waiting for other arm's inhibit state")
+
+            rospy.sleep(self.poll_period)
+            time_elapsed += self.poll_period
+            if time_elapsed > self.timeout:
+                return 'Timeout'
+
+        # return information based on both inhibits
+        if rospy.get_param(other_arm_param) and self.inhibit_status:
+            return 'Partial_Inhibit'
+        elif not rospy.get_param(other_arm_param) and not self.inhibit_status:
+            return 'No_Inhibit'
+        else:
+            return 'Full_Inhibit'
+
+
+
 """
 =============================================================================
                     PAYLOAD CONTROL SYSTEM (PCS)
@@ -109,6 +164,10 @@ class PCS_Deactivate_State(PCS_State):
                     transitions={'Success': 'step_' + str(i-1),
                                  'Fail': 'Fail'})
 
+
+
+            
+    
 
 
 """
