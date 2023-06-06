@@ -46,8 +46,7 @@ void led_cb(const std_msgs::Bool::ConstPtr& msg)
 void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
 {
     //cout << "Position Callback----------------------------------------------------" << endl;
-    //ROS_INFO("Sleeping...");
-    //sleep(10);
+
     ROS_INFO("--Position Callback--");
     for (int l = 0; l < NUM_JOINTS; l++)
     {
