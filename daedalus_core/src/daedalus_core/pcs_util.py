@@ -69,3 +69,6 @@ class ARM_Sync(smach.State):
                 return 'Timeout'
 
         return 'Ready'
+    
+
+
