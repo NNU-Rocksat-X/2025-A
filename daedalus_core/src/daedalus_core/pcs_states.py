@@ -84,8 +84,9 @@ class Check_Inhibit(smach.State):
     def execute(self, userdata):
         time_elapsed = 0
         other_arm_param = other_arm + 'inhibit_status'
+        inhibit_status = self.inhibit_status()
 
-        rospy.set_param('inhibit_status', self.inhibit_status)
+        rospy.set_param('inhibit_status', inhibit_status.state)
 
         # Wait until other arm has a inhibit status set
         while not rospy.has_param(other_arm_param):
@@ -97,9 +98,9 @@ class Check_Inhibit(smach.State):
                 return 'Timeout'
 
         # return information based on both inhibits
-        if rospy.get_param(other_arm_param) and self.inhibit_status:
+        if rospy.get_param(other_arm_param) and inhibit_status.state:
             return 'Partial_Inhibit'
-        elif not rospy.get_param(other_arm_param) and not self.inhibit_status:
+        elif not rospy.get_param(other_arm_param) and not inhibit_status.state:
             return 'No_Inhibit'
         else:
             return 'Full_Inhibit'
