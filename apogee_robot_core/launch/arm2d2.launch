@@ -2,22 +2,23 @@
     <arg name="version" default="arm2v4"/>
     <arg name="dual" default="false"/>
     <arg name="launch_rviz" default="false"/>
+    <arg name="ARM" default="ARM1"/>
 
-    <group ns="ARM1">
+    <group ns="$(arg ARM)">
         <include if="$(eval arg('version') == 'arm2d2_v3')" file="$(find arm2d2_v3_description)/launch/config.launch"/>
         <include if="$(eval arg('version') == 'arm2d2_v2')" file="$(find arm2d2_v2_description)/launch/config.launch"/>
         <include if="$(eval arg('version') == 'arm2v4')" file="$(find arm2v4_description)/launch/config.launch">
-            <arg name="ns" value="ARM1"/>
+            <arg name="ns" value="$(arg ARM)"/>
             <arg name="dual" value="true"/>
         </include>
         <include if="$(eval arg('version') == 'arm2v4_wrench')" file="$(find arm2v4_description)/launch/config.launch">
-            <arg name="ns" value="ARM1"/>
+            <arg name="ns" value="$(arg ARM)"/>
             <arg name="dual" value="true"/>
         </include>
 
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
             <arg name="launch_rviz" value="$(arg launch_rviz)"/>
-            <arg name="ns" value="ARM1"/>
+            <arg name="ns" value="$(arg ARM)"/>
         </include>
     </group>
 
@@ -35,8 +36,8 @@
         </include>
     </group>
 
-    <group ns="ARM1">
-        <node pkg="apogee_robot_core" name="ARM1_deeze_nuts" type="teensy_interface" output="screen"/>
+    <group ns="$(arg ARM)">
+        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface" output="screen"/>
     </group>
 
     
