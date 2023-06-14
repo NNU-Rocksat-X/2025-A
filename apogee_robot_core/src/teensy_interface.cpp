@@ -89,6 +89,8 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     ros::Subscriber sub = nh.subscribe("/led", 1, led_cb);
+
+    sleep(1);
     ros::Subscriber ctrl_sub = nh.subscribe("joint_position_cmd", 2, &positionCB);
     ros::Publisher robotStatePub = nh.advertise<moveit_msgs::DisplayRobotState>("display_robot_state", 2);
 
@@ -142,12 +144,14 @@ int main(int argc, char** argv)
         teensy_tx.write((char*)&tx, sizeof(CMDPacket));
         teensy_tx.close();
 
-
+        //ROS_INFO("1");
 
         char buffer[BUFFER_SIZE];
         teensy_rx.open("/dev/ttyACM0"); 
         teensy_rx.read((char*)&rx, sizeof(RESPacket));
         teensy_rx.close();
+
+        //ROS_INFO("2");
 
         //rad_per_enc_step[3] = 0.000145;
 
@@ -160,13 +164,13 @@ int main(int argc, char** argv)
             //ROS_INFO("%f", rad_per_enc_step[i]);
             //ROS_INFO("J%i: %f", i, robotState.state.joint_state.position[i]);
         }
-
+/*
         ROS_INFO("TX SEQ: %u RX SEQ: %u STATUS: %u", seq, rx.seq, rx.reserved);
         for (int ii = 0; ii < NUM_JOINTS; ++ii) {
             ROS_INFO("Joint: %i Output: %f Input: %f", ii + 1, tx.joint_velocity_cmd[ii] * rad_per_enc_step[ii], robotState.state.joint_state.position[ii]); // output what the teensy is recieving
         }
         ROS_INFO("\n");
-
+*/
         //ROS_INFO("publishing");
         robotStatePub.publish(robotState);
 

@@ -71,7 +71,6 @@ class MoveInterface {
         ros::Publisher display_publisher;
         ros::Publisher posePub; // added publisher for the joint position cmds
 
-
         std::string pose_param;
         std::string joint_param;
         

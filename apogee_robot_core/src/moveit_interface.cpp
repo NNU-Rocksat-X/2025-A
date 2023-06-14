@@ -42,7 +42,7 @@ MoveInterface::MoveInterface(ros::NodeHandle *nh) {
     graspPub = nh->advertise<std_msgs::Float32>("grip_position_cmd", 1);
     display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
 
-    posePub = nh->advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 7);
+    posePub = nh->advertise<daedalus_msgs::TeensyMsg>("joint_position_cmd", 8);
 
     //display_publisher = nh->advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 2, true);
 
@@ -278,8 +278,6 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
         
         return true;
     }
-
-
 }
 
 /// @brief - Exact same as jointPoseCmd, but doesn't block

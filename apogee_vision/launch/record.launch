@@ -1,6 +1,6 @@
 <launch>
 
-    <node name="realsense_record" pkg="apogee_vision" type="realsense_record"/>
+    <node name="realsense_record" pkg="apogee_vision" type="realsense_record" output=screen/>
     <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
 
 

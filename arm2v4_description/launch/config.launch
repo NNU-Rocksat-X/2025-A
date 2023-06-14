@@ -1,5 +1,5 @@
 <launch>
-    <arg name="ns" default="ARM1"/>
+    <arg name="ns" default="ARM2"/>
     <arg name="dual" default="false"/>
 
     <rosparam file="$(find arm2v4_description)/config/joint_config.yaml" command="load"/>

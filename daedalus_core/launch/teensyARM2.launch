@@ -1,0 +1,7 @@
+<launch>
+    
+    <include file="$(find apogee_robot_core)/launch/arm2d2.launch">
+        <arg name="ARM" value="ARM2"/>
+    </include>
+
+</launch>

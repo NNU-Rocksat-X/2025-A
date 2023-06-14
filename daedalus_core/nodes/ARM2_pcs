@@ -6,7 +6,7 @@ import smach_ros
 
 
 from daedalus_core.pcs_states import *
-#from daedalus_core.pcs_move_states import *
+from daedalus_core.pcs_move_states import *
 
 class Mission_SM:
     def __init__(self):
@@ -22,39 +22,78 @@ class Mission_SM:
 
 
 # start movment SM here
+
             smach.StateMachine.add('Init_Arm_sync', ARM_Sync("init", timeout=60),
-                transitions={'Ready': 'Unfold',
-                             'Timeout': 'Mission_Fail'}) #
+                transitions={'Ready': 'Wait_for_TE_delay',
+                             'Timeout': 'Finish_Fail'}) #
+            
+            smach.StateMachine.add('Wait_for_TE', Detector_Status('te_detection'),
+                    transitions={'On': 'TE_Sync',
+                                 'Off': 'Wait_for_TE_delay'})
+
+            smach.StateMachine.add('Wait_for_TE_delay', Wait_State(0.5),
+                    transitions={'Complete': 'Wait_for_TE'})
+            
+            smach.StateMachine.add('TE_Sync', ARM_Sync("TE", timeout=15),
+                    transitions={'Ready': 'Check_For_Inhibit',
+                                 'Timeout': 'Wait_for_TE'})
+            
+            smach.StateMachine.add('Check_For_Inhibit', Check_Inhibit(),
+                    transitions={'Full_Inhibit' : 'Full_Inhibit_Delay',
+                                'Partial_Inhibit' : 'Partial_Inhibit_Procedure',
+                                'No_Inhibit' : 'Unfold_Sync_1',
+                                'Timeout' : 'Finish_Fail'})
+            
+            smach.StateMachine.add('Full_Inhibit_Delay', Wait_State(1),
+                    transitions={'Complete' : 'Finish_Success'})
+            
+            smach.StateMachine.add('Partial_Inhibit_Procedure', Partial_Inhibit_SM,
+                    transitions={'Success' : 'Finish_Success',
+                                 'Fail' : 'Finish_Fail'})
+            
+# unfold
+            smach.StateMachine.add('Unfold_Sync_1', ARM_Sync('unfold_1'),
+                                   transitions={'Ready': 'Wait_Unfold',
+                                                'Timeout': 'Finish_Fail'})
+        
+            smach.StateMachine.add('Wait_Unfold', Wait_State(20),
+                                   transitions={'Complete': 'Unfold_Sync_2'})
+
+            smach.StateMachine.add('Unfold_Sync_2', ARM_Sync('unfold_2'),
+                                   transitions={'Ready': 'Unfold',
+                                                'Timeout': 'Finish_Fail'})
 
             smach.StateMachine.add('Unfold', Unfold_SM,
-                    transitions={'Success': 'Mission_Success',
-                                 'Fail': 'Mission_Fail'}) #
+                    transitions={'Success': 'Finish_Success',
+                                 'Fail': 'Finish_Fail'}) # done
+            
+
 
 # ball 1
             smach.StateMachine.add('Handoff_1', handoff_1_SM_ARM2, 
                                    transitions={'Success': 'Discard_1',
-                                                'Fail': 'Home_Pos_1'}) #
+                                                'Fail': 'Home_Pos_1'}) # done
             
             smach.StateMachine.add('Discard_1', discard_obj_1_SM_ARM2,
                                    transitions={'Success': 'Home_Pos_1',
-                                                'Fail': 'Home_Pos_1'}) #
+                                                'Fail': 'Home_Pos_1'}) # done
 
             smach.StateMachine.add('Home_Pos_1', home_pos_1_SM_ARM2,
                                    transitions={'Success': 'Pickup_Obj_2',
-                                               'Fail': 'Pickup_Obj_2'}) #
+                                               'Fail': 'Finish_Fail'}) # done
 
 # ball 2
             smach.StateMachine.add('Pickup_Obj_2', pickup_obj_2_SM_ARM2,
                                     transitions={'Success': 'Handoff_2',
-                                                 'Fail': 'Home_Pos_2'}) #
+                                                 'Fail': 'Handoff_2'}) # done
             
             smach.StateMachine.add('Handoff_2', handoff_2_SM_ARM2, 
                                    transitions={'Success': 'Home_Pos_2',
-                                                'Fail': 'Home_Pos_2'}) #
+                                                'Fail': 'Finish_Fail'}) # done
             
             smach.StateMachine.add('Home_Pos_2', home_pos_2_SM_ARM2, 
                                    transitions={'Success': 'Handoff_3',
-                                               'Fail': 'Handoff_3'}) #
+                                               'Fail': 'Handoff_3'}) # done
 
 # cube 1
             smach.StateMachine.add('Handoff_3', handoff_3_SM_ARM2, 
@@ -70,13 +109,19 @@ class Mission_SM:
                                                'Fail': 'Fold_Arms'}) #
 
 # done
-            smach.stateMachine.add('Fold_Arms', fold_arms_SM, 
-                                   transitions={'Success': 'Deinit',
-                                                'Fail': 'Fold_Arms'}) #
+            smach.StateMachine.add('Fold_Arms', Fold_SM, 
+                                   transitions={'Success': 'Finish_Success',
+                                                'Fail': 'Finish_Fail'}) #
             
-            smach.StateMachine.add('Deinit', deinit_SM, 
-                                   transitions={'Success': 'Deinit',
-                                                'Fail': 'Deinit'})    
+            # smach.StateMachine.add('Deinit', deinit_SM, 
+            #                        transitions={'Success': 'Deinit',
+            #                                     'Fail': 'Deinit'})
+
+            smach.StateMachine.add('Finish_Success', Delete_Param(),
+                                   transitions={'Done': 'Mission_Success'})
+            
+            smach.StateMachine.add('Finish_Fail', Delete_Param(),
+                                   transitions={'Done': 'Mission_Fail'})                
 
     def run(self):
         outcome = self.sm.execute()
@@ -93,24 +138,34 @@ class Inhibit_Test_SM:
 
     def mission_sm(self):
         with self.sm:
+
+            smach.StateMachine.add('Init_Arm_Sync', ARM_Sync('init', timeout=20),
+                                   transitions={'Ready': 'Start',
+                                                'Timeout': 'Mission_Fail'})
+            
             smach.StateMachine.add('Start', Wait_State(1),
-                                   transitions={'Complete': 'Check_For_Inhibit'})
+                                   transitions={'Complete': 'Sync_Again'})
+            
+            smach.StateMachine.add('Sync_Again', ARM_Sync('again', timeout=20),
+                                   transitions={'Ready': 'Check_For_Inhibit',
+                                                'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Check_For_Inhibit', Check_Inhibit(),
-                                  transitions={'Full_Inhibit' : 'Mission_Success',
-                                               'Partial_Inhibit' : 'Mission_Success',
-                                               'No_Inhibit' : 'Mission_Success',
+                                  transitions={'Full_Inhibit' : 'Waaaaiiiitttt',
+                                               'Partial_Inhibit' : 'Waaaaiiiitttt',
+                                               'No_Inhibit' : 'Waaaaiiiitttt',
                                                'Timeout' : 'Mission_Fail'})
 
+            smach.StateMachine.add('Waaaaiiiitttt', Wait_State(1),
+                                   transitions={'Complete' : 'Finish'})
             
+            smach.StateMachine.add('Finish', Delete_Param(),
+                                   transitions={'Done': 'Mission_Success'})
 
     def run(self):
         outcome = self.sm.execute()
 
-
-    
-
 if __name__ == "__main__":
     rospy.init_node("mission_sm")
-    sm = Inhibit_Test_SM()
+    sm = Mission_SM()
     sm.run()

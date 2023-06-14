@@ -1,5 +1,7 @@
 <launch>
-    <group ns="ARM2">
+<!--   <arg name="ns" default="ARM2"/> -->
+
+    <group ns="ARM2"> 
         <include file="$(find arm2v4_description)/launch/config.launch"/>
         <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
         <node pkg="daedalus_core" name="ARM2_pcs" type="ARM2_pcs" output="screen"/>
