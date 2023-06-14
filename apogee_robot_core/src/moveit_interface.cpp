@@ -278,8 +278,6 @@ bool MoveInterface::jointPoseCmd(daedalus_msgs::MoveCmd::Request &req,
         
         return true;
     }
-
-
 }
 
 /// @brief - Exact same as jointPoseCmd, but doesn't block
