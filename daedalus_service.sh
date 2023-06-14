@@ -10,9 +10,15 @@ echo "Launching for $1"
 
 ARM1_HOSTNAME="daedalus1"
 
-if [ "$ROS_HOSTNAME" == daedalus1 ]; 
-then
+if [ "$ROS_HOSTNAME" == daedalus1 ]; then
+    roscore &
+    roslaunch arm2v4_description config.launch
+    roslaunch apogee_vision record.launch &
+    roslaunch apogee_robot_core arm2d2.launch ARM:=ARM1 > /dev/null &
     roslaunch daedalus_core ARM1_mission.launch
 else
-    roslaunch daedalus_core ARM2_mission.launch
+    roslaunch arm2v4_description config.launch
+    roslaunch apogee_robot_core arm2d2.launch ARM:=ARM2 > /dev/null & 
+    roslaunch daedalus_core ARM2_mission.launch 
 fi
+

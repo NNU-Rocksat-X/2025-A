@@ -106,6 +106,15 @@ class Check_Inhibit(smach.State):
             return 'Full_Inhibit'
 
 
+class Delete_Param(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['Done'])
+
+    def execute(self, userdata):
+        rospy.delete_param('inhibit_status')
+        rospy.delete_param('sync_id')
+        return 'Done'
+
 
 """
 =============================================================================

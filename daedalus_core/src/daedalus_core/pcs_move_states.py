@@ -256,6 +256,7 @@ NUM_PICKUP_OBJ_1_STEPS = len(rospy.get_param('joints/pickup_obj_1'))
 with pickup_obj_1_SM_ARM1:
     for i in range(0, NUM_PICKUP_OBJ_1_STEPS):
         step_str = 'step_' + str(i)
+        delay_str = 'delay_' + str(i)
 
         if i == NUM_PICKUP_OBJ_1_STEPS - 1:
             smach.StateMachine.add(step_str, Joint_Pose_State('pickup_obj_1/' + step_str, allowed_attempts=2),
@@ -834,18 +835,18 @@ with home_pos_3_SM_ARM2:
 
 """
 
-Partial_Inhibit_Test_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
+Partial_Inhibit_SM = smach.StateMachine(outcomes=['Success', 'Fail'])
 
-with Partial_Inhibit_Test_SM:
+with Partial_Inhibit_SM:
 
-    smach.StateMachine.add('Open_Gripper', Grasp_Cmd_State("open"),
+    smach.StateMachine.add('Open_Gripper', Joint_Pose_State("open"),
                             transitions={'Success': 'Delay',
                                         'Fail': 'Fail'})
     
     smach.StateMachine.add('Delay', Wait_State(1),
                            transitions={'Complete': 'Close_Gripper'})
     
-    smach.StateMachine.add('Close_Gripper', Grasp_Cmd_State("close"),
+    smach.StateMachine.add('Close_Gripper', Joint_Pose_State("close"),
                             transitions={'Success': 'Success',
                                         'Fail': 'Fail'})
 
