@@ -16,10 +16,19 @@
             <arg name="dual" value="true"/>
         </include>
 
+        <!-- added this in to try to not need arm2v4 in the other launch stuff
+        <include file="$(find arm2v4_description)/launch/config.launch">
+            <arg name="ns" value="$(arg ARM)"/>
+        </include>         -->
+
         <include file="$(find apogee_robot_core)/launch/core_bringup.launch">
             <arg name="launch_rviz" value="$(arg launch_rviz)"/>
             <arg name="ns" value="$(arg ARM)"/>
         </include>
+
+     
+
+
     </group>
 
     <group if="$(arg dual)" ns="ARM2">
