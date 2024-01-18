@@ -4,7 +4,7 @@
 To install simply clone the daedalus repository to the home directory:
 
 ```
-git clone https://github.com/Apogee-Robotics/daedalus.git
+git clone https://github.com/NNU-Rocksat-X/2024-A.git
 ```
 Then install pcl with the installation script:
 
