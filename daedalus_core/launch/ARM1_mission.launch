@@ -1,6 +1,7 @@
 <launch>
+    <include file="$(find apogee_robot_core)/launch/arm2d2.launch"/><!--Connor thinks maybe this is supposed to be here--> <!-- Riley also thinks this should be here but isnt sure why.. I dont think we need it but something is wrong so we do need it now -->
+    
     <group ns="ARM1">
-        <!--<include file="$(find apogee_robot_core)/launch/arm2d2.launch"/>--><!--Connor thinks maybe this is supposed to be here-->
         <include file="$(find arm2v4_description)/launch/config.launch"/>
         <node pkg="daedalus_core" name="detector_node" type="detector_node"/>
         <node pkg="daedalus_core" name="ARM1_pcs" type="ARM1_pcs" output="screen"/>

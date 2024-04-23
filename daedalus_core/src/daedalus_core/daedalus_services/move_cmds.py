@@ -6,8 +6,8 @@ from daedalus_msgs.srv import MoveCmd, GraspDetect
 
 print('waiting for services')
 
-rospy.wait_for_service('joint_pose_cmd')
-joint_pose_cmd = rospy.ServiceProxy('joint_pose_cmd', MoveCmd)
+rospy.wait_for_service('/ARM1/joint_pose_cmd')
+joint_pose_cmd = rospy.ServiceProxy('/ARM1/joint_pose_cmd', MoveCmd)
 print("joint_pose_cmd found")
 
 # rospy.wait_for_service('async_joint_pose_cmd')

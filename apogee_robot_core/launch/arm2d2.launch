@@ -46,7 +46,7 @@
     </group>
 
     <group ns="$(arg ARM)">
-        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface" output="screen"/>
+        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface"/> <!-- output="screen"/> -->
     </group>
 
     
