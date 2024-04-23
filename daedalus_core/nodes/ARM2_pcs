@@ -19,7 +19,8 @@ class Mission_SM:
     
     def mission_sm(self):
         with self.sm:
-
+            
+# NNU is the worst
 
 # start movment SM here
             smach.StateMachine.add('Init_Arm_sync', ARM_Sync("init", timeout=60),
