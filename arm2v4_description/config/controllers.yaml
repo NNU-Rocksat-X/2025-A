@@ -12,7 +12,6 @@ arm2d2/controllers:
       - joint_4
       - joint_5
       - joint_6
-      - joint_7
     gains:
       joint_1: {p: 10,  d: 0, i: 0.1, i_clamp: 0.5}
       joint_2: {p: 10,  d: 0, i: 0, i_clamp: 1}
@@ -20,7 +19,7 @@ arm2d2/controllers:
       joint_4: {p: 10,  d: 0, i: 0, i_clamp: 1}
       joint_5: {p: 1,  d: 0, i: 0, i_clamp: 1}
       joint_6: {p: 6, d: 0.7, i: 0, i_clamp: 1}
-      joint_7: {p: 7, d: 0.9, i: 0, i_clamp: 1}
+      # joint_7: {p: 7, d: 0.9, i: 0, i_clamp: 1}
     constraints:
       goal_time: 100
       stopped_velocity_tolerance: 0
@@ -34,7 +33,7 @@ arm2d2/controllers:
       - joint_4
       - joint_5
       - joint_6
-      - joint_7
+
     constraints:
       goal_time: 10
       stopped_velocity_tolerance: 10
