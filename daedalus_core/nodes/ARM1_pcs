@@ -171,9 +171,9 @@ class IRL_SM:
 
     def mission_sm(self):
         with self.sm:
-            smach.StateMachine.add('Wait_for_Jetson_Sync', ARM_Sync(0, timeout=130),
-                    transitions={'Ready': 'Blink_on',
-                                 'Timeout': 'Mission_Fail'})
+            # smach.StateMachine.add('Wait_for_Jetson_Sync', ARM_Sync(0, timeout=130),
+            #         transitions={'Ready': 'Blink_on',
+            #                      'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Blink_on', PCS_Activate_State('led'),
                     transitions={'Complete': 'Blink_Delay',
@@ -193,9 +193,9 @@ class IRL_SM:
             smach.StateMachine.add('Wait_for_TE_delay', Wait_State(0.5),
                     transitions={'Complete': 'Wait_for_TE'})
             
-            smach.StateMachine.add('TE_Sync', ARM_Sync("TE", timeout=150),
-                    transitions={'Ready': 'Success_led',
-                                 'Timeout': 'Mission_Fail'})
+            # smach.StateMachine.add('TE_Sync', ARM_Sync("TE", timeout=150),
+            #         transitions={'Ready': 'Success_led',
+            #                      'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Success_led', PCS_Activate_State('led'),
                     transitions={'Complete': 'Mission_Success',
@@ -216,16 +216,16 @@ class Inhibit_Test_SM:
     def mission_sm(self):
         with self.sm:
 
-            smach.StateMachine.add('Init_Arm_Sync', ARM_Sync('init', timeout=120),
-                                   transitions={'Ready': 'Start',
-                                                'Timeout': 'Mission_Fail'})
+            # smach.StateMachine.add('Init_Arm_Sync', ARM_Sync('init', timeout=120),
+            #                        transitions={'Ready': 'Start',
+            #                                     'Timeout': 'Mission_Fail'})
             
             smach.StateMachine.add('Start', Wait_State(5),
                                    transitions={'Complete': 'Sync_Again'})
             
-            smach.StateMachine.add('Sync_Again', ARM_Sync('again', timeout=120),
-                                   transitions={'Ready': 'Check_For_Inhibit',
-                                                'Timeout': 'Mission_Fail'})
+            # smach.StateMachine.add('Sync_Again', ARM_Sync('again', timeout=120),
+            #                        transitions={'Ready': 'Check_For_Inhibit',
+            #                                     'Timeout': 'Mission_Fail'})
 
             smach.StateMachine.add('Check_For_Inhibit', Check_Inhibit(),
                                   transitions={'Full_Inhibit' : 'Waaaaiiiitttt',
