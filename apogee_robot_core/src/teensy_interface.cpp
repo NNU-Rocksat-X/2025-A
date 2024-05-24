@@ -50,7 +50,7 @@ void positionCB(const daedalus_msgs::TeensyMsg::ConstPtr& msg)
     ROS_INFO("--Position Callback--");
     for (int l = 0; l < NUM_JOINTS; l++)
     {
-        // teensy msg gives radians
+        // teensy msg gives radians/sec
 
         //ROS_INFO("1");
 
