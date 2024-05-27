@@ -199,8 +199,6 @@ with Unfold_SM:
         delay_str = 'delay_' + str(i)
 
         if i == NUM_FOLDING_STEPS - 1:
-
-            print('last step')
             smach.StateMachine.add(step_str, Joint_Pose_State('folding/' + step_str, allowed_attempts=2),
                     transitions={'Success': 'Success',
                                  'Fail': 'Fail'})
@@ -210,7 +208,7 @@ with Unfold_SM:
                     transitions={'Success': delay_str,
                                  'Fail': 'Fail'})
             
-            smach.StateMachine.add(delay_str, Wait_State(3),
+            smach.StateMachine.add(delay_str, Wait_State(1),
                     transitions={'Complete': 'step_' + str(i+1)})
 
 
