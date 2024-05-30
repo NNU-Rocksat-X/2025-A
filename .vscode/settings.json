@@ -1,0 +1,14 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/usr/local/lib/python2.7/pyrealsense2",
+        "/usr/local/lib",
+        "/opt/ros/melodic/lib/python2.7/dist-packages",
+        "/home/rocksat1/catkin_ws/devel/lib/python2.7/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/usr/local/lib/python2.7/pyrealsense2",
+        "/usr/local/lib",
+        "/opt/ros/melodic/lib/python2.7/dist-packages",
+        "/home/rocksat1/catkin_ws/devel/lib/python2.7/dist-packages"
+    ]
+}
