@@ -5,8 +5,8 @@ from daedalus_core.signal_detector import Detector
 from daedalus_msgs.srv import SignalStatus, SignalStatusResponse
 
 TE_PIN = 5 # pin 29
-FULL_INHIBIT_PIN = 21 # pin 40
-PARTIAL_INHIBIT_PIN = 20 # pin 38
+FULL_INHIBIT_PIN = 21 # pin 40 
+PARTIAL_INHIBIT_PIN = 20 # pin 38 
 
 PERSISTENCE_THRESHOLD = 10
 
@@ -41,7 +41,7 @@ def main():
         partial_inhibit_detector.detect()
         rospy.loginfo("TE_State: " + str(te_detector.get_state()))
         rospy.loginfo("Full_Inhibit_State: " + str(full_inhibit_detector.get_state()))
-        rospy.loginfo("Partial_Inhibit_State: " + str(full_inhibit_detector.get_state()))
+        rospy.loginfo("Partial_Inhibit_State: " + str(partial_inhibit_detector.get_state()))
         rate.sleep()
 
 if __name__ == "__main__":
