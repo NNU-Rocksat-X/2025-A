@@ -46,12 +46,14 @@
     </group>
 
     <group ns="$(arg ARM)">
-        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface"  /> <!--<output="screen"/> -->
+        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface" output="screen"/>
+
     </group>
 
     
     <!--<output="screen"/> 
-        
+        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface" output="screen"/>
+        <node pkg="apogee_robot_core" name="teensy_interface" type="teensy_interface"/>
         include file="$(find mujoco_ros)/launch/sim.launch" >
         <arg name="env" value="$(arg version)"/>
         <arg name="dual" value="$(arg dual)"/>
