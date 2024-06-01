@@ -237,7 +237,7 @@ joints:
   # Must start at step_0
 
   # folding and unfolding
-  # done-ish
+  # done
   folding:
     step_0:
       - 0.0

@@ -28,6 +28,9 @@ class Simulation_SM:
             #smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
              #   transitions={'Ready': 'Check_For_Inhibit',
               #               'Timeout': 'Mission_Fail'})
+            # ember state
+            # smach.StateMachine.add('Ember_Test', Ember_High_State(),
+            #                         transitions={'Done': 'Whatever is next CHANGE'})
 
         
             print("start state machine")
@@ -250,3 +253,4 @@ if __name__ == "__main__":
     sm = Simulation_SM()
     print("Begin Run SM")
     sm.run()
+    

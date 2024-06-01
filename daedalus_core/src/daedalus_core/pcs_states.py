@@ -3,6 +3,8 @@
 import rospy
 import smach
 import smach_ros
+import RPi.GPIO as GPIO
+import time
 from daedalus_msgs.srv import SignalStatus
 from daedalus_msgs.srv import DeviceCmd
 from daedalus_core.pcs_util import *
@@ -34,7 +36,6 @@ class Detector_Status(smach.State):
             return 'On'
         else:
             return 'Off'
-
 
 
 class Wait_State(smach.State):
@@ -77,7 +78,7 @@ class Check_Inhibit(smach.State):
     def __init__(self, timeout=10, poll_period=0.1):
         smach.State.__init__(self, outcomes=['Full_Inhibit', 'Partial_Inhibit', 'No_Inhibit', 'Timeout'])
         rospy.wait_for_service('full_inhibit_detection')
-        self.inhibit_status = rospy.ServiceProxy('full_inhibit_detection', SignalStatus)
+        # self.inhibit_status = rospy.ServiceProxy('full_inhibit_detection', SignalStatus)
         self.timeout = timeout
         self.poll_period = poll_period
 
@@ -89,18 +90,18 @@ class Check_Inhibit(smach.State):
         rospy.set_param('inhibit_status', inhibit_status.state)
 
         # Wait until other arm has a inhibit status set
-        while not rospy.has_param(other_arm_param):
-            rospy.logwarn("Waiting for other arm's inhibit state")
+        # while not rospy.has_param(other_arm_param):
+        #     rospy.logwarn("Waiting for other arm's inhibit state")
 
-            rospy.sleep(self.poll_period)
-            time_elapsed += self.poll_period
-            if time_elapsed > self.timeout:
-                return 'Timeout'
+        #     rospy.sleep(self.poll_period)
+        #     time_elapsed += self.poll_period
+        #     if time_elapsed > self.timeout:
+        #         return 'Timeout'
 
         # return information based on both inhibits
-        if rospy.get_param(other_arm_param) and inhibit_status.state:
+        if inhibit_status.state: # Was if rospy.get_param(other_arm_param) and inhibit_status.state:
             return 'Partial_Inhibit'
-        elif not rospy.get_param(other_arm_param) and not inhibit_status.state:
+        elif not inhibit_status.state: # Was elif not rospy.get_param(other_arm_param) and not inhibit_status.state: 
             return 'No_Inhibit'
         else:
             return 'Full_Inhibit'
@@ -116,6 +117,24 @@ class Delete_Param(smach.State):
         return 'Done'
 
 
+class Ember_High_State(smach.State):
+    #Sends Ember a High using gpio launching ball 
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['Done'])
+        GPIO.setmode(GPIO.BCM)
+        self.output_pin = 16 # Physical Pin no 36
+        GPIO.setup(self.output_pin, GPIO.OUT, initial=GPIO.LOW)
+ 
+ 
+
+    def execute(self, userdata):
+        GPIO.output(self.output_pin, GPIO.HIGH)  
+        time.sleep(2)
+        GPIO.output(self.output_pin, GPIO.LOW)
+
+        return 'Done'
+    
 """
 =============================================================================
                     PAYLOAD CONTROL SYSTEM (PCS)

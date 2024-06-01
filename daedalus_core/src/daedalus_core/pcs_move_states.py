@@ -48,33 +48,6 @@ class Joint_Pose_State(smach.State):
         else:
             return 'Fail'
 
-# class Ender_High_State(smach.State):
-#     #Sends Ember a High using gpio
-
-#     def __init__(self):
-#         smach.State.__init__(self, outcomes=['Success', 'Fail'])
-#         GPIO.setmode(GPIO.BCM)
-#         output_pin = 16 # Physical Pin no 36
-#         GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
-#         self.time = time.time()
- 
-
-#     def execute(self, userdata):
-#         complete = False
-
-#         GPIO.output(output_pin, GPIO.HIGH)  
-#         time.sleep(5)
-#         GPIO.output(output_pin, GPIO.LOW)
-
-#         if complete:
-#             return 'Success'
-#         else:
-#             return 'Fail'
-
-#     start_time = time.time()
-#     trigger_action()
-
-#     GPIO.cleanup()
 
 
 class Grasp_Cmd_State(smach.State):

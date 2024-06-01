@@ -4,17 +4,20 @@ import time
 import rospy
 
 
-GPIO.setmode(GPIO.BCM)
-output_pin = 16 # Physical Pin no 36
-GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
+class Ember_High_State(smach.State):
+    #Sends Ember a High using gpio launching ball 
 
-# 
-def launch_ball():
-    GPIO.output(output_pin, GPIO.HIGH)  
-    time.sleep(2)
-    GPIO.output(output_pin, GPIO.LOW)  
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['Done'])
+        GPIO.setmode(GPIO.BCM)
+        self.output_pin = 16 # Physical Pin no 36
+        GPIO.setup(self.output_pin, GPIO.OUT, initial=GPIO.LOW)
+ 
+ 
 
-start_time = time.time()
-launch_ball()
+    def execute(self, userdata):
+        GPIO.output(self.output_pin, GPIO.HIGH)  
+        time.sleep(2)
+        GPIO.output(self.output_pin, GPIO.LOW)
 
-GPIO.cleanup()
+        return 'Done'
