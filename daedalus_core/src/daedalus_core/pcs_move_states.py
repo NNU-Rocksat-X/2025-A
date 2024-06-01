@@ -266,12 +266,80 @@ with Fold_ARM_SM:
 
 """
 ============================================================================================================
+                                                  Attempt Catch                                                  
+============================================================================================================
+
+
+--------------------------------~+=|=+~- Arm Attempting Catch Sequence~+=|=+~-------------------------------
+- ARM1 attempts to catch ball
+- ARM1 moves to the ball, checks to see if its grasped
+"""
+attempt_catch = smach.StateMachine(outcomes=['Success', 'Fail'])
+NUM_Attempt_Catch_STEPS = len(rospy.get_param('joints/attempt_catch'))
+
+with attempt_catch:
+    for i in range(0, NUM_Attempt_Catch_STEPS):
+        step_str = 'step_' + str(i)
+        delay_str = 'delay_' + str(i)
+
+        if i == NUM_Attempt_Catch_STEPS - 1:
+            smach.StateMachine.add(step_str, Joint_Pose_State('attempt_catch/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'Success',
+                                 'Fail': 'Fail'})
+
+        else:
+            smach.StateMachine.add(step_str, Joint_Pose_State('attempt_catch/' + step_str, allowed_attempts=2),
+                    transitions={'Success': delay_str,
+                                 'Fail': 'Fail'})
+            
+            smach.StateMachine.add(delay_str, Wait_State(0),
+                    transitions={'Complete': 'step_' + str(i+1)})
+
+
+"""
+============================================================================================================
+                                                   Release Ball                                               
+============================================================================================================
+
+
+------------------------------------~+=|=+~- Throw Ball Sequence~+=|=+~-------------------------------------
+- ARM1 attempts to throw ball away
+- ARM1 moves to the ball, checks to see if its grasped
+"""
+release_catch = smach.StateMachine(outcomes=['Success', 'Fail'])
+NUM_Release_Catch_STEPS = len(rospy.get_param('joints/release_sequence'))
+
+with attempt_catch:
+    for i in range(0, NUM_Release_Catch_STEPS):
+        step_str = 'step_' + str(i)
+        delay_str = 'delay_' + str(i)
+
+        if i == NUM_Release_Catch_STEPS - 1:
+            smach.StateMachine.add(step_str, Joint_Pose_State('release_sequence/' + step_str, allowed_attempts=2),
+                    transitions={'Success': 'Success',
+                                 'Fail': 'Fail'})
+
+        else:
+            smach.StateMachine.add(step_str, Joint_Pose_State('release_sequence/' + step_str, allowed_attempts=2),
+                    transitions={'Success': delay_str,
+                                 'Fail': 'Fail'})
+            
+            smach.StateMachine.add(delay_str, Wait_State(0),
+                    transitions={'Complete': 'step_' + str(i+1)})
+
+
+
+
+
+
+
+"""
+============================================================================================================
                                                   OBJECT 1                                                  
 ============================================================================================================
 
 
 --------------------------------------~+=|=+~- Pickup Obj 1 ~+=|=+~---------------------------------------
-
 - ARM1 Picks up Ball 1
 - ARM1 moves to the ball, checks to see if its grasped
 - Test Ready

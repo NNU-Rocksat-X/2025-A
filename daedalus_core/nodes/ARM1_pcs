@@ -28,17 +28,87 @@ class Simulation_SM:
             #smach.StateMachine.add('Init_Arm_sync', ARM_Sync('init', timeout=60),
              #   transitions={'Ready': 'Check_For_Inhibit',
               #               'Timeout': 'Mission_Fail'})
-            # ember state
-            # smach.StateMachine.add('Ember_Test', Ember_High_State(),
-            #                         transitions={'Done': 'Whatever is next CHANGE'})
+            
 
-        
             print("start state machine")
+            
+# wait for TE 
+            smach.StateMachine.add('Wait_for_TE', Detector_Status('te_detection'),
+                    transitions={'On': 'Check_For_Inhibit',
+                                 'Off': 'Wait_for_TE_delay'})
 
-            smach.StateMachine.add('Unfold_Test', Unfold_SM,
-                                    transitions={'Success': 'Finish_Success',
+            smach.StateMachine.add('Wait_for_TE_delay', Wait_State(0.5),
+                    transitions={'Complete': 'Wait_for_TE'})
+            
+# TE found Inhibit Check            
+            smach.StateMachine.add('Check_For_Inhibit', Check_Inhibit(),
+                    transitions={'Full_Inhibit' : 'Full_Inhibit_Delay',
+                                'Partial_Inhibit' : 'Partial_Inhibit_Procedure',
+                                'No_Inhibit' : 'Unfold',
+                                'Timeout' : 'Finish_Fail'})
+            
+# Full inhibit
+            smach.StateMachine.add('Full_Inhibit_Delay', Wait_State(1),
+                    transitions={'Complete' : 'Finish_Success'})
+            
+# Partial Inhibit   TODO CHANGE VALUES FOR PARTIAL INHIBIT TEST         
+            smach.StateMachine.add('Partial_Inhibit_Procedure', Partial_Inhibit_SM,
+                    transitions={'Success' : 'Finish_Success',
+                                 'Fail' : 'Finish_Fail'})
+            
+# Unfold Arm
+            smach.StateMachine.add('Unfold', Unfold_SM,
+                                    transitions={'Success': 'Home_Pos_1',
                                     'Fail': 'Finish_Fail'})
 
+# -----------------------------------  BALL 1  --------------------------------------            
+# Set arm at Home Position  TODO ADD HOME POSITION STATE AND POSITION INFO
+            smach.StateMachine.add('Home_Pos_1', home_pos_1_SM_ARM1, 
+                                   transitions={'Success': 'Launch_Ball_1',
+                                               'Fail': 'Finish_Fail'}) 
+# Launch Ball 1             TODO ADD WAIT TIME BETWEEN BALL LAUNCH AND CATCH ATTEMPT
+            smach.StateMachine.add('Launch_Ball_1', Ember_High_State(),
+                                    transitions={'Done': 'Wait_till_ball_out_1'})
+                            
+            smach.StateMachine.add('Wait_till_ball_out_1', Wait_State(0.5),
+                                    transitions={'Complete': 'Attempt_Catch_1'})
+# Attempt First Catch       TODO ADD POSITION INFO FOR CATCH
+            smach.StateMachine.add('Attempt_Catch_1', attempt_catch,
+                                     transitions={'Success': 'Release_Ball_1',
+                                                  'Fail': 'Home_Pos_2'})   
+# Release caught ball       TODO ADD POSITION INFO FOR RELEASE
+            smach.StateMachine.add('Release_Ball_1', release_catch,
+                                     transitions={'Success': 'Home_Pos_2',
+                                                  'Fail': 'ReFold'})
+
+# -----------------------------------  BALL 2  -------------------------------------- 
+# Set arm at Home Position  TODO ADD HOME POSITION STATE AND POSITION INFO
+            smach.StateMachine.add('Home_Pos_2', home_pos_1_SM_ARM1, 
+                                   transitions={'Success': 'Launch_Ball_2',
+                                               'Fail': 'Finish_Fail'}) 
+# Launch Ball 1             TODO ADD WAIT TIME BETWEEN BALL LAUNCH AND CATCH ATTEMPT
+            smach.StateMachine.add('Launch_Ball_2', Ember_High_State(),
+                                    transitions={'Done': 'Wait_till_ball_out_2'})
+                            
+            smach.StateMachine.add('Wait_till_ball_out_2', Wait_State(0.5),
+                                    transitions={'Complete': 'Attempt_Catch_2'})
+# Attempt First Catch       TODO ADD POSITION INFO FOR CATCH
+            smach.StateMachine.add('Attempt_Catch_2', attempt_catch,
+                                     transitions={'Success': 'Release_Ball_2',
+                                                  'Fail': 'ReFold'})   
+# Release caught ball       TODO ADD POSITION INFO FOR RELEASE
+            smach.StateMachine.add('Release_Ball_1', release_catch,
+                                     transitions={'Success': 'ReFold',
+                                                  'Fail': 'ReFold'})
+            
+
+# Refold Arm
+            smach.StateMachine.add('ReFold', Fold_SM, 
+                                   transitions={'Success': 'Finish_Success',
+                                                'Fail': 'Finish_Fail'}) 
+# ---------------------------------------------------------------------------------------------------------
+#                                      OLD MISSION STATE MACHINE BELOW
+# ---------------------------------------------------------------------------------------------------------
 #             smach.StateMachine.add('Init_Arm_sync', ARM_Sync("init", timeout=240),
 #                 transitions={'Ready': 'Wait_for_TE_delay',
 #                              'Timeout': 'Finish_Fail'}) 

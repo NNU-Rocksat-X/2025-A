@@ -503,8 +503,41 @@ joints:
       - 0.0 
       - 0.0
       - 0.0
+# Used for Mission 2024
+  attempt_catch:
+    step_0: # Set as Home Position
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
 
-    
+    step_1: # Start ploting catch steps
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+   
+# Used for Mission 2024
+  release_sequence:
+    step_0: # Set as Home Position
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+
+    step_1: # Start ploting release steps
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
 
 # pickup object 1 poses
 # done-ish
