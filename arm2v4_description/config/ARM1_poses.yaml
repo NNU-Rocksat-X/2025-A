@@ -383,6 +383,22 @@ joints:
       - -0.131
       - 0.0
 
+    step_18:
+      - 1.367
+      - 0.139
+      - 1.48
+      - 2.977
+      - -0.279
+      - -2.81
+
+    step_19:
+      - 1.32
+      - 0.164
+      - 1.555
+      - 3.01
+      - -0.303
+      - -2.81
+
   refolding:
     step_0:
       - 0.12
@@ -503,41 +519,76 @@ joints:
       - 0.0 
       - 0.0
       - 0.0
+
+# Used for Mission 2024
+  home_pos:
+    step_0: # Set as Home Position
+      - 1.32
+      - 0.164
+      - 1.555
+      - 3.01
+      - -0.303
+      - -2.81
+
 # Used for Mission 2024
   attempt_catch:
     step_0: # Set as Home Position
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
+      - 1.32
+      - 0.164
+      - 1.555
+      - 3.01
+      - -0.303
+      - -2.81
 
     step_1: # Start ploting catch steps
+      - 1.285
       - 0.0
+      - 1.741
+      - 3.003
+      - -0.302
+      - -2.81
+
+    step_2: # Start ploting catch steps
+      - 1.285
       - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
+      - 1.741
+      - 3.003
+      - -0.302
       - 0.0
    
 # Used for Mission 2024
   release_sequence:
     step_0: # Set as Home Position
+      - 1.285
       - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
-      - 0.0
+      - 1.741
+      - 3.003
+      - -0.302
       - 0.0
 
-    step_1: # Start ploting release steps
+    step_1: # wave to canmer
+      - 1.281
       - 0.0
+      - 1.858
+      - 3.475
+      - -0.259
       - 0.0
+
+    step_2: 
+      - 1.285
       - 0.0
+      - 1.741
+      - 3.003
+      - -0.302
       - 0.0
-      - 0.0
-      - 0.0
+
+    step_3: # Start ploting release steps
+      - 1.212
+      - 0.036
+      - 1.597
+      - 3.001
+      - 1.7
+      - -2.81
 
 # pickup object 1 poses
 # done-ish
