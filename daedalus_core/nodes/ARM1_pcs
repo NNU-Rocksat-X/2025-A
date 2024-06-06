@@ -75,7 +75,7 @@ class Simulation_SM:
 # Attempt First Catch       TODO ADD POSITION INFO FOR CATCH
             smach.StateMachine.add('Attempt_Catch_1', attempt_catch,
                                      transitions={'Success': 'Release_Ball_1',
-                                                  'Fail': 'Home_Pos_2'})   
+                                                  'Fail': 'Release_Ball_1'})   
 # Release caught ball       TODO ADD POSITION INFO FOR RELEASE
             smach.StateMachine.add('Release_Ball_1', release_catch,
                                      transitions={'Success': 'Home_Pos_2',
@@ -97,13 +97,13 @@ class Simulation_SM:
                                      transitions={'Success': 'Release_Ball_2',
                                                   'Fail': 'ReFold'})   
 # Release caught ball       TODO ADD POSITION INFO FOR RELEASE
-            smach.StateMachine.add('Release_Ball_1', release_catch,
+            smach.StateMachine.add('Release_Ball_2', release_catch,
                                      transitions={'Success': 'ReFold',
                                                   'Fail': 'ReFold'})
             
 
 # Refold Arm
-            smach.StateMachine.add('ReFold', Fold_SM, 
+            smach.StateMachine.add('ReFold', Fold_ARM_SM, 
                                    transitions={'Success': 'Finish_Success',
                                                 'Fail': 'Finish_Fail'}) 
 # ---------------------------------------------------------------------------------------------------------

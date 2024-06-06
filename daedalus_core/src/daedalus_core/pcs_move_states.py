@@ -309,7 +309,7 @@ with attempt_catch:
 release_catch = smach.StateMachine(outcomes=['Success', 'Fail'])
 NUM_Release_Catch_STEPS = len(rospy.get_param('joints/release_sequence'))
 
-with attempt_catch:
+with release_catch:
     for i in range(0, NUM_Release_Catch_STEPS):
         step_str = 'step_' + str(i)
         delay_str = 'delay_' + str(i)
@@ -326,9 +326,6 @@ with attempt_catch:
             
             smach.StateMachine.add(delay_str, Wait_State(0),
                     transitions={'Complete': 'step_' + str(i+1)})
-
-
-
 
 
 
@@ -926,9 +923,11 @@ with Partial_Inhibit_SM:
                            transitions={'Complete': 'Close_Gripper'})
     
     smach.StateMachine.add('Close_Gripper', Joint_Pose_State("close"),
-                            transitions={'Success': 'Success',
+                            transitions={'Success': 'Delay_2',
                                         'Fail': 'Fail'})
 
+    smach.StateMachine.add('Delay_2', Wait_State(3),
+                           transitions={'Complete': 'Success'})
 
 
 

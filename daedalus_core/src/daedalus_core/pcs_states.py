@@ -78,16 +78,18 @@ class Check_Inhibit(smach.State):
     def __init__(self, timeout=10, poll_period=0.1):
         smach.State.__init__(self, outcomes=['Full_Inhibit', 'Partial_Inhibit', 'No_Inhibit', 'Timeout'])
         rospy.wait_for_service('full_inhibit_detection')
-        # self.inhibit_status = rospy.ServiceProxy('full_inhibit_detection', SignalStatus)
+        self.partial_inhibit_detection_check = rospy.ServiceProxy("partial_inhibit_detection", SignalStatus)
+        self.full_inhibit_detection_check = rospy.ServiceProxy("full_inhibit_detection", SignalStatus)
+        
         self.timeout = timeout
         self.poll_period = poll_period
 
     def execute(self, userdata):
-        time_elapsed = 0
-        other_arm_param = other_arm + 'inhibit_status'
-        inhibit_status = self.inhibit_status()
+        # time_elapsed = 0
+        # other_arm_param = other_arm + 'inhibit_status'
+        #inhibit_status = self.inhibit_status()
 
-        rospy.set_param('inhibit_status', inhibit_status.state)
+        #rospy.set_param('inhibit_status', inhibit_status.state)
 
         # Wait until other arm has a inhibit status set
         # while not rospy.has_param(other_arm_param):
@@ -99,12 +101,16 @@ class Check_Inhibit(smach.State):
         #         return 'Timeout'
 
         # return information based on both inhibits
-        if inhibit_status.state: # Was if rospy.get_param(other_arm_param) and inhibit_status.state:
-            return 'Partial_Inhibit'
-        elif not inhibit_status.state: # Was elif not rospy.get_param(other_arm_param) and not inhibit_status.state: 
-            return 'No_Inhibit'
-        else:
+
+        partial_inhibit_status = self.partial_inhibit_detection_check()
+        full_inhibit_status = self.full_inhibit_detection_check()
+
+        if full_inhibit_status.state: # Was if rospy.get_param(other_arm_param) and inhibit_status.state:
             return 'Full_Inhibit'
+        elif partial_inhibit_status.state: # Was elif not rospy.get_param(other_arm_param) and not inhibit_status.state: 
+            return 'Partial_Inhibit'
+        else:
+            return 'No_Inhibit'
 
 
 class Delete_Param(smach.State):
@@ -112,8 +118,8 @@ class Delete_Param(smach.State):
         smach.State.__init__(self, outcomes=['Done'])
 
     def execute(self, userdata):
-        rospy.delete_param('inhibit_status')
-        rospy.delete_param('sync_id')
+        # rospy.delete_param('inhibit_status')
+        # rospy.delete_param('sync_id')
         return 'Done'
 
 
@@ -130,7 +136,7 @@ class Ember_High_State(smach.State):
 
     def execute(self, userdata):
         GPIO.output(self.output_pin, GPIO.HIGH)  
-        time.sleep(2)
+        time.sleep(3)
         GPIO.output(self.output_pin, GPIO.LOW)
 
         return 'Done'
