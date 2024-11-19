@@ -12,7 +12,7 @@ ARM1_HOSTNAME="daedalus1"
 
 roscore &
 sleep 20
-roslaunch apogee_vision record.launch &
+# roslaunch apogee_vision record.launch &
 roslaunch arm2v4_description config.launch 
 roslaunch apogee_robot_core arm2d2.launch ARM:=ARM1 > /dev/null &
 roslaunch daedalus_core ARM1_mission.launch
